@@ -7,15 +7,6 @@ import 'element-plus/dist/index.css'
 import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 
-
-
-import { FontAwesomeIcon } from '@fortawesome/vue-fontawesome'
-import { library } from '@fortawesome/fontawesome-svg-core'
-// 引入你需要的具体图标，例如点赞图标（这里以 solid 图标集中的 thumbs-up 为例）
-import { faThumbsUp } from '@fortawesome/free-solid-svg-icons'
-// // 将图标添加到库中
-// library.add(faThumbsUp)
-
 // 自定义指令
 import directives from './directives'
 
@@ -26,10 +17,6 @@ import api from './api'
 import '@/assets/styles/index.scss'
 
 const app = createApp(App)
-
-// // 全局注册 FontAwesomeIcon 组件
-// app.component('font-awesome-icon', FontAwesomeIcon)
-// app.mount('#app')
 
 // 注册 Element Plus 图标
 for (const [key, component] of Object.entries(ElementPlusIconsVue)) {

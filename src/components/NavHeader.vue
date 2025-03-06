@@ -104,6 +104,11 @@ onUnmounted(() => {
 </script>
 
 <style lang="scss" scoped>
+/* 定义主色调 */
+:root {
+  --primary-color: #007BFF;
+}
+
 .nav-header {
   position: fixed;
   top: 0;
@@ -112,6 +117,7 @@ onUnmounted(() => {
   z-index: 100;
   background: white;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+  padding: 0 20px; /* 增加左右内边距 */
 
   .container {
     max-width: 1200px;
@@ -141,17 +147,22 @@ onUnmounted(() => {
     .menu-list {
       display: flex;
       gap: 20px;
+      list-style-type: none; /* 去除列表项默认样式（小黑点） */
+      margin: 0;
+      padding: 0;
     }
 
     .menu-item {
       position: relative;
 
-      a, .menu-title {
+      a,
+      .menu-title {
         color: #333;
-        font-size: 14px;
+        font-size: 16px; /* 增大字体大小 */
         text-decoration: none;
         padding: 8px 0;
         cursor: pointer;
+        transition: color 0.3s ease; /* 添加过渡效果 */
 
         &:hover {
           color: var(--primary-color);
@@ -182,6 +193,7 @@ onUnmounted(() => {
         display: block;
         padding: 8px 16px;
         white-space: nowrap;
+        transition: background-color 0.3s ease; /* 添加过渡效果 */
 
         &:hover {
           background: #f5f7fa;
@@ -202,6 +214,7 @@ onUnmounted(() => {
         gap: 4px;
         color: #333;
         text-decoration: none;
+        transition: color 0.3s ease; /* 添加过渡效果 */
 
         &:hover {
           color: var(--primary-color);
@@ -217,6 +230,7 @@ onUnmounted(() => {
         color: #333;
         text-decoration: none;
         font-size: 14px;
+        transition: color 0.3s ease; /* 添加过渡效果 */
 
         &:hover {
           color: var(--primary-color);

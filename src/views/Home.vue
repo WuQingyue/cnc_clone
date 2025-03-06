@@ -44,9 +44,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-.home {
-  // 首页样式可以为空，因为各组件都有自己的样式
-}
-</style>
