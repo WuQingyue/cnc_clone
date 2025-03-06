@@ -1,0 +1,60 @@
+// 响应式布局
+@mixin responsive($breakpoint) {
+    @if $breakpoint == sm {
+      @media (max-width: $screen-sm) {
+        @content;
+      }
+    } @else if $breakpoint == md {
+      @media (max-width: $screen-md) {
+        @content;
+      }
+    } @else if $breakpoint == lg {
+      @media (max-width: $screen-lg) {
+        @content;
+      }
+    } @else if $breakpoint == xl {
+      @media (max-width: $screen-xl) {
+        @content;
+      }
+    }
+  }
+  
+  // 文本省略
+  @mixin text-ellipsis {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  
+  // 多行文本省略
+  @mixin text-ellipsis-multiple($lines) {
+    display: -webkit-box;
+    -webkit-line-clamp: $lines;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+  
+  // flex布局居中
+  @mixin flex-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+  }
+  
+  // 绝对定位居中
+  @mixin absolute-center {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+  
+  // 渐变背景
+  @mixin gradient-bg($start-color, $end-color) {
+    background: linear-gradient(to right, $start-color, $end-color);
+  }
+  
+  // 过渡动画
+  @mixin transition($property: all, $duration: 0.3s) {
+    transition: $property $duration ease;
+  }
