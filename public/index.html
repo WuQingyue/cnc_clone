@@ -1,11 +1,101 @@
 <!DOCTYPE html>
-<html lang="">
+<html lang="zh">
   <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-    <title><%= htmlWebpackPlugin.options.title %></title>
+    <title>嘉立诚数控</title>
+    <!-- <script src="https://cdn.staticfile.net/translate.js/3.4.2/translate.js"></script>
+    <script>
+      // 设置本地语种（当前网页的语种）
+      translate.language.setLocal('chinese_simplified');
+      // 开启页面变化监控，自动翻译变化部分
+      translate.listener.start();
+      // 执行翻译初始化
+      translate.execute();
+    </script> -->
+    <!-- 引入 translate.js -->
+    <!-- <script src="https://res.zvo.cn/translate/translate.js"></script>
+    <script>
+      window.translateConfig = {
+        // 排除不需要翻译的元素
+        // excludeSelectors: [
+        //   '.no-translate',
+        //   '.el-icon',
+        //   '.logo',
+        //   '.el-dropdown',
+        //   '.el-button',
+        //   'script',
+        //   'style'
+        // ],
+        // 默认语言
+        defaultLang: 'zh',
+        // 关闭自动检测
+        detectLanguage: false,
+        // 设置翻译延迟
+        translateDelay: 100,
+        // 缓存翻译结果
+        cache: true
+      }
+    </script> -->
+    <script src="https://res.zvo.cn/translate/translate.js"></script>
+    <script>
+      // 翻译配置
+      window.translateConfig = {
+        // 排除不需要翻译的元素
+        excludeSelectors: [
+          '.no-translate',
+          '.el-icon',
+          '.logo',
+          '.el-dropdown',
+          '.el-button',
+          'script',
+          'style'
+        ],
+        // 默认语言
+        defaultLang: 'zh',
+        // 关闭自动检测
+        detectLanguage: false,
+        // 设置翻译延迟
+        translateDelay: 100,
+        // 缓存翻译结果
+        cache: true
+      }
+
+      // 等待 translate.js 加载完成
+      window.onload = function() {
+        if (window.translate) {
+          // 设置本地语种（当前网页的语种）
+          translate.language.setLocal('chinese_simplified');
+          
+          // 开启页面变化监控，自动翻译变化部分
+          translate.listener.start();
+          
+          // 执行翻译初始化
+          translate.execute();
+
+          // 检查是否有保存的语言设置
+          const savedLang = localStorage.getItem('preferred_language');
+          if (savedLang && savedLang !== 'zh') {
+            // 延迟执行翻译，确保页面完全加载
+            setTimeout(() => {
+              translate.execute(savedLang);
+            }, 300);
+          }
+        }
+      }
+    </script>
+    <style>
+      .notranslate {
+        opacity: 1 !important;
+      }
+      
+      /* 添加翻译过渡效果 */
+      [data-translate] {
+        transition: opacity 0.3s ease;
+      }
+    </style>
   </head>
   <body>
     <noscript>

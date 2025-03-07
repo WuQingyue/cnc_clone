@@ -50,3 +50,4 @@ app.use(store)
 if (process.env.NODE_ENV === 'development') {
   console.log('当前运行在开发环境')
 }
+

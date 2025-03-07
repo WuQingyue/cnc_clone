@@ -120,7 +120,7 @@
             color: '#409EFF',
             size: 'large',
             icon: 'el-icon-document',
-            image: 'E:\model\api\CNC\jlc-cnc-clone\src\assets\images\about-banner.png'
+            image: '@/assets/images/about-banner.png'
           },
           {
             title: '工艺设计',
@@ -129,7 +129,7 @@
             color: '#67C23A',
             size: 'large',
             icon: 'el-icon-edit',
-            image: 'E:\model\api\CNC\jlc-cnc-clone\src\assets\images\about-banner.png'
+            image: '@/assets/images/about-banner.png'
           },
           {
             title: 'CNC加工',
@@ -138,7 +138,7 @@
             color: '#E6A23C',
             size: 'large',
             icon: 'el-icon-setting',
-            image: 'E:\model\api\CNC\jlc-cnc-clone\src\assets\images\about-banner.png'
+            image: '@/assets/images/about-banner.png'
           },
           {
             title: '品质检验',
@@ -147,7 +147,7 @@
             color: '#909399',
             size: 'large',
             icon: 'el-icon-aim',
-            image: 'E:\model\api\CNC\jlc-cnc-clone\src\assets\images\about-banner.png'
+            image: '@/assets/images/about-banner.png'
           }
         ],
         capabilities: [
@@ -176,17 +176,17 @@
           {
             name: '日本发那科CNC加工中心',
             description: '5轴联动，高精度加工',
-            image: 'E:\model\api\CNC\jlc-cnc-clone\src\assets\images\about-banner.png'
+            image: '@/assets/images/about-banner.png'
           },
           {
             name: '德国DMG数控车床',
             description: '精密车削加工设备',
-            image: 'E:\model\api\CNC\jlc-cnc-clone\src\assets\images\about-banner.png'
+            image: '@/assets/images/about-banner.png'
           },
           {
             name: '瑞士三坐标测量仪',
             description: '高精度检测设备',
-            image: 'E:\model\api\CNC\jlc-cnc-clone\src\assets\images\about-banner.png'
+            image: '@/assets/images/about-banner.png'
           }
         ],
         qualityStandards: [
@@ -221,7 +221,7 @@
     .page-header {
       margin-top: 60px;
       background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
-                  url('E:\model\api\CNC\jlc-cnc-clone\src\assets\images\about-banner.png') center/cover;
+                  url('@/assets/images/about-banner.png') center/cover;
       padding: 60px 0;
       color: white;
     }

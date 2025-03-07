@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import ServiceGuidance from '@/views/ServiceGuidance.vue'
-
+import ServiceGuidance from '@/components/ServiceGuidance.vue'
+import OnlineQuote from '@/components/OnlineQuote.vue'
 const routes = [
   {
     path: '/',
@@ -71,7 +71,43 @@ const routes = [
     path: '/service-guidance',
     name: 'ServiceGuidance',
     component: ServiceGuidance
+  },
+  {
+    path: '/quote',
+    name: 'OnlineQuote',
+    component: OnlineQuote
+  },
+  {
+    path: '/sales-promotion',
+    name: 'SalesPromotion',
+    component: () => import('@/components/SalesPromotion.vue')
+  },
+  {
+    path: '/coupons',
+    name: 'Coupons',
+    component: () => import('@/components/CouponsCenter.vue'),
+  },
+  {
+    path: '/materials',
+    name: 'Materials',
+    component: () => import('@/components/MaterialsIntroduction.vue'),
+  },
+  {
+    path: '/user-evaluation',
+    name: 'UserEvaluation',
+    component: () => import('@/components/UserEvaluation.vue'),
+  },
+  {
+    path: '/technical-column',
+    name: 'TechnicalColumn',
+    component: () => import('@/components/TechnicalColumn.vue'),
+  },
+  {
+    path: '/forum',
+    name: 'TechForum',
+    component: () => import('@/components/TechForum.vue'),
   }
+
 ]
 
 const router = createRouter({

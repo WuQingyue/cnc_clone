@@ -137,19 +137,19 @@
             id: 1,
             title: '公司获得高新技术企业认证',
             date: '2024-01-10',
-            image: 'E:\model\api\CNC\jlc-cnc-clone\src\assets\images\avatar1.png'
+            image: '@/assets/images/avatar1.png'
           },
           {
             id: 2,
             title: '新一代数控机床投入使用',
             date: '2024-01-08',
-            image: 'E:\model\api\CNC\jlc-cnc-clone\src\assets\images\avatar1.png'
+            image: '@/assets/images/avatar1.png'
           },
           {
             id: 3,
             title: '公司举办技术交流会',
             date: '2024-01-05',
-            image: 'E:\model\api\CNC\jlc-cnc-clone\src\assets\images\avatar1.png'
+            image: '@/assets/images/avatar1.png'
           }
         ]
       }
@@ -179,7 +179,7 @@
     .page-header {
       margin-top: 60px;
       background: linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)), 
-                  url('E:\model\api\CNC\jlc-cnc-clone\src\assets\images\logo.png') center/cover;
+                  url('@/assets/images/logo.png') center/cover;
       padding: 60px 0;
       color: white;
     }
