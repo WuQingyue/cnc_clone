@@ -58,6 +58,10 @@
                 <el-icon><ShoppingCart /></el-icon>
                 <span>加入购物车</span>
             </button>
+            <button class="white-button">
+                <el-icon><Pointer /></el-icon>
+                <span>支付</span>
+            </button>
           </div>
         </div>
       </div>
@@ -67,7 +71,7 @@
   <script setup>
   import { ref, computed, watch } from 'vue'
   import FileUploader from '@/components/quote/FileUploader.vue'
-  import { ShoppingCart } from '@element-plus/icons-vue'
+  import { ShoppingCart, Pointer } from '@element-plus/icons-vue'
   
   const props = defineProps({
     selectedRecords: {
