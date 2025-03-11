@@ -30,7 +30,6 @@ import OrderProcess from '@/components/OrderProcess.vue'
 import ProcessDisplay from '@/components/ProcessDisplay.vue'
 import CustomerReviews from '@/components/CustomerReviews.vue'
 import CompanyNews from '@/components/CompanyNews.vue'
-
 export default {
   name: 'Home',
   components: {

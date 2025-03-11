@@ -6,39 +6,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
     <title>嘉立诚数控</title>
-    <!-- <script src="https://cdn.staticfile.net/translate.js/3.4.2/translate.js"></script>
-    <script>
-      // 设置本地语种（当前网页的语种）
-      translate.language.setLocal('chinese_simplified');
-      // 开启页面变化监控，自动翻译变化部分
-      translate.listener.start();
-      // 执行翻译初始化
-      translate.execute();
-    </script> -->
-    <!-- 引入 translate.js -->
-    <!-- <script src="https://res.zvo.cn/translate/translate.js"></script>
-    <script>
-      window.translateConfig = {
-        // 排除不需要翻译的元素
-        // excludeSelectors: [
-        //   '.no-translate',
-        //   '.el-icon',
-        //   '.logo',
-        //   '.el-dropdown',
-        //   '.el-button',
-        //   'script',
-        //   'style'
-        // ],
-        // 默认语言
-        defaultLang: 'zh',
-        // 关闭自动检测
-        detectLanguage: false,
-        // 设置翻译延迟
-        translateDelay: 100,
-        // 缓存翻译结果
-        cache: true
-      }
-    </script> -->
+  
     <script src="https://res.zvo.cn/translate/translate.js"></script>
     <script>
       // 翻译配置
@@ -47,9 +15,9 @@
         excludeSelectors: [
           '.no-translate',
           '.el-icon',
-          '.logo',
+          // '.logo',
           '.el-dropdown',
-          '.el-button',
+          // '.el-button',
           'script',
           'style'
         ],
@@ -96,6 +64,8 @@
         transition: opacity 0.3s ease;
       }
     </style>
+    <!-- 添加 Google OAuth 脚本 -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
   </head>
   <body>
     <noscript>

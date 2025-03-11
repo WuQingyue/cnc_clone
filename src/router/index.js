@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import ServiceGuidance from '@/components/ServiceGuidance.vue'
-import OnlineQuote from '@/components/OnlineQuote.vue'
+import { useAuthStore } from '@/store/modules/auth'
+
 const routes = [
   {
     path: '/',
@@ -75,8 +76,18 @@ const routes = [
   {
     path: '/quote',
     name: 'OnlineQuote',
-    component: OnlineQuote
+    component: () => import('@/views/OnlineQuote.vue')
   },
+  // {
+  //   path: '/mechanical',
+  //   name: 'MechanicalParts',
+  //   component: () => import('@/views/MechanicalParts.vue')
+  // },
+  // {
+  //   path: '/aluminum',
+  //   name: 'AluminumCase',
+  //   component: () => import('@/views/AluminumCase.vue')
+  // },
   {
     path: '/sales-promotion',
     name: 'SalesPromotion',
@@ -84,8 +95,8 @@ const routes = [
   },
   {
     path: '/coupons',
-    name: 'Coupons',
-    component: () => import('@/components/CouponsCenter.vue'),
+    name: 'CouponCenter',
+    component: () => import('@/views/CouponCenter.vue'),
   },
   {
     path: '/materials',
@@ -106,8 +117,25 @@ const routes = [
     path: '/forum',
     name: 'TechForum',
     component: () => import('@/components/TechForum.vue'),
-  }
-
+  },
+  {
+    path: '/register',
+    name: 'Register',
+    component: () => import('@/components/SignUp/Register.vue'),
+    meta: {
+      title: '用户注册',
+      guest: true
+    }
+  },
+  {
+    path: '/login',
+    name: 'Login',
+    component: () => import('@/components/SignIn/Login.vue'),
+    meta: {
+      title: '登录 - 嘉立创',
+      guest: true
+    }
+  },
 ]
 
 const router = createRouter({
@@ -123,10 +151,41 @@ const router = createRouter({
   }
 })
 
-// 全局前置守卫
+// 路由守卫
 router.beforeEach((to, from, next) => {
+  const auth = useAuthStore()
+  
   // 设置页面标题
-  document.title = to.meta.title || '嘉立诚数控科技有限公司'
+  document.title = to.meta.title ? `${to.meta.title} - 嘉立创` : '嘉立创'
+  
+  // // 处理需要登录的页面
+  // if (to.meta.requiresAuth && !auth.isAuthenticated) {
+  //   next({ name: 'Login', query: { redirect: to.fullPath } })
+  //   return
+  // }
+  
+  // // 处理游客页面
+  // if (to.meta.guest && auth.isAuthenticated) {
+  //   next({ name: 'Home' })
+  //   return
+  // }
+  
+  if (to.meta.requiresAuth && !auth.isAuthenticated) {
+    next({ path: '/register' }) // 改为重定向到注册页
+    return
+  }
+  
+  if (to.meta.guest && auth.isAuthenticated) {
+    next({ path: '/' })
+    return
+  }
+
+  // console.log('路由变化:', {
+  //   to: to.fullPath,
+  //   query: to.query,
+  //   params: to.params
+  // })
+
   next()
 })
 

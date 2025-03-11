@@ -15,17 +15,87 @@
   </div>
 </template>
 
-<script>
+<script setup>
+import { watch, onMounted } from 'vue'
+import { useRoute, useRouter } from 'vue-router'
+import { useUserStore } from '@/store/user'
+import { ElMessage } from 'element-plus'
+import axios from 'axios'
 import NavHeader from '@/components/NavHeader.vue'
 import NavFooter from '@/components/Footer.vue'
 
-export default {
-  name: 'App',
-  components: {
-    NavHeader,
-    NavFooter
+const route = useRoute()
+const router = useRouter()
+const userStore = useUserStore()
+
+// 初始化检查用户登录状态
+onMounted(() => {
+  // 从 localStorage 获取用户信息
+  const savedUser = localStorage.getItem('userInfo')
+  if (savedUser) {
+    try {
+      const userData = JSON.parse(savedUser)
+      userStore.setUser(userData)
+      console.log('已从本地存储恢复用户信息:', userData)
+    } catch (error) {
+      console.error('解析本地存储的用户信息失败:', error)
+      localStorage.removeItem('user')
+      userStore.clearUser()
+    }
   }
-}
+})
+
+
+// 监听路由变化
+watch(
+  () => route.query,
+  async (newQuery) => {
+    // 打印完整的路由信息
+    console.log('路由变化:', {
+      fullPath: route.fullPath,
+      query: route.query,
+      params: route.params
+    })
+
+    // 检查是否有 Google 授权码
+    const code = newQuery.code
+    if (code) {
+      try {
+        console.log('检测到 Google 授权码:', code)
+        
+        // 调用后端 callback 接口
+        const response = await axios.get('http://localhost:8000/api/login/callback', {
+          params: { code },
+          withCredentials: true
+        } )
+
+        console.log('Google 登录响应:', response.data)
+
+        if (response.data) {
+          // 保存用户信息到 localStorage
+        
+          localStorage.setItem('userInfo', JSON.stringify(response.data))
+          // 保存用户信息到 store
+          userStore.setUser(response.data)
+          
+          // 清除 URL 中的授权码
+          router.replace({ query: {} })
+          
+          ElMessage.success('Google 登录成功！')
+          router.push('/')
+        }
+      } catch (error) {
+        console.error('Google 登录失败:', error)
+        ElMessage.error('登录失败，请重试')
+        router.push('/login')
+      }
+    }
+  },
+  { 
+    immediate: true,
+    deep: true
+  }
+)
 </script>
 
 <style lang="scss">

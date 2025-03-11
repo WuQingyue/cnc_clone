@@ -19,6 +19,7 @@
               <router-link to="/sales-promotion">CNC1元打样</router-link>
             </li>
             <li class="menu-item">
+              <el-icon style="color: red"><Flag /></el-icon>
               <router-link to="/coupons">领券中心</router-link>
             </li>
             <li class="menu-item">
@@ -76,20 +77,6 @@
             </router-link>
           </div>
 
-          <!-- 注册按钮 -->
-          <div class="action-button">
-            <router-link to="/register">
-              <span>注册</span>
-            </router-link>
-          </div>
-
-          <!-- 登录按钮 -->
-          <div class="action-button">
-            <router-link to="/login">
-              <span>登录</span>
-            </router-link>
-          </div>
-
           <!-- 语言切换按钮 -->
           <div class="action-button has-submenu" 
                @click="toggleLanguage('language')"
@@ -138,6 +125,37 @@
               </div>
             </div>
           </div>
+          
+           <!-- 用户区域 -->
+          <div class="user-area">
+            <!-- 未登录状态 -->
+            <template v-if="!userStore.isLoggedIn">
+              <el-button class="action-button" @click="$router.push('/register')">注册</el-button>
+              <el-button class="action-button" @click="$router.push('/login')">登录</el-button>
+            </template>
+
+            <!-- 已登录状态 -->
+            <template v-else>
+              <el-dropdown @command="handleCommand">
+                <div class="user-info">
+                  <el-avatar 
+                    :size="32" 
+                    :src="userStore.user.user.picture" 
+                  />
+                  <span>{{ userStore.user.user.name }}</span>
+                </div>
+                <template #dropdown>
+                  <el-dropdown-menu>
+                    <el-dropdown-item command="profile">个人中心</el-dropdown-item>
+                    <el-dropdown-item command="orders">我的订单</el-dropdown-item>
+                    <el-dropdown-item command="logout">退出登录</el-dropdown-item>
+                  </el-dropdown-menu>
+                </template>
+              </el-dropdown>
+            </template>
+          </div>
+          
+
         </div>
         <!-- 移动端菜单按钮 -->
         <div class="menu-toggle" @click="toggleMenu">
@@ -147,14 +165,23 @@
       </div>
     </div>
   </header>
+  <div class="login-options">
+    <div id="googleButton"></div>
+  </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
-import { useRoute } from 'vue-router'
-import { ShoppingCart, Menu, Close, ArrowUpBold, ArrowDownBold, Language } from '@element-plus/icons-vue'
+import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { useRouter } from 'vue-router'
+import { ShoppingCart, Menu, Close, ArrowUpBold, ArrowDownBold, Language,Flag } from '@element-plus/icons-vue'
+import { useUserStore } from '@/store/user'
+import { storeToRefs } from 'pinia'
+import { ElMessage } from 'element-plus'
 
-const route = useRoute()
+const router = useRouter()
+const userStore = useUserStore()
+// 使用 storeToRefs 保持响应性
+const { userInfo, isLoggedIn } = storeToRefs(userStore)
 const isScrolled = ref(false)
 const isMenuOpen = ref(false)
 const activeSubmenu = ref(null)
@@ -162,11 +189,7 @@ const activeSubmenu2 = ref(null)
 const activeLang = ref(null)
 const currentLang = ref(localStorage.getItem('preferred_language') || 'zh')
 let isTranslating = ref(false)
-
-// 检查当前路径
-const isCurrentPath = (path) => {
-  return route.path === path
-}
+const isUserMenuVisible = ref(false)
 
 // 切换移动端菜单
 const toggleMenu = () => {
@@ -319,6 +342,61 @@ const handleLanguageChange = async (lang) => {
   document.documentElement.lang = lang
 }
 
+
+import axios from 'axios'
+// 处理退出登录
+const handleCommand = async (command) => {  // 添加 async
+  switch (command) {
+    case 'profile':
+      router.push('/profile')
+      break
+    case 'orders':
+      router.push('/orders')
+      break
+    case 'logout':
+      try {
+        // 添加 await 和 withCredentials 配置
+        const response = await axios.post(
+          'http://localhost:8000/api/login/logout',
+          {},  // 空对象作为请求体
+          {
+            withCredentials: true,  // 允许发送 cookies
+            headers: {
+              'Content-Type': 'application/json',
+            }
+          }
+        )
+        console.log('response',response)
+        // 移除调试信息，改用正确的响应处理
+        if (response.data.success) {
+          // 清除用户状态
+          userStore.clearUser()
+          
+          // 清除可能存在的存储数据
+          localStorage.removeItem('userInfo')
+          sessionStorage.removeItem('userInfo')
+          
+          // 清除 axios 默认 headers
+          delete axios.defaults.headers.common['Authorization']
+          
+          // 提示成功
+          ElMessage.success('退出成功')
+          
+          // 重定向到首页
+          router.push('/login')
+        } else {
+          // 如果后端返回失败信息
+          ElMessage.error(response.data.message || '退出失败，请重试')
+        }
+      } catch (error) {
+        console.error('退出失败:', error.response?.data || error)
+        ElMessage.error(error.response?.data?.detail || '退出失败，请重试')
+      }
+      break
+  }
+}
+
+
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
   // 初始化翻译
@@ -333,11 +411,50 @@ onMounted(() => {
       handleLanguageChange(savedLang)
     }, 500)
   }
+
+  // 确保 google 脚本已加载
+  if (window.google && window.google.accounts) {
+    initializeGoogleLogin()
+  } else {
+    // 如果脚本还未加载完成，等待加载
+    window.onload = () => {
+      initializeGoogleLogin()
+    }
+  }
+  
 })
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
 })
+
+// 初始化 Google 登录
+const initializeGoogleLogin = () => {
+  window.google.accounts.id.initialize({
+    client_id: 'your-google-client-id', // 替换为你的 Google Client ID
+    callback: handleCredentialResponse
+  })
+
+  window.google.accounts.id.renderButton(
+    document.getElementById('googleButton'),
+    { 
+      theme: 'outline', 
+      size: 'large',
+      text: '使用Google账号登录',
+      width: 250
+    }
+  )
+}
+
+// Google 登录回调
+const handleCredentialResponse = async (response) => {
+  try {
+    await userStore.handleGoogleLogin(response)
+    router.push('/')
+  } catch (error) {
+    console.error('登录失败：', error)
+  }
+}
 </script>
 
 <style lang="scss" scoped>
@@ -599,6 +716,24 @@ onUnmounted(() => {
     }
   }
 }
+.user-area {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.user-info:hover {
+  background-color: #f5f7fa;
+}
 
 /* 添加翻译过渡样式 */
 .translating {
@@ -753,6 +888,78 @@ onUnmounted(() => {
         background: #f5f7fa;
       }
     }
+  }
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  
+  .username {
+    max-width: 80px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.user-submenu {
+  width: 200px;
+  padding: 0;
+  
+  .user-header {
+    padding: 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    border-bottom: 1px solid #eee;
+    
+    .user-info {
+      flex: 1;
+      overflow: hidden;
+      
+      .name {
+        font-weight: 500;
+        margin-bottom: 4px;
+      }
+      
+      .email {
+        font-size: 12px;
+        color: #999;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+    }
+  }
+  
+  .menu-items {
+    padding: 8px 0;
+    
+    a {
+      display: block;
+      padding: 8px 16px;
+      color: #333;
+      text-decoration: none;
+      transition: all 0.3s;
+      
+      &:hover {
+        color: var(--primary-color);
+        background: #f5f7fa;
+      }
+    }
+  }
+}
+
+.login-options {
+  margin-top: 20px;
+  display: flex;
+  justify-content: center;
+  
+  #googleButton {
+    width: 100%;
+    display: flex;
+    justify-content: center;
   }
 }
 </style>

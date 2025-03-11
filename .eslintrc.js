@@ -19,5 +19,8 @@ module.exports = {
     'vue/no-unused-components': 'warn',
     'no-unused-vars': 'warn',
     'no-useless-escape': 'off'
+  },
+  globals: {
+    google: 'readonly'  // 添加这行来解决 google 未定义的问题
   }
 }
