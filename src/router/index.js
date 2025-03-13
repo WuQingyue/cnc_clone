@@ -93,6 +93,7 @@ const routes = [
     name: 'SalesPromotion',
     component: () => import('@/components/SalesPromotion.vue')
   },
+  
   {
     path: '/coupons',
     name: 'CouponCenter',
@@ -101,7 +102,12 @@ const routes = [
   {
     path: '/materials',
     name: 'Materials',
-    component: () => import('@/components/MaterialsIntroduction.vue'),
+    component: () => import('@/components/MaterialsIntroduction.vue')
+  },
+  {
+    path: '/material/:materialId',
+    name: 'MaterialDetail',
+    component: () => import('@/views/MaterialDetail.vue')
   },
   {
     path: '/user-evaluation',
