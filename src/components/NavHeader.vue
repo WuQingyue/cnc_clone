@@ -5,7 +5,7 @@
         <!-- Logo -->
         <div class="logo">
           <router-link to="/">
-            <img src="@/assets/images/logo.png" alt="嘉立诚数控">
+            <img src="@/assets/images/logo.jpg" alt="嘉立诚数控">
           </router-link>
         </div>
 
@@ -136,23 +136,19 @@
 
             <!-- 已登录状态 -->
             <template v-else>
-              <el-dropdown @command="handleCommand">
-                <div class="user-info">
-                  <el-avatar 
-                    :size="32" 
-                    :src="userStore.user.user.picture" 
-                  />
-                  <span>{{ userStore.user.user.name }}</span>
-                </div>
-                <template #dropdown>
-                  <el-dropdown-menu>
-                    <el-dropdown-item command="profile">个人中心</el-dropdown-item>
-                    <el-dropdown-item command="orders">我的订单</el-dropdown-item>
-                    <el-dropdown-item command="logout">退出登录</el-dropdown-item>
-                  </el-dropdown-menu>
+              <Profile>
+                <template #trigger>
+                  <div class="user-info">
+                    <el-avatar 
+                      :size="32" 
+                      :src="userStore.user.user.picture" 
+                    />
+                    <span>{{ userStore.user.user.name }}</span>
+                  </div>
                 </template>
-              </el-dropdown>
+              </Profile>
             </template>
+            
           </div>
           
 
@@ -177,18 +173,17 @@ import { ShoppingCart, Menu, Close, ArrowUpBold, ArrowDownBold, Language,Flag } 
 import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
 import { ElMessage } from 'element-plus'
+import Profile from '@/views/Profile.vue' // 引入新组件
 
 const router = useRouter()
 const userStore = useUserStore()
 // 使用 storeToRefs 保持响应性
-const { userInfo, isLoggedIn } = storeToRefs(userStore)
+
 const isScrolled = ref(false)
 const isMenuOpen = ref(false)
-const activeSubmenu = ref(null)
+
 const activeSubmenu2 = ref(null)
-const activeLang = ref(null)
-const currentLang = ref(localStorage.getItem('preferred_language') || 'zh')
-let isTranslating = ref(false)
+
 const isUserMenuVisible = ref(false)
 
 // 切换移动端菜单
@@ -229,21 +224,22 @@ const hideAbout = (menu) => {
   }
 }
 
+const activeSubmenu = ref(null)
+const activeLang = ref(null)
+const currentLang = ref(localStorage.getItem('preferred_language') || 'zh')
+let isTranslating = ref(false)
 // 语言菜单控制
 const toggleLanguage = (menu) => {
   activeLang.value = activeLang.value === menu ? null : menu
 }
-
 const showLanguage = (menu) => {
   activeLang.value = menu
 }
-
 const hideLanguage = (menu) => {
   if (activeLang.value === menu) {
     activeLang.value = null
   }
 }
-
 // 语言配置
 const languages = {
   // 亚洲语言
@@ -281,12 +277,10 @@ const languages = {
     translateCode: 'spanish'
   }
 }
-
 // 获取语言显示标签
 const getLanguageLabel = (lang) => {
   return languages[lang]?.label || languages['zh'].label
 }
-
 // 初始化翻译
 const initTranslate = () => {
   if (window.translate) {
@@ -313,7 +307,6 @@ const initTranslate = () => {
     window.translate.cache.enable = true
   }
 }
-
 // 处理语言切换
 const handleLanguageChange = async (lang) => {
   if (isTranslating.value) return // 如果正在翻译，则不执行
