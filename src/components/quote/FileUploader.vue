@@ -1,39 +1,40 @@
 <template>
   <div class="file-uploader">
-    <el-upload
-      v-if="processInfo"
-      class="upload-area"
-      drag
-      :action="uploadUrl"
-      :headers="uploadHeaders"
-      :data="uploadData"
-      :accept="processInfo.acceptTypes"
-      :before-upload="handleBeforeUpload"
-      :on-success="handleUploadSuccess"
-      :on-error="handleUploadError"
-      :with-credentials="true"
-      multiple
-    >
-      <div class="upload-content">
-        <!-- 上传图标 -->
-        <el-icon class="upload-icon"><upload-filled /></el-icon>
-        
-        <!-- 上传按钮 -->
-        <el-button type="primary" class="upload-button">
-          点击上传
-        </el-button>
-        
-        <!-- 文字说明 -->
-        <div class="upload-tips">
-          <p>或将文件拖到这里</p>
-          <template v-for="(tip, index) in processInfo.uploadTips" :key="index">
-            <p>{{ tip }}</p>
-          </template>
+    <div v-if="isUserLoggedIn">
+      <el-upload
+        v-if="processInfo"
+        class="upload-area"
+        drag
+        :action="uploadUrl"
+        :headers="uploadHeaders"
+        :data="uploadData"
+        :limit="fileLimit"
+        :accept="processInfo.acceptTypes"
+        :before-upload="handleBeforeUpload"
+        :on-success="handleUploadSuccess"
+        :on-error="handleUploadError"
+        :on-exceed="handleExceed"
+        :with-credentials="true"
+        multiple
+      >
+        <div class="upload-content">
+          <!-- 上传图标 -->
+          <el-icon class="upload-icon"><upload-filled /></el-icon>
+          
+          <!-- 文字说明 -->
+          <div class="upload-tips">
+            <p>点击上传或将文件拖到这里</p>
+            <template v-for="(tip, index) in formattedUploadTips" :key="index">
+              <p v-html="tip"></p>
+            </template>
+          </div>
         </div>
-      </div>
-    </el-upload>
-    <div v-else class="no-process">
-      请先选择工艺类型
+      </el-upload>
+    </div>
+    <div v-else>
+      <button class="login-button" @click="redirectToLogin">
+        请登录再上传文件
+      </button>
     </div>
   </div>
 </template>
@@ -42,6 +43,10 @@
 import { ref, computed } from 'vue'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import { useUserStore } from '@/store/user'
+
+// 检查用户是否登录
+const isUserLoggedIn = useUserStore().isLoggedIn
 
 const props = defineProps({
   processInfo: {
@@ -65,6 +70,15 @@ const uploadData = computed(() => ({
   process_type: props.processInfo?.type || ''
 }))
 
+// 文件数量限制
+const fileLimit = 20
+
+// 文件数量超出限制时的处理
+const handleExceed = (files) => {
+  ElMessage.error(`文件数量为 ${files.length} 个, 单次上传文件数量不能超过 ${fileLimit} 个!`)
+}
+
+// 上传前检查
 const handleBeforeUpload = (file) => {
   if (!props.processInfo) {
     ElMessage.error('请先选择工艺类型!')
@@ -72,9 +86,9 @@ const handleBeforeUpload = (file) => {
   }
 
   // 检查文件大小
-  const isLt50M = file.size / 1024 / 1024 < 50
-  if (!isLt50M) {
-    ElMessage.error('文件大小不能超过 50MB!')
+  const isLt100M = file.size / 1024 / 1024 < 100
+  if (!isLt100M) {
+    ElMessage.error('文件大小不能超过 100MB!')
     return false
   }
 
@@ -105,6 +119,18 @@ const handleUploadError = (error) => {
   console.error('上传失败:', error)
   ElMessage.error('上传失败，请重试')
 }
+
+// 重定向到登录页面
+const redirectToLogin = () => {
+  window.location.href = '/login' // 假设登录页面的路径是 /login
+}
+
+// 动态替换占位符为实际图片路径
+const formattedUploadTips = computed(() => {
+  return props.processInfo.uploadTips.map(tip =>
+    tip.replace('IMAGE_PLACEHOLDER', require('@/assets/images/safety.png'))
+  );
+});
 </script>
 
 <style lang="scss" scoped>
@@ -154,20 +180,21 @@ const handleUploadError = (error) => {
       }
     }
   }
+
+  .login-button {
+    background-color: #409eff;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-left: 600px;
+  }
   
   :deep(.el-upload-dragger) {
     width: 100%;
     height: auto;
     padding: 0;
   }
-}
-
-.no-process {
-  text-align: center;
-  padding: 40px;
-  color: #909399;
-  font-size: 14px;
-  background: #f5f7fa;
-  border-radius: 6px;
 }
 </style>

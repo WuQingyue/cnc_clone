@@ -18,7 +18,14 @@
         />
       </template>
       <template v-else>
-        <h2 class="section-title">上传图纸</h2>
+        <div class="upload-header">
+          <h2 class="section-title">上传图纸</h2>
+          <div class="button-group">
+            <button class="blue-button" @click="openGuidance">CNC下单必看</button>
+            <button class="gray-button" @click="openGuidance2D">2D文件转换须知</button>
+            <button class="gray-button" @click="openGuidanceSecret">保密协议</button>
+          </div>
+        </div>
         <file-uploader 
           :process-info="currentProcess"
           @upload-success="handleUploadSuccess"
@@ -33,32 +40,30 @@
       @order="handleOrder"
       @delete="handleDelete"
     />
+
+    <!-- 添加客户指引组件 -->
+  <CustomerGuidance ref="guidanceRef" />
   </div>
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import ProcessSelector from '@/components/quote/ProcessSelector.vue'
 import FileUploader from '@/components/quote/FileUploader.vue'
 import HistoryList from '@/components/quote/HistoryList.vue'
-import FileList from '@/components/quote/FileList.vue' // 引入新组件
-import {
-  Refresh,
-  PictureFilled,
-  Document,
-  ShoppingCart,
-  Delete
-} from '@element-plus/icons-vue'
+import FileList from '@/components/quote/FileList.vue'
+import CustomerGuidance from '@/views/CustomerGuidance.vue'
+import { processList } from '@/components/quote/processList.js'
 
-// 当前选择的工艺
 const currentProcess = ref(null)
-const historyData = ref([])  // 存储历史记录数据
-const isOrdering = ref(false) // 标记是否处于下单状态
-const selectedRecords = ref([]) // 存储选中的记录
+const historyData = ref([])
+const isOrdering = ref(false)
+const selectedRecords = ref([])
+const guidanceVisible = ref(false) // 初始化为 false
+const activeIndex = ref(0) // 初始化为 0
 
-// 获取历史记录
 const fetchHistory = async (processType) => {
   if (!processType) return
   
@@ -76,104 +81,55 @@ const fetchHistory = async (processType) => {
   }
 }
 
-// 处理工艺变更
 const handleProcessChange = async (process) => {
   currentProcess.value = process
-  // 切换工艺时获取对应的历史记录
   fetchHistory(process.type)
 }
 
-// 处理下单
 const handleOrder = (record) => {
   isOrdering.value = true
-  // 初始化数量为 1
   record.quantity = 1
   selectedRecords.value.push(record)
 }
 
-// 处理删除
 const handleDelete = async (id) => {
   console.log('删除:', id)
-  // TODO: 实现删除逻辑
 }
 
-// 上传成功后刷新历史记录
 const handleUploadSuccess = () => {
   if (currentProcess.value?.type) {
     fetchHistory(currentProcess.value.type)
   }
 }
 
-// 组件挂载时获取历史记录
+const showGuidance = (index = 0) => {
+  activeIndex.value = index
+  guidanceVisible.value = true // 设置为 true 以显示对话框
+}
+
 onMounted(() => {
-  // 找到 3D 打印工艺
-  const processList = [
-    {
-      type: 'mechanical',
-      name: '机械/自动化零部件选购',
-      description: '新人领30元优惠劵',
-      route: '/mechanical-parts'
-    },
-    {
-      type: '3dprint',
-      name: '3D打印',
-      description: '树脂/尼龙/金属3D打印服务',
-      acceptTypes: '.stl,.stp,.step,.obj,.3mf,.zip,.rar',
-      uploadTips: [
-        '支持3D格式:stl/stp/step/obj/3mf，单次上传文件数量≤20个，单个文件大小<100M，全彩打印可上传压缩文件rar/zip',
-        '注:为了更准确打印以及避免不必要的纠纷，强烈建议上传STL格式文件!',
-        '特别提醒:壁厚需大于1.2mm，处不低于0.8mm'
-      ]
-    },
-    {
-      type: 'cnc',
-      name: 'CNC加工',
-      description: '铝件/钢件/塑胶件，快速打样',
-      acceptTypes: '.stp,.step,.dwg,.dxf,.pdf,.zip,.rar',
-      uploadTips: [
-        '支持3D(必须)格式:step,stp;支持2D格式:dwg,dxf,pdf，可压缩包(zip、rar)直接上传',
-        '建议您同时上传3D(必须)和2D图纸，同一款零件3D和2D图纸名称需要一致',
-        '单次上传文件 ≤20 个，单个文件大小<100M',
-        '嘉立创CNC将对您的文件绝对保密，保护您的知识产权'
-      ]
-    },
-    {
-      type: 'sheet',
-      name: '钣金加工',
-      description: '激光切割/折弯压铆/焊接喷涂',
-      acceptTypes: '.dxf,.dwg,.stp,.step',
-      uploadTips: [
-        '支持格式：DXF、DWG、STP、STEP',
-        '单个文件大小不超过50MB',
-        '建议上传2D图纸或3D模型',
-        '支持各类钣金工艺'
-      ]
-    },
-    {
-      type: 'mold',
-      name: '手板复模',
-      description: '手板件塑料外壳，小批量打样',
-      acceptTypes: '.stp,.step,.igs,.iges,.x_t',
-      uploadTips: [
-        '支持格式：STP、STEP、IGS、IGES、X_T',
-        '单个文件大小不超过50MB',
-        '建议上传3D模型文件',
-        '支持手板、复模等工艺'
-      ]
-    },
-    {
-      type: 'aluminum',
-      name: '铝合金壳体',
-      description: '百种壳体，一个起订',
-      route: '/aluminum-case'
-    }
-  ];
-  const threeDPrintProcess = processList.find(process => process.type === '3dprint');
+  const threeDPrintProcess = processList.find(process => process.type === 'cnc');
   if (threeDPrintProcess) {
     currentProcess.value = threeDPrintProcess;
-    fetchHistory('3dprint');
+    fetchHistory('cnc');
   }
 })
+// 客户指引
+const guidanceRef = ref(null)
+const openGuidance = () => {
+  guidanceRef.value?.openDialog()
+}
+const openGuidance2D = () => {
+  guidanceRef.value?.openDialog()
+  // 切换到2D文件转换须知
+  guidanceRef.value?.switchComponent('FileGuidance')
+}
+
+const openGuidanceSecret = () => {
+  guidanceRef.value?.openDialog()
+  // 切换到保密协议
+  guidanceRef.value?.switchComponent('SecretGuidance')
+}
 </script>
 
 <style lang="scss" scoped>
@@ -189,83 +145,59 @@ onMounted(() => {
     margin-bottom: 20px;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
 
-    .section-title {
-      font-size: 18px;
-      font-weight: bold;
-      color: #303133;
-      margin-bottom: 20px;
-      display: flex; // 添加 flex 布局
-      align-items: center; // 垂直居中对齐
-
-      &::before { // 使用伪元素创建竖线
-        content: '';
-        width: 4px;
-        height: 18px; // 与文字大小相同
-        background-color: #409eff;
-        margin-right: 8px; // 设置竖线和文字的间距为8px
-        border-radius: 2px; // 可选：添加圆角效果
-      }
-    }
-  }
-
-  .history-section {
-    margin-top: 30px;
-    background: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1);
-
-    .section-header {
+    .upload-header {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 20px;
     }
 
-    .section-header h3 {
-      margin: 0;
-      color: #333;
+    .section-title {
       font-size: 18px;
+      font-weight: bold;
+      color: #303133;
+      display: flex;
+      align-items: center;
+
+      &::before {
+        content: '';
+        width: 4px;
+        height: 18px;
+        background-color: #409eff;
+        margin-right: 8px;
+        border-radius: 2px;
+      }
     }
-  }
 
-  .filename-text {
-    display: inline-block;
-    max-width: 200px;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
+    .button-group {
+      display: flex;
+      gap: 10px;
 
-  .image-error,
-  .no-preview {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 60px;
-    height: 60px;
-    background: #f5f7fa;
-    border-radius: 4px;
-    color: #909399;
-  }
+      .blue-button {
+        background-color: #409eff;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.3s;
+      }
 
-  .operation-buttons {
-    display: flex;
-    gap: 8px;
-  }
+      .gray-button {
+        background-color: transparent;
+        color: #909399;
+        border: 1px solid #909399;
+        padding: 8px 16px;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: all 0.3s;
+      }
 
-  .el-image {
-    border: 1px solid #ebeef5;
-    transition: all 0.3s;
-  }
-
-  .el-image:hover {
-    transform: scale(1.05);
-    box-shadow: 0 2px 12px 0 rgba(0,0,0,0.1);
-  }
-
-  :deep(.el-table .cell) {
-    white-space: nowrap;
+      .gray-button:hover {
+        color: #409eff;
+        border-color: #409eff;
+      }
+    }
   }
 }
 </style>

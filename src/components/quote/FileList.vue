@@ -53,7 +53,9 @@
           <hr />
           <p>零件数量：{{ totalQuantity }}件1款</p>
           <p class="red-text">系统自动报价仅做参考, 最终以人工审核报价为准</p>
-          <button class="blue-button">提交询价</button>
+          <button class="blue-button">
+            <router-link class="inquiry-link" to="/price-inquiry">提交询价</router-link>
+          </button>
           <button class="white-button">
             <el-icon><ShoppingCart /></el-icon>
             <span>加入购物车</span>
@@ -309,12 +311,19 @@ onMounted(() => {
 
       .blue-button {
         background: #409eff;
-        color: white;
         padding: 10px 20px;
         border: none;
         border-radius: 4px;
         width: 100%;
         margin-bottom: 10px;
+        cursor: pointer;
+
+        .inquiry-link {
+          color: white;
+          text-decoration: none;
+          display: block;
+          width: 100%;
+        }
       }
 
       .white-button {
