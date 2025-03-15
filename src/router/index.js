@@ -142,6 +142,24 @@ const routes = [
       guest: true
     }
   },
+  {
+    path: '/members',
+    name: 'Members',
+    component: () => import('@/views/Members.vue'),
+  },
+  {
+    path: '/guidance',
+    name: 'CustomerGuidance',
+    component: () => import('@/views/CustomerGuidance.vue')
+  },
+  {
+    path: '/price-inquiry',
+    name: 'PriceInquiry',
+    component: () => import('@/views/PriceInquiry.vue'),
+    meta: {
+      title: '订单询价'
+    }
+  },
 ]
 
 const router = createRouter({
