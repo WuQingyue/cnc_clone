@@ -21,15 +21,46 @@
             <tr v-for="(record, index) in localRecords" :key="index">
               <td>{{ index + 1 }}</td>
               <td>{{ record.file_name }}</td>
-              <td>模型信息待完善</td>
-              <td>参数信息待完善</td>
+              <td>
+                尺寸: {{ modelInfo.size }}<br>
+                体积: {{ modelInfo.volume }}<br>
+                表面积: {{ modelInfo.surfaceArea }}<br>
+                备注: {{ modelInfo.remarks }}
+              </td>
+              <td class="parameter-info-cell" @click="showParameterDialog = true">
+                <div class="parameter-details">
+                  <div>{{ record.parameters.material || '铝合金-6061' }}</div>
+                  <div v-if="record.parameters.surfaceTreatment === 'none'">
+                    表面不做处理
+                  </div>
+                  <div v-else>
+                    <template v-if="record.parameters.selectedTreatment">
+                      表面处理一: {{ record.parameters.selectedTreatment }} 
+                      <span v-if="record.parameters.selectedColor">- {{ record.parameters.selectedColor }}</span>
+                      <span v-if="record.parameters.glossiness">- {{ record.parameters.glossiness }}</span>
+                      <span v-if="record.parameters.uploadedFileName">- {{ record.parameters.uploadedFileName }}</span>
+                    </template>
+                    <template v-if="record.parameters.selectedTreatment2">
+                      <br>表面处理二: {{ record.parameters.selectedTreatment2 }}
+                      <span v-if="record.parameters.selectedColor2">- {{ record.parameters.selectedColor2 }}</span>
+                      <span v-if="record.parameters.glossiness2">- {{ record.parameters.glossiness2 }}</span>
+                      <span v-if="record.parameters.uploadedFileName2">- {{ record.parameters.uploadedFileName2 }}</span>
+                    </template>
+                  </div>
+                  <div>最严公差: {{ record.parameters.tolerance || 'GB/T 1804-2000 m级' }}</div>
+                  <div>最小粗糙度: {{ record.parameters.roughness || 'Ra3.2' }}</div>
+                </div>
+                <el-icon class="edit-icon">
+                  <Edit />
+                </el-icon>
+              </td>
               <td>
                 <button @click="decreaseQuantity(index)">-</button>
-                {{ record.quantity }}
+                {{ quantity }}
                 <button @click="increaseQuantity(index)">+</button>
               </td>
-              <td>待报价</td>
-              <td>待报价</td>
+              <td>{{ record.parameters.pricePerUnit }}</td>
+              <td>{{ record.parameters.totalPrice }}</td>
             </tr>
           </tbody>
         </table>
@@ -69,6 +100,12 @@
         </div>
       </div>
     </div>
+    <!-- 引入 ParameterInfo 组件 -->
+    <ParameterInfo 
+      :visible="showParameterDialog"
+      @update:visible="showParameterDialog = $event"
+      @confirm="handleParameterConfirm"
+    />
   </div>
 </template>
 
@@ -76,9 +113,15 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import FileUploader from '@/components/quote/FileUploader.vue'
-import { Pointer, ShoppingCart } from '@element-plus/icons-vue'
+import { Pointer, ShoppingCart, Edit } from '@element-plus/icons-vue' // 引入 Edit 图标
 import axios from 'axios'
-
+import { 
+  currentParameters, 
+  quantity, 
+  updateQuantity,
+  modelInfo
+} from './AutomationTool' 
+import ParameterInfo from './ParameterInfo.vue' // 引入 ParameterInfo 组件
 const props = defineProps({
   selectedRecords: {
     type: Array,
@@ -96,13 +139,32 @@ const emit = defineEmits(['update:selectedRecords'])
 const localRecords = ref([])
 
 // 监听 props 变化更新本地数据
+
 watch(() => props.selectedRecords, (newVal) => {
   localRecords.value = newVal.map(record => ({
     ...record,
-    quantity: record.quantity || 1
+    quantity: record.quantity || 1,
+    parameters: {
+      // 添加默认参数
+      material: '铝合金-6061',
+      surfaceTreatment: 'none',
+      tolerance: 'GB/T 1804-2000 m级',
+      roughness: 'Ra3.2',
+      selectedTreatment: '',
+      selectedColor: '',
+      glossiness: '',
+      uploadedFileName: '',
+      selectedTreatment2: '',
+      selectedColor2: '',
+      glossiness2: '',
+      uploadedFileName2: '',
+      pricePerUnit: '91.98',
+      totalPrice: '91.98',
+      // 保留已有参数
+      ...(record.parameters || {})
+    }
   }))
 }, { immediate: true, deep: true })
-
 const totalQuantity = computed(() => {
   return localRecords.value.reduce((total, record) => total + record.quantity, 0)
 })
@@ -112,13 +174,13 @@ const updateRecords = () => {
 }
 
 const increaseQuantity = (index) => {
-  localRecords.value[index].quantity++
+  updateQuantity(quantity.value + 1)
   updateRecords()
 }
 
 const decreaseQuantity = (index) => {
-  if (localRecords.value[index].quantity > 1) {
-    localRecords.value[index].quantity--
+  if (quantity.value > 1) {
+    updateQuantity(quantity.value - 1)
     updateRecords()
   }
 }
@@ -138,108 +200,15 @@ const handleUploadSuccess = () => {
   // 处理上传成功逻辑
 }
 
+const showParameterDialog = ref(false) // 控制 ParameterInfo 对话框的显示与隐藏
 
-const paypalButtonContainer = ref(null)
-
-// PayPal 支付初始化
-const initPayment = async () => {
-  try {
-    // 检查是否有选中的记录
-    if (localRecords.value.length === 0) {
-      ElMessage.warning('请先选择需要支付的零件')
-      return
-    }
-
-    // 计算总金额（这里需要根据实际业务逻辑修改）
-    const totalAmount = calculateTotalAmount()
-
-    await loadPayPalScript()
-    renderPayPalButton(totalAmount)
-  } catch (error) {
-    console.error('PayPal 初始化失败:', error)
-    ElMessage.error('支付初始化失败，请重试')
-  }
-}
-
-// 加载 PayPal SDK
-const loadPayPalScript = () => {
-  return new Promise((resolve, reject) => {
-    if (document.getElementById('paypal-sdk')) {
-      resolve()
-      return
-    }
-    const script = document.createElement('script')
-    script.id = 'paypal-sdk'
-    script.src = `https://www.paypal.com/sdk/js?client-id=ATas7noQJF7_8E6TIb2VlM8oYn-bspUGzEoCPbKXN2xIepJbH1Fucsj5S4kFYoWi38kClcn-W5wowZIn&currency=USD`
-    script.onload = resolve
-    script.onerror = reject
-    document.body.appendChild(script)
+const handleParameterConfirm = (newParameters) => {
+  currentParameters.value = newParameters
+  localRecords.value.forEach(record => {
+    record.parameters = newParameters
   })
+  updateRecords()
 }
-
-// 计算总金额
-const calculateTotalAmount = () => {
-  // 这里需要根据实际业务逻辑计算总金额
-  return localRecords.value.reduce((total, record) => {
-    return total + (record.price || 0) * record.quantity
-  }, 0)
-}
-
-// 渲染 PayPal 按钮
-const renderPayPalButton = (amount) => {
-  if (!window.paypal) return
-
-  window.paypal.Buttons({
-    createOrder: (data, actions) => {
-      return actions.order.create({
-        purchase_units: [{
-          // amount: {
-          //   value: amount.toFixed(2)
-          // }
-          amount: {
-          currency_code: 'USD',
-          value: '100.00'
-        }
-        }]
-      })
-    },
-    onApprove: async (data, actions) => {
-      try {
-        const order = await actions.order.capture()
-        await handlePaymentSuccess(order)
-        ElMessage.success('支付成功！')
-      } catch (error) {
-        console.error('支付处理失败:', error)
-        ElMessage.error('支付处理失败，请联系客服')
-      }
-    },
-    onError: (err) => {
-      console.error('PayPal 错误:', err)
-      ElMessage.error('支付出错，请重试')
-    }
-  }).render(paypalButtonContainer.value)
-}
-
-// 处理支付成功
-const handlePaymentSuccess = async (paypalOrder) => {
-  try {
-    // 调用后端 API 处理支付成功逻辑
-    await axios.post('http://localhost:8000/api/payment/success', {
-      paypalOrder,
-      records: localRecords.value
-    }, {
-      withCredentials: true
-    })
-  } catch (error) {
-    console.error('更新订单状态失败:', error)
-    throw new Error('订单状态更新失败')
-  }
-}
-
-onMounted(() => {
-  initPayment()
-})
-
 </script>
 
 <style lang="scss" scoped>
@@ -342,6 +311,25 @@ onMounted(() => {
         background: #409eff;
         margin-right: 5px;
       }
+    }
+  }
+
+  .parameter-info-cell {
+    position: relative;
+    background-color: #e6f7ff; /* 浅蓝色背景 */
+    border: 1px dashed #409eff; /* 浅蓝色虚线边框 */
+
+    .parameter-details div {
+      margin: 4px 0;
+      line-height: 1.5;
+      text-align: left;
+    }
+
+    .edit-icon {
+      position: absolute;
+      top: 2px;
+      right: 2px;
+      color: #409eff;
     }
   }
 }

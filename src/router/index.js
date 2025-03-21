@@ -143,6 +143,15 @@ const routes = [
     }
   },
   {
+    path: '/admin',
+    name: 'Admin',
+    component: () => import('@/components/SignIn/Admin.vue'),
+    meta: {
+      title: '管理员界面 - 嘉立创',
+      guest: true
+    }
+  },
+  {
     path: '/members',
     name: 'Members',
     component: () => import('@/views/Members.vue'),
@@ -160,6 +169,11 @@ const routes = [
       title: '订单询价'
     }
   },
+  {
+    path: '/submitOrderSuccess',
+    name: 'SubmitOrder',
+    component: () => import('@/views/SubmitOrder.vue')
+  }
 ]
 
 const router = createRouter({
