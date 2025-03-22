@@ -730,11 +730,8 @@ export default {
       }
     }
    
-    // 加载状态
-    const isLoading = ref(false)
     // 获取价格信息
     const fetchPrices = async () => {
-      isLoading.value = true
       try {
  
         const response = await axios.post('http://localhost:8000/api/price/price', {
@@ -775,8 +772,6 @@ export default {
       } catch (error) {
         console.error('请求失败:', error.response?.data || error.message)
         ElMessage.error('获取价格信息失败，请检查网络连接')
-      } finally {
-        isLoading.value = false
       }
     }
     // 添加计算属性

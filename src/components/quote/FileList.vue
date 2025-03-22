@@ -55,9 +55,22 @@
                 </el-icon>
               </td>
               <td>
-                <button @click="decreaseQuantity(index)">-</button>
-                {{ quantity }}
-                <button @click="increaseQuantity(index)">+</button>
+                <div class="custom-number-input">
+                  <el-button 
+                    class="number-btn" 
+                    @click="decreaseQuantity(index)"
+                    :disabled="quantity === 1"
+                  >
+                    -
+                  </el-button>
+                  <span class="number-value">{{ quantity }}</span>
+                  <el-button 
+                    class="number-btn" 
+                    @click="increaseQuantity(index)"
+                  >
+                    +
+                  </el-button>
+                </div>
               </td>
               <td>{{ record.parameters.pricePerUnit }}</td>
               <td>{{ record.parameters.totalPrice }}</td>
@@ -85,7 +98,7 @@
           <p>零件数量：{{ totalQuantity }}件1款</p>
           <p class="red-text">系统自动报价仅做参考, 最终以人工审核报价为准</p>
           <button class="blue-button">
-            <router-link class="inquiry-link" to="/price-inquiry">提交询价</router-link>
+            <router-link class="inquiry-link" to="/price-inquiry"  @click="handleConfirm">提交询价</router-link>
           </button>
           <button class="white-button">
             <el-icon><ShoppingCart /></el-icon>
@@ -116,12 +129,13 @@ import FileUploader from '@/components/quote/FileUploader.vue'
 import { Pointer, ShoppingCart, Edit } from '@element-plus/icons-vue' // 引入 Edit 图标
 import axios from 'axios'
 import { 
-  currentParameters, 
-  quantity, 
-  updateQuantity,
+  // currentParameters, 
+  // quantity, 
+  // updateQuantity,
   modelInfo
 } from './AutomationTool' 
 import ParameterInfo from './ParameterInfo.vue' // 引入 ParameterInfo 组件
+const quantity = ref(1)
 const props = defineProps({
   selectedRecords: {
     type: Array,
@@ -169,31 +183,31 @@ const totalQuantity = computed(() => {
   return localRecords.value.reduce((total, record) => total + record.quantity, 0)
 })
 
-const updateRecords = () => {
-  emit('update:selectedRecords', localRecords.value)
-}
+// const updateRecords = () => {
+//   emit('update:selectedRecords', localRecords.value)
+// }
 
-const increaseQuantity = (index) => {
-  updateQuantity(quantity.value + 1)
-  updateRecords()
-}
+// const increaseQuantity = (index) => {
+  // updateQuantity(quantity.value + 1)
+//   updateRecords()
+// }
 
-const decreaseQuantity = (index) => {
-  if (quantity.value > 1) {
-    updateQuantity(quantity.value - 1)
-    updateRecords()
-  }
-}
+// const decreaseQuantity = (index) => {
+//   if (quantity.value > 1) {
+//     updateQuantity(quantity.value - 1)
+//     updateRecords()
+//   }
+// }
 
 const copyPart = (index) => {
   const newRecord = JSON.parse(JSON.stringify(localRecords.value[index]))
   localRecords.value.push(newRecord)
-  updateRecords()
+  // updateRecords()
 }
 
 const deletePart = (index) => {
   localRecords.value.splice(index, 1)
-  updateRecords()
+  // updateRecords()
 }
 
 const handleUploadSuccess = () => {
@@ -203,15 +217,60 @@ const handleUploadSuccess = () => {
 const showParameterDialog = ref(false) // 控制 ParameterInfo 对话框的显示与隐藏
 
 const handleParameterConfirm = (newParameters) => {
-  currentParameters.value = newParameters
+  // currentParameters.value = newParameters
   localRecords.value.forEach(record => {
     record.parameters = newParameters
   })
-  updateRecords()
+  // updateRecords()
 }
 </script>
 
 <style lang="scss" scoped>
+.custom-number-input {
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  overflow: hidden;
+  transition: border-color 0.2s;
+
+  &:hover {
+    border-color: #409eff;
+  }
+
+  .number-btn {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border: none;
+    border-radius: 0;
+    background: #f5f7fa;
+
+    &:hover {
+      background: #ecf5ff;
+      color: #409eff;
+    }
+
+    &:active {
+      background: #d9ecff;
+    }
+
+    &:disabled {
+      background: #f5f7fa;
+      color: #c0c4cc;
+      cursor: not-allowed;
+    }
+  }
+
+  .number-value {
+    width: 40px;
+    text-align: center;
+    font-size: 14px;
+    color: #606266;
+    border-left: 1px solid #ebeef5;
+    border-right: 1px solid #ebeef5;
+  }
+}
 .file-list {
   padding: 24px;
   background: #fff;
