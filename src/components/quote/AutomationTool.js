@@ -55,15 +55,7 @@ export const parametersList = reactive([
 export const currentParameters = ref(parametersList[0])
 
 // 数量
-export const quantity = ref(1)
-
-// 单价
-export const unitPrice = ref(0)
-
-// 计算总价
-export const totalPrice = computed(() => {
-  return (quantity.value * unitPrice.value).toFixed(2)
-})
+export const quantity = ref(2)
 
 // 加载状态
 export const loading = ref(false)
@@ -97,7 +89,6 @@ export function updateQuantity(newQuantity) {
 export function resetData() {
   currentParameters.value = parametersList[0]
   quantity.value = 1
-  unitPrice.value = 0
   error.value = null
 }
 export const surfaceTreatmentData = [

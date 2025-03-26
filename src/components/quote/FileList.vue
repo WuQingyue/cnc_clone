@@ -55,22 +55,7 @@
                 </el-icon>
               </td>
               <td>
-                <div class="custom-number-input">
-                  <el-button 
-                    class="number-btn" 
-                    @click="decreaseQuantity(index)"
-                    :disabled="quantity === 1"
-                  >
-                    -
-                  </el-button>
-                  <span class="number-value">{{ quantity }}</span>
-                  <el-button 
-                    class="number-btn" 
-                    @click="increaseQuantity(index)"
-                  >
-                    +
-                  </el-button>
-                </div>
+                {{ record.parameters.quantity }}
               </td>
               <td>{{ record.parameters.pricePerUnit }}</td>
               <td>{{ record.parameters.totalPrice }}</td>
@@ -128,6 +113,12 @@ import { ElMessage } from 'element-plus'
 import FileUploader from '@/components/quote/FileUploader.vue'
 import { Pointer, ShoppingCart, Edit } from '@element-plus/icons-vue' // 引入 Edit 图标
 import axios from 'axios'
+const materialCost = ref(0)
+const engineeringCost = ref(0)
+const clampingCost = ref(0)
+const processingCost = ref(0)
+const surfaceCost = ref(0)
+const pricePerUnit = ref(0)
 import { 
   // currentParameters, 
   // quantity, 
@@ -172,8 +163,25 @@ watch(() => props.selectedRecords, (newVal) => {
       selectedColor2: '',
       glossiness2: '',
       uploadedFileName2: '',
-      pricePerUnit: '91.98',
-      totalPrice: '91.98',
+      pricePerUnit: '',
+      totalPrice: '',
+      quantity: 0,
+      hasThread: false,
+      hasAssembly: false,
+      materialCost: '',
+      engineeringCost: '',
+      clampingCost: '',
+      processingCost: '',
+      surfaceCost: '',
+      materialAccessId: '',
+      craftAccessId1: '',
+      craftAttributeColorAccessIds1: '',
+      craftAttributeGlossinessAccessIds1: '',
+      craftAttributeFileAccessIds1: '',
+      craftAccessId2: '',
+      craftAttributeColorAccessIds2: '',
+      craftAttributeGlossinessAccessIds2: '',
+      craftAttributeFileAccessIds2: '',
       // 保留已有参数
       ...(record.parameters || {})
     }
@@ -182,22 +190,6 @@ watch(() => props.selectedRecords, (newVal) => {
 const totalQuantity = computed(() => {
   return localRecords.value.reduce((total, record) => total + record.quantity, 0)
 })
-
-// const updateRecords = () => {
-//   emit('update:selectedRecords', localRecords.value)
-// }
-
-// const increaseQuantity = (index) => {
-  // updateQuantity(quantity.value + 1)
-//   updateRecords()
-// }
-
-// const decreaseQuantity = (index) => {
-//   if (quantity.value > 1) {
-//     updateQuantity(quantity.value - 1)
-//     updateRecords()
-//   }
-// }
 
 const copyPart = (index) => {
   const newRecord = JSON.parse(JSON.stringify(localRecords.value[index]))
@@ -223,6 +215,120 @@ const handleParameterConfirm = (newParameters) => {
   })
   // updateRecords()
 }
+
+const handleConfirm = async () => {
+  try {
+    // 确保数据存在且类型正确
+    if (!localRecords.value || !localRecords.value[0]) {
+      ElMessage.error('没有可提交的记录')
+      return
+    }
+
+    const params = localRecords.value[0].parameters
+    const orderData = {
+      order_no: generateOrderNo(),
+      user_email: '3@q.com',
+      // 确保数值类型为数字
+      material_cost: Number(params.materialCost || 0),
+      engineering_cost: Number(params.engineeringCost || 0),
+      clamping_cost: Number(params.clampingCost || 0),
+      processing_cost: Number(params.processingCost || 0),
+      surface_cost: Number(params.surfaceCost || 0),
+      unit_price: Number(params.pricePerUnit || 0),
+      total_price: Number(params.totalPrice || 0),
+      // 字符串类型
+      material: String(params.material || ''),
+      // 布尔类型
+      surface_treatment: params.surfaceTreatment === 'need',
+      // 可选字符串
+      treatment1_option: params.selectedTreatment || null,
+      treatment1_color: params.selectedColor || null,
+      treatment1_gloss: params.glossiness || null,
+      treatment1_drawing: params.uploadedFileName || null,
+      treatment2_option: params.selectedTreatment2 || null,
+      treatment2_color: params.selectedColor2 || null,
+      treatment2_gloss: params.glossiness2 || null,
+      treatment2_drawing: params.uploadedFileName2 || null,
+      // 数值类型
+      quantity: Number(params.quantity || 1),
+      // 字符串类型
+      tolerance: String(params.tolerance || 'GB/T 1804-2000 m级'),
+      roughness: String(params.roughness || 'Ra3.2'),
+      // 布尔类型
+      has_thread: Boolean(params.hasThread),
+      has_assembly: Boolean(params.hasAssembly)
+    }
+
+    console.log('提交的订单数据:', orderData) // 调试用
+
+    const response = await axios.post('http://localhost:8000/api/orders/orders', orderData)
+    if(response.data.message === "订单创建成功") {
+      ElMessage.success('订单提交成功')
+    }
+  } catch (error) {
+    console.error('订单提交失败:', error.response?.data || error)
+    ElMessage.error(`订单提交失败: ${error.response?.data?.detail || '请重试'}`)
+  }
+}
+// 生成订单号
+const generateOrderNo = () => {
+  const date = new Date()
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0')
+  return `ORDER${year}${month}${day}${random}`
+}
+onMounted(() => {
+  fetchPrices()
+})
+const fetchPrices = async () => {
+      try {
+ 
+        const response = await axios.post('http://localhost:8000/api/price/price', {
+          materialAccessId: localRecords.value[0].parameters.materialAccessId,
+          crafts: [
+            {
+              craftAccessId: localRecords.value[0].parameters.craftAccessId1,
+              craftAttributeAccessIds: [
+                localRecords.value[0].parameters.craftAttributeColorAccessIds1,
+                localRecords.value[0].parameters.craftAttributeGlossinessAccessIds1,
+                localRecords.value[0].parameters.craftAttributeFileAccessIds1
+              ].filter(Boolean) // 过滤空值
+            },
+            {
+              craftAccessId: localRecords.value[0].parameters.craftAccessId2,
+              craftAttributeAccessIds: [
+                localRecords.value[0].parameters.craftAttributeColorAccessIds2,
+                localRecords.value[0].parameters.craftAttributeGlossinessAccessIds2,
+                localRecords.value[0].parameters.craftAttributeFileAccessIds2
+              ].filter(Boolean)
+            }
+          ], 
+          goodsQuantity: localRecords.value[0].parameters.quantity,
+          toleranceAccessId: "4c5b4f8543b34dd2b4c861a270f36ea7",
+          roughnessAccessId: "4e6158ff486640ab9c82196c64196fe9",
+          deliveryTypeCode: "BD"
+        })
+        console.log('response', response)
+        // 正确解析响应数据
+        const priceData = response.data
+        console.log('priceData', priceData)
+        materialCost.value = priceData.materialPrice
+        engineeringCost.value = priceData.programPrice
+        clampingCost.value = priceData.clampPrice
+        processingCost.value = priceData.processPrice
+        surfaceCost.value = priceData.craftPrice
+        pricePerUnit.value = priceData.price
+      } catch (error) {
+        console.error('请求失败:', error.response?.data || error.message)
+        ElMessage.error('获取价格信息失败，请检查网络连接')
+      }
+}
+// 添加计算属性
+const totalPrice = computed(() => {
+  return pricePerUnit.value * localRecords.value[0].parameters.quantity
+})
 </script>
 
 <style lang="scss" scoped>

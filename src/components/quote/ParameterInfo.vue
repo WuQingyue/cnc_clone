@@ -440,7 +440,24 @@ export default {
       glossiness2: glossiness2.value,
       uploadedFileName2: uploadedFileName2.value,
       totalPrice: totalPrice.value,
-      pricePerUnit: pricePerUnit.value
+      pricePerUnit: pricePerUnit.value,
+      quantity: quantity.value,
+      hasThread: hasThread.value,
+      hasAssembly: hasAssembly.value,
+      materialCost: materialCost.value,
+      engineeringCost: engineeringCost.value,
+      clampingCost: clampingCost.value,
+      processingCost: processingCost.value,
+      surfaceCost: surfaceCost.value,
+      materialAccessId: selectedMaterial.value.materialAccessId,
+      craftAccessId1: craftAccessId1.value,
+      craftAttributeColorAccessIds1: craftAttributeColorAccessIds1.value,
+      craftAttributeGlossinessAccessIds1: craftAttributeGlossinessAccessIds1.value,
+      craftAttributeFileAccessIds1: craftAttributeFileAccessIds1.value,
+      craftAccessId2: craftAccessId2.value,
+      craftAttributeColorAccessIds2: craftAttributeColorAccessIds2.value,
+      craftAttributeGlossinessAccessIds2: craftAttributeGlossinessAccessIds2.value,
+      craftAttributeFileAccessIds2: craftAttributeFileAccessIds2.value,
     }
     
     emit('confirm', parameters)
@@ -1240,3 +1257,4 @@ export default {
   color: #c0c4cc;
 }
 </style>
+

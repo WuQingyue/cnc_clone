@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <!-- 顶部导航栏 -->
-    <nav-header />
+    <!-- <nav-header /> -->
 
     <!-- 路由视图 -->
     <router-view v-slot="{ Component }">

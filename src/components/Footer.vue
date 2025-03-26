@@ -6,7 +6,7 @@
           <div class="footer-content">
             <!-- 公司信息 -->
             <div class="footer-section company-info">
-              <img src="@/assets/images/logo_bottom.png" alt="嘉立诚数控" class="footer-logo">
+              <!-- <img src="@/assets/images/logo_bottom.png" alt="嘉立诚数控" class="footer-logo"> -->
               <p class="company-desc">
                 嘉立诚数控科技有限公司专注于精密零件加工制造，提供CNC加工、3D打印、钣金加工等一站式服务。
               </p>

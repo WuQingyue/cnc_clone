@@ -41,7 +41,7 @@
               </div>
             </div>
             <div class="intro-image">
-              <img src="@/assets/images/company.png" alt="公司简介">
+              <img src="@/assets/images/map1.png" alt="公司简介">
             </div>
           </div>
         </div>

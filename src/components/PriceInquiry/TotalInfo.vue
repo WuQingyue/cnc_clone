@@ -73,7 +73,7 @@ export default {
   },
   methods: {
     submitOrder() {
-      this.$emit('submit-order')
+      this.$router.push('/submitOrderSuccess')
     },
     goBack() {
       this.$router.go(-1)

@@ -145,11 +145,7 @@ const routes = [
   {
     path: '/admin',
     name: 'Admin',
-    component: () => import('@/components/SignIn/Admin.vue'),
-    meta: {
-      title: '管理员界面 - 嘉立创',
-      guest: true
-    }
+    component: () => import('@/views/Admin.vue')
   },
   {
     path: '/members',

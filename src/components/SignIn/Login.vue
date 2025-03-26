@@ -2,7 +2,7 @@
   <div class="login-container">
     <div class="login-box">
       <!-- Logo -->
-      <img src="@/assets/images/logo.png" alt="JLC Logo" class="logo">
+      <img src="@/assets/images/logo.jpg" alt="JLC Logo" class="logo">
       
       <!-- Title -->
       <h1 class="title">Sign In</h1>
@@ -105,7 +105,14 @@ const handleEmailLogin = async () => {
     await formRef.value.validate()
     loading.value = true
 
-    // 调用登录接口
+    // // 检查是否是管理员账号
+    // if (form.email === 'admin@tongtron.com' && form.password === 'admin') {
+    //   // 在新标签页打开管理员界面
+    //   window.open('/admin', '_blank', 'noopener,noreferrer');
+    //   return
+    // }
+
+    // 普通用户登录逻辑
     const response = await axios.post(
       'http://localhost:8000/api/login/email/login',
       {
