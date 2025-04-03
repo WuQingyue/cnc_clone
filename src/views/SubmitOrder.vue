@@ -76,7 +76,7 @@
   
       const viewOrder = () => {
         // 跳转到订单详情页
-        router.push('/orderDetail')
+        router.push('/cnc_order')
       }
   
       const backToHome = () => {

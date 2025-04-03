@@ -169,7 +169,17 @@ const routes = [
     path: '/submitOrderSuccess',
     name: 'SubmitOrder',
     component: () => import('@/views/SubmitOrder.vue')
-  }
+  },
+  {
+    path: '/cnc_order',
+    name: 'cncOrder',
+    component: () => import('@/components/cncOrder.vue')
+  },
+  {
+    path: '/unified-payment',
+    name: 'UnifiedPaymentCenter',
+    component: () => import('@/components/UnifiedPaymentCenter.vue')
+  },
 ]
 
 const router = createRouter({

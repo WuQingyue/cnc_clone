@@ -41,15 +41,12 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { Search, CaretBottom, Document, List, User, Truck } from '@element-plus/icons-vue'
 import PartAuditInfo from '@/components/SignIn/PartAuditInfo.vue'
 import OrderInfo from '@/components/SignIn/OrderInfo.vue'
 import UserInfo from '@/components/SignIn/UserInfo.vue'
 import LogisticsInfo from '@/components/SignIn/LogisticsInfo.vue'
-
-const router = useRouter()
 
 // 导航项
 const navItems = [
@@ -59,15 +56,14 @@ const navItems = [
   { name: '物流信息', component: LogisticsInfo, icon: Truck }
 ]
 
-// 初始化 currentComponent 为 PartAuditInfo
 const currentComponent = ref(PartAuditInfo)
 const componentData = ref(null) // 用于存储从后端获取的数据
 
 // 导航到指定组件
 const navigate = async (item) => {
-  currentComponent.value = item.component
+  currentComponent.value = item.component 
   if (item.name === '零件审核信息') {
-    await fetchPartAuditData() // 获取零件审核信息
+    // await fetchPartAuditData() // 获取零件审核信息
   } else {
     componentData.value = null // 清空数据
   }
@@ -80,17 +76,14 @@ const navigate = async (item) => {
 //     if (!response.ok) {
 //       throw new Error('网络响应不是 OK')
 //     }
+//     console.log("response:",response)
 //     componentData.value = await response.json() // 获取数据并存储
+//     console.log("componentData",componentData.value)
 //   } catch (error) {
 //     console.error('请求失败:', error)
 //     ElMessage.error('获取零件审核信息失败')
 //   }
 // }
-
-// // 在组件加载时自动获取零件审核信息
-// onMounted(() => {
-//   fetchPartAuditData(); // 直接调用获取数据的方法
-// });
 
 // 处理下拉菜单命令
 const handleCommand = (command) => {
@@ -101,6 +94,9 @@ const handleCommand = (command) => {
     window.close()
   }
 }
+onMounted(() => {
+  // fetchPartAuditData(); // 直接调用获取数据的方法
+});
 </script>
 
 <style scoped>
