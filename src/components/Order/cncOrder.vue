@@ -65,13 +65,7 @@
       <el-table-column prop="status" label="状态" width="200" align="center">
         <template #default="scope">
             <el-tag :type="getStatusType(scope.row.status)">
-                <!-- 条件判断 -->
-                <template v-if="getStatusText(scope.row.status) === '已通过'">
-                    待付款
-                </template>
-                <template v-else>
-                    {{ getStatusText(scope.row.status) }}
-                </template>
+              {{ getStatusText(scope.row.status) }}
             </el-tag>
         </template>
     </el-table-column>
@@ -155,7 +149,7 @@ import { useRouter } from 'vue-router' // 引入 Vue Router
 import { ElMessage } from 'element-plus'
 import ModelInfoDialog from '@/components/SignIn/ModelInfoDialog.vue'
 import AmountDialog from '@/components/SignIn/AmountDialog.vue'
-import ShippingDialog from '@/components/ShippingCostDialog.vue' // 引入运费对话框组件
+import ShippingDialog from '@/components/Order/ShippingCostDialog.vue' // 引入运费对话框组件
 
 // 数据状态
 const searchQuery = ref('')
@@ -233,7 +227,7 @@ const handleSearch = () => {
 const viewDetails = (record) => {
   ElMessage.info(`查看详情: ${record.order_no}`)
 }
-import { EventBus,EventBus_message } from './SignIn/eventBus.js';
+import { EventBus } from '@/components/SignIn/eventBus.js';
 // 初始化支付
 const initiatePayment = (record) => {
   EventBus.data = { 
@@ -279,10 +273,6 @@ const fetchPartAuditData = async () => {
 
 // 初始化
 onMounted(() => {
-  const message = EventBus_message.data
-  if (message) {
-    ElMessage.success(message)
-  }
   fetchPartAuditData(); // 直接调用获取数据的方法
 })
 </script>

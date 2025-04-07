@@ -1,7 +1,7 @@
 <template>
   <div id="app">
     <!-- 顶部导航栏 -->
-    <!-- <nav-header /> -->
+    <nav-header />
 
     <!-- 路由视图 -->
     <router-view v-slot="{ Component }">
@@ -21,7 +21,7 @@ import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
-import NavHeader from '@/components/NavHeader.vue'
+import NavHeader from '@/components/NavHeader/NavHeader.vue'
 import NavFooter from '@/components/Footer.vue'
 
 const route = useRoute()

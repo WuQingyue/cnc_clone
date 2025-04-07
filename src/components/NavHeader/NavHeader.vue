@@ -173,7 +173,7 @@ import { ShoppingCart, Menu, Close, ArrowUpBold, ArrowDownBold, Language,Flag } 
 import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
 import { ElMessage } from 'element-plus'
-import Profile from '@/views/Profile.vue' // 引入新组件
+import Profile from '@/views/Profile/Profile.vue' // 引入新组件
 
 const router = useRouter()
 const userStore = useUserStore()

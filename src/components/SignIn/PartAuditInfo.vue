@@ -194,7 +194,6 @@ const pass = (record) => {
   record.operation = 'pass'
   record.update_time = new Date().toLocaleString() // 更新操作时间
   updataRecord(record)
-  // updataOrderRecord(record)
   console.log('record',record)
   ElMessage.success(`订单 ${record.order_no} 审核通过`)
 }
@@ -242,32 +241,6 @@ const updataRecord = async (record) => {
   }
 }
 
-// const updataOrderRecord = async (record) => {
-//   try {
-//     const response = await fetch(`http://localhost:8000/api/orders/create_order`, {
-//       method: 'POST', // 设置请求方法为 POST
-//       headers: {
-//         'Content-Type': 'application/json' // 设置请求头
-//       },
-//       body: JSON.stringify({
-//         "id": record.order_no,
-//         "status": 'pending',
-//       })
-//     });
-
-//     // 检查响应状态
-//     if (!response.ok) {
-//       console.log('record', record);
-//       throw new Error('网络响应不是 OK');
-//     }
-
-//     // 可选：如果需要处理响应数据，可以在这里获取
-//     const responseData = await response.json();
-//     console.log('创建成功:', responseData);
-//   } catch (error) {
-//     console.error('请求失败:', error);
-//   }
-// }
 
 // 打开模型信息对话框
 const openModelInfoDialog = (row) => {

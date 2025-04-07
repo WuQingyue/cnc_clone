@@ -7,10 +7,12 @@ src
 ├── router
 │   └── index.js # 路由
 ├── components
-│   └── cncOrder.vue # cnc订单
-│   └── PaymentDialog.vue # 确认支付
-│   └── ShippingCostDialog.vue # 运费计算
-│   └── UnifiedPaymentCenter.vue # 统一支付中心
+│   ├── Order
+    │   └── cncOrder.vue # cnc订单
+    │   └── PaymentDialog.vue # 确认支付
+    │   └── ShippingCostDialog.vue # 运费计算
+    │   └── UnifiedPaymentCenter.vue # 统一支付中心
+    │   └── cncPaidOrder.vue # 订单信息
 Readme
 └── SubmitOrder.md # 成员文档
 ```

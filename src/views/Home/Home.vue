@@ -23,13 +23,13 @@
 </template>
 
 <script>
-import HomeBanner from '@/components/HomeBanner.vue'
-import OurProcessDisplay from '@/components/OurProcessDisplay.vue'
-import MaterialSupport from '@/components/MaterialSupport.vue'
-import OrderProcess from '@/components/OrderProcess.vue'
-import ProcessDisplay from '@/components/ProcessDisplay.vue'
-import CustomerReviews from '@/components/CustomerReviews.vue'
-import CompanyNews from '@/components/CompanyNews.vue'
+import HomeBanner from '@/components/Home/HomeBanner.vue'
+import OurProcessDisplay from '@/components/Home/OurProcessDisplay.vue'
+import MaterialSupport from '@/components/Home/MaterialSupport.vue'
+import OrderProcess from '@/components/Home/OrderProcess.vue'
+import ProcessDisplay from '@/components/Home/ProcessDisplay.vue'
+import CustomerReviews from '@/components/Home/CustomerReviews.vue'
+import CompanyNews from '@/components/Home/CompanyNews.vue'
 export default {
   name: 'Home',
   components: {

@@ -4,7 +4,7 @@
     <div class="search-bar">
       <el-input
         v-model="searchQuery"
-        placeholder="搜索订单号/用户邮箱"
+        placeholder="搜索订单号"
         class="search-input"
         clearable
         @clear="handleSearch"
@@ -25,15 +25,14 @@
       <el-select v-model="orderStatus" placeholder="订单状态" @change="handleSearch">
         <el-option label="全部状态" value="" />
         <el-option label="待审核" value="wait" />
-        <el-option label="待加工" value="pending" />
+        <el-option label="待付款" value="pending" />
+        <el-option label="待加工" value="pending_processing" />
         <el-option label="加工中" value="processing" />
         <el-option label="加工完成-未揽货" value="completed_not_collected" />
         <el-option label="已揽货" value="collected" />
         <el-option label="运输中" value="in_transit" />
         <el-option label="待取件" value="waiting_for_pickup" />
         <el-option label="已签收" value="delivered" />
-        <el-option label="已通过" value="pass" />
-        <el-option label="已拒绝" value="reject" />
       </el-select>
     </div>
 
@@ -45,14 +44,33 @@
       stripe
       v-loading="loading"
     >
-      <el-table-column prop="order_no" label="订单号" width="200" align="center"/>
-      <el-table-column prop="user_email" label="用户邮箱" width="200" align="center" />
-      <el-table-column prop="create_time" label="创建时间" width="200" align="center">
+      <el-table-column type="index" label="序号" min-width="80" max-width="120" align="center" />
+      <el-table-column prop="order_no" label="订单号" min-width="180" align="center" />
+      <el-table-column prop="user_email" label="用户邮箱" min-width="200" align="center" />
+      <el-table-column prop="status" label="状态" min-width="120" align="center">
         <template #default="scope">
-          {{ formatDate(scope.row.create_time) }}
+            <el-tag :type="getStatusType(scope.row.status)">
+              {{ getStatusText(scope.row.status) }}
+            </el-tag>
+        </template>
+    </el-table-column>
+      <el-table-column prop="created_at" label="创建时间" min-width="150" align="center">
+        <template #default="scope">
+          {{ formatDate(scope.row.created_at) }}
         </template>
       </el-table-column>
-      <el-table-column label="加工金额" width="200" align="center">
+      <el-table-column label="模型信息" min-width="150" align="center">
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="openModelInfoDialog(scope.row)"
+          >
+            查看详情
+          </el-button>
+        </template>
+      </el-table-column>
+      <el-table-column label="加工金额" min-width="150" align="center">
         <template #default="scope">
           <el-button
             link
@@ -63,27 +81,33 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column prop="status" label="状态" width="200" align="center">
-        <template #default="scope">
-          <el-tag :type="getStatusType(scope.row.status)">
-            {{ getStatusText(scope.row.status) }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column prop="update_time" label="更新时间" width="200" align="center">
-        <template #default="scope">
-          {{ formatDate(scope.row.update_time) }}
-        </template>
-      </el-table-column>
-      <el-table-column label="模型信息" width="200" align="center">
+      <el-table-column prop="shipping_cost" label="物流信息" min-width="150" align="center">
         <template #default="scope">
           <el-button
             link
             type="primary"
-            @click="openModelInfoDialog(scope.row)"
+            @click="openShippingDialog(scope.row.order_no, scope.row.shipping_cost)"
           >
             查看详情
           </el-button>
+        </template>
+      </el-table-column>
+      <el-table-column prop="updated_at" label="更新时间" min-width="150" align="center">
+        <template #default="scope">
+          {{ formatDate(scope.row.updated_at) }}
+        </template>
+      </el-table-column>
+      <el-table-column label="操作" fixed="right" min-width="280" align="center">
+        <template #default="scope">
+          <div class="button-group">
+              <el-button
+                link
+                type="primary"
+                @click="viewDetails(scope.row)"
+              >
+                查看进度
+              </el-button>
+          </div>
         </template>
       </el-table-column>
     </el-table>
@@ -99,15 +123,24 @@
       v-model="amountDialogVisible"
       :amount-data="selectedAmount"
     />
+
+    <!-- 运费对话框 -->
+    <shipping-dialog
+      v-model:visible="shippingDialogVisible"
+      :order-no="selectedShippingOrderNo"
+      :shipping-cost="selectedShippingCost"
+    />
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router' // 引入 Vue Router
 import { ElMessage } from 'element-plus'
 import ModelInfoDialog from '@/components/SignIn/ModelInfoDialog.vue'
 import AmountDialog from '@/components/SignIn/AmountDialog.vue'
-
+import ShippingDialog from '@/components/Order/ShippingCostDialog.vue' // 引入运费对话框组件
+import { EventBus,EventBus_message } from '@/components/SignIn/eventBus.js';
 // 数据状态
 const searchQuery = ref('')
 const timeRange = ref('week')
@@ -119,6 +152,9 @@ const amountDialogVisible = ref(false)
 const selectedModel = ref(null)
 const selectedAmount = ref(null)
 
+// 使用 Vue Router
+const router = useRouter()
+
 // 格式化日期
 const formatDate = (date) => {
   return new Date(date).toLocaleString()
@@ -127,16 +163,17 @@ const formatDate = (date) => {
 // 获取状态类型
 const getStatusType = (status) => {
   const types = {
-    wait: 'warning', // 待审核
-    pending: 'info', // 待加工
-    processing: 'primary', // 加工中
-    completed_not_collected: 'success', // 加工完成-未揽货
+    wait: 'warning',
+    pass: 'success',
+    reject: 'danger',
+    pending: 'warning',
+    pending_processing: 'warning',
+    processing: 'danger', // 加工中
+    completed_not_collected: 'warning', // 加工完成-未揽货
     collected: 'success', // 已揽货
-    in_transit: 'info', // 运输中
+    in_transit: 'danger', // 运输中
     waiting_for_pickup: 'warning', // 待取件
-    delivered: 'success', // 已签收
-    pass: 'success', // 已通过
-    reject: 'danger' // 已拒绝
+    delivered: 'success' // 已签收
   }
   return types[status] || 'info'
 }
@@ -145,15 +182,16 @@ const getStatusType = (status) => {
 const getStatusText = (status) => {
   const texts = {
     wait: '待审核',
-    pending: '待加工',
-    processing: '加工中',
-    completed_not_collected: '加工完成-未揽货',
-    collected: '已揽货',
-    in_transit: '运输中',
-    waiting_for_pickup: '待取件',
-    delivered: '已签收',
     pass: '已通过',
-    reject: '已拒绝'
+    reject: '已拒绝',
+    pending: '待付款',
+    pending_processing: '待加工',
+    processing: '加工中', // 加工中
+    completed_not_collected: '加工完成-未揽货', // 加工完成-未揽货
+    collected: '已揽货', // 已揽货
+    in_transit: '运输中', // 运输中
+    waiting_for_pickup: '待取件', // 待取件
+    delivered: '已签收' // 已签收
   }
   return texts[status] || status
 }
@@ -165,8 +203,7 @@ const handleSearch = () => {
     filteredRecords.value = filteredRecords.value.filter(record => {
       const matchQuery =
         !searchQuery.value ||
-        record.order_no?.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-        record.user_email?.toLowerCase().includes(searchQuery.value.toLowerCase())
+        record.order_no?.toLowerCase().includes(searchQuery.value.toLowerCase())
 
       const matchStatus = !orderStatus.value || record.status === orderStatus.value
 
@@ -181,37 +218,20 @@ const viewDetails = (record) => {
   ElMessage.info(`查看详情: ${record.order_no}`)
 }
 
-const updataRecord = async (record) => {
-  try {
-    const response = await fetch(`http://localhost:8000/api/orders/orders_info/${record.id}`, {
-      method: 'PUT', // 设置请求方法为 PUT
-      headers: {
-        'Content-Type': 'application/json' // 设置请求头
-      },
-      body: JSON.stringify({ // 将对象转换为 JSON 字符串
-        "order_no": record.order_no,
-        "user_email": record.user_email,
-        "processing_fee_id": record.processing_fee_id,
-        "status": record.status,
-        "model_info_id": record.model_info_id,
-        "operation": record.operation
-      })
-    });
-
-    // 检查响应状态
-    if (!response.ok) {
-      throw new Error('网络响应不是 OK');
-    }
-
-    // 可选：如果需要处理响应数据，可以在这里获取
-    const responseData = await response.json();
-    console.log('更新成功:', responseData);
-
-    // 更新数据
-    fetchPartAuditData(); // 重新获取数据
-  } catch (error) {
-    console.error('请求失败:', error);
+// 初始化支付
+const initiatePayment = (record) => {
+  EventBus.data = { 
+    id: record.id,
+    order_no: record.order_no,
+    user_email: record.user_email,
+    processing_fee_id: record.processing_fee_id,
+    status: record.status,
+    model_info_id: record.model_info_id,
+    operation: record.operation 
   }
+  // 跳转到 UnifiedPaymentCenter 组件
+  router.push({ name: 'UnifiedPaymentCenter' 
+  })
 }
 
 // 打开模型信息对话框
@@ -226,16 +246,10 @@ const openAmountDialog = (row) => {
   amountDialogVisible.value = true
 }
 
-// 初始化
-onMounted(() => {
-  fetchPartAuditData(); // 直接调用获取数据的方法
-  handleSearch()
-})
-
-// 获取零件审核信息
 const fetchPartAuditData = async () => {
   try {
-    const response = await fetch('http://localhost:8000/api/orders/get_orders_info') // 替换为实际的后端 API
+    const response = await fetch('http://localhost:8000/api/orders/get_paid_allOrders')
+    console.log('response', response)
     if (!response.ok) {
       throw new Error('网络响应不是 OK')
     }
@@ -243,9 +257,14 @@ const fetchPartAuditData = async () => {
     console.log('filteredRecords.value', filteredRecords.value)
   } catch (error) {
     console.error('请求失败:', error)
-    ElMessage.error('获取零件审核信息失败')
+    ElMessage.error('获取订单信息失败')
   }
 }
+
+// 初始化
+onMounted(() => {
+  fetchPartAuditData(); // 直接调用获取数据的方法
+})
 </script>
 
 <style scoped>

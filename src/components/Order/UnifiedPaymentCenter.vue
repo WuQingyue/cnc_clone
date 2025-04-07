@@ -65,6 +65,8 @@
   import axios from 'axios'
   import { useRouter } from 'vue-router' // 导入 Vue Router
   import { useRoute } from 'vue-router' // 导入 Vue Router
+  import { EventBus } from '@/components/SignIn/eventBus.js'; 
+  const record = EventBus.data
   // 创建路由实例
   const router = useRouter()
   const route = useRoute()
@@ -133,7 +135,6 @@ const renderPayPalButton = (amount) => {
     createOrder: (data, actions) => {
       return actions.order.create({
         purchase_units: [{
-          id: record.order_no,
           amount: {
           currency_code: 'USD',
           value: '100.00'
@@ -163,14 +164,14 @@ const handlePaymentSuccess = async (paypalOrder) => {
     // 调用后端 API 处理支付成功逻辑
     const response = await axios.post('http://localhost:8000/api/payment/success', {
       paypalOrder,
-      records: 100
+      records: 100,
+      order_no: record.order_no
     }, {
       withCredentials: true
     })
     if(response.status === 200) {
       ElMessage.success('支付成功！')
-      updataRecord()
-      message.data = '支付成功！'
+      // updataRecord()
       router.push({ path: '/cnc_order' })
       
     } else {
@@ -182,9 +183,6 @@ const handlePaymentSuccess = async (paypalOrder) => {
     throw new Error('订单状态更新失败')
   }
 }
-import { EventBus,EventBus_message } from './SignIn/eventBus.js';
-const record = EventBus.data
-const message = EventBus_message.data
 const initiatePayment = async () => {
   console.log('record', record)
   initPayment()

@@ -1,3 +1,4 @@
+
 import { ref, reactive, computed } from 'vue'
 
 // 参数信息列表
@@ -1472,3 +1473,26 @@ export const surfaceTreatmentData = [
         }
     }
 ];
+// export const deliveryOptions = [
+//       {
+//         "type": "标准交期：5个工作日",
+//         "code": "BD"
+//       },
+//       {
+//         "type": "经济交期：10个工作日",
+//         "code": "ED"
+//       },
+//       {
+//         "type": "加急交期：3个工作日",
+//         "code": "UD"
+//       }
+//     ]
+
+export const roughness = {
+    type: "Ra3.2",
+    roughnessAccessId: "3440240be18e4d0fa92399b12fb37e8c",
+}
+export const tolerance = {
+    type: "GB/T 18.4-2000 m级",
+    toleranceAccessId: "4c5b4f8543b34dd2b4c861a270f36ea7",
+}

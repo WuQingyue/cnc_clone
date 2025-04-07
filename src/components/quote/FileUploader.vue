@@ -197,4 +197,4 @@ const formattedUploadTips = computed(() => {
     padding: 0;
   }
 }
-</style>
+</style> 

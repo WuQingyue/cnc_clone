@@ -1,52 +1,28 @@
 import { createRouter, createWebHistory } from 'vue-router'
-import ServiceGuidance from '@/components/ServiceGuidance.vue'
+import ServiceGuidance from '@/components/NavHeader/ServiceGuidance/ServiceGuidance.vue'
 import { useAuthStore } from '@/store/modules/auth'
 
 const routes = [
   {
     path: '/',
     name: 'Home',
-    component: () => import('@/views/Home.vue'),
+    component: () => import('@/views/Home/Home.vue'),
     meta: {
       title: '首页 - 嘉立诚数控'
     }
   },
   {
-    path: '/products',
-    name: 'Products',
-    component: () => import('@/views/Products.vue'),
-    meta: {
-      title: '产品中心 - 嘉立诚数控'
-    }
-  },
-  {
-    path: '/process',
-    name: 'Process',
-    component: () => import('@/views/Process.vue'),
-    meta: {
-      title: '加工工艺 - 嘉立诚数控'
-    }
-  },
-  {
     path: '/news',
     name: 'News',
-    component: () => import('@/views/News.vue'),
+    component: () => import('@/views/NavHeader/About/News.vue'),
     meta: {
       title: '新闻资讯 - 嘉立诚数控'
     }
   },
   {
-    path: '/news/detail',
-    name: 'NewsDetail',
-    component: () => import('@/views/NewsDetail.vue'),
-    meta: {
-      title: '新闻详情 - 嘉立诚数控'
-    }
-  },
-  {
     path: '/about',
     name: 'About',
-    component: () => import('@/views/About.vue'),
+    component: () => import('@/views/NavHeader/About/About.vue'),
     meta: {
       title: '关于我们 - 嘉立诚数控'
     }
@@ -54,7 +30,7 @@ const routes = [
   {
     path: '/contact',
     name: 'Contact',
-    component: () => import('@/views/Contact.vue'),
+    component: () => import('@/views/NavHeader/Contact/Contact.vue'),
     meta: {
       title: '联系我们 - 嘉立诚数控'
     }
@@ -76,7 +52,7 @@ const routes = [
   {
     path: '/quote',
     name: 'OnlineQuote',
-    component: () => import('@/views/OnlineQuote.vue')
+    component: () => import('@/views/Order/OnlineQuote.vue')
   },
   // {
   //   path: '/mechanical',
@@ -87,42 +63,43 @@ const routes = [
   //   path: '/aluminum',
   //   name: 'AluminumCase',
   //   component: () => import('@/views/AluminumCase.vue')
+
   // },
   {
     path: '/sales-promotion',
     name: 'SalesPromotion',
-    component: () => import('@/components/SalesPromotion.vue')
+    component: () => import('@/components/NavHeader/SalesPromotion.vue')
   },
   
   {
     path: '/coupons',
     name: 'CouponCenter',
-    component: () => import('@/views/CouponCenter.vue'),
+    component: () => import('@/components/CouponCenter/CouponsCenter.vue'),
   },
   {
     path: '/materials',
     name: 'Materials',
-    component: () => import('@/components/MaterialsIntroduction.vue')
+    component: () => import('@/components/NavHeader/MaterialsIntroduction.vue')
   },
   {
     path: '/material/:materialId',
     name: 'MaterialDetail',
-    component: () => import('@/views/MaterialDetail.vue')
+    component: () => import('@/views/NavHeader/MaterialDetail.vue')
   },
   {
     path: '/user-evaluation',
     name: 'UserEvaluation',
-    component: () => import('@/components/UserEvaluation.vue'),
+    component: () => import('@/components/NavHeader/ServiceGuidance/UserEvaluation.vue'),
   },
   {
     path: '/technical-column',
     name: 'TechnicalColumn',
-    component: () => import('@/components/TechnicalColumn.vue'),
+    component: () => import('@/components/NavHeader/ServiceGuidance/TechnicalColumn.vue'),
   },
   {
     path: '/forum',
     name: 'TechForum',
-    component: () => import('@/components/TechForum.vue'),
+    component: () => import('@/components/NavHeader/ServiceGuidance/TechForum.vue'),
   },
   {
     path: '/register',
@@ -145,22 +122,22 @@ const routes = [
   {
     path: '/admin',
     name: 'Admin',
-    component: () => import('@/views/Admin.vue')
+    component: () => import('@/views/Admin/Admin.vue')
   },
   {
     path: '/members',
     name: 'Members',
-    component: () => import('@/views/Members.vue'),
+    component: () => import('@/views/Members/Members.vue'),
   },
   {
     path: '/guidance',
     name: 'CustomerGuidance',
-    component: () => import('@/views/CustomerGuidance.vue')
+    component: () => import('@/views/NavHeader/CustomerGuidance/CustomerGuidance.vue')
   },
   {
     path: '/price-inquiry',
     name: 'PriceInquiry',
-    component: () => import('@/views/PriceInquiry.vue'),
+    component: () => import('@/views/Order/PriceInquiry.vue'),
     meta: {
       title: '订单询价'
     }
@@ -168,18 +145,23 @@ const routes = [
   {
     path: '/submitOrderSuccess',
     name: 'SubmitOrder',
-    component: () => import('@/views/SubmitOrder.vue')
+    component: () => import('@/views/Order/SubmitOrder.vue')
   },
   {
     path: '/cnc_order',
     name: 'cncOrder',
-    component: () => import('@/components/cncOrder.vue')
+    component: () => import('@/components/Order/cncOrder.vue')
+  },
+  {
+    path: '/cnc_paid_order',
+    name: 'cncPaidOrder',
+    component: () => import('@/components/Order/cncPaidOrder.vue')
   },
   {
     path: '/unified-payment',
     name: 'UnifiedPaymentCenter',
-    component: () => import('@/components/UnifiedPaymentCenter.vue')
-  },
+    component: () => import('@/components/Order/UnifiedPaymentCenter.vue')
+  }
 ]
 
 const router = createRouter({

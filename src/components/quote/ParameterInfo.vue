@@ -318,7 +318,7 @@
         </div>
 
         <!-- 确认按钮 -->
-        <el-button type="primary" class="confirm-btn" @click="handleConfirm">
+        <el-button type="primary" class="confirm-btn" @click="confirmParameters">
           确认
         </el-button>
       </div>
@@ -336,12 +336,17 @@ import {
 } from './AutomationTool'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
+
 export default {
   name: 'ParameterInfo',
   props: {
     visible: {
       type: Boolean,
       default: false
+    },
+    record: { // 新增属性，用于接收 FileList.vue 中的记录
+      type: Object,
+      default: () => ({})
     }
   },
   emits: ['update:visible', 'confirm'],
@@ -369,7 +374,42 @@ export default {
     }
 
     const confirmParameters = () => {
-      emit('confirm', currentParameters.value)
+      // 将更新后的参数传递给 FileList.vue
+      const parameters = {
+        material: selectedMaterial.value.materialName,
+        surfaceTreatment: surfaceTreatment.value,
+        tolerance: tolerance.value,
+        roughness: roughness.value,
+        selectedTreatment: selectedTreatment.value,
+        selectedColor: selectedColor.value,
+        glossiness: glossiness.value,
+        uploadedFileName: uploadedFileName.value,
+        selectedTreatment2: selectedTreatment2.value,
+        selectedColor2: selectedColor2.value,
+        glossiness2: glossiness2.value,
+        uploadedFileName2: uploadedFileName2.value,
+        totalPrice: totalPrice.value,
+        pricePerUnit: pricePerUnit.value,
+        quantity: quantity.value,
+        hasThread: hasThread.value,
+        hasAssembly: hasAssembly.value,
+        materialCost: materialCost.value,
+        engineeringCost: engineeringCost.value,
+        clampingCost: clampingCost.value,
+        processingCost: processingCost.value,
+        surfaceCost: surfaceCost.value,
+        materialAccessId: selectedMaterial.value.materialAccessId,
+        craftAccessId1: craftAccessId1.value,
+        craftAttributeColorAccessIds1: craftAttributeColorAccessIds1.value,
+        craftAttributeGlossinessAccessIds1: craftAttributeGlossinessAccessIds1.value,
+        craftAttributeFileAccessIds1: craftAttributeFileAccessIds1.value,
+        craftAccessId2: craftAccessId2.value,
+        craftAttributeColorAccessIds2: craftAttributeColorAccessIds2.value,
+        craftAttributeGlossinessAccessIds2: craftAttributeGlossinessAccessIds2.value,
+        craftAttributeFileAccessIds2: craftAttributeFileAccessIds2.value,
+      }
+      
+      emit('confirm', parameters) // 触发 confirm 事件
       dialogVisible.value = false
     }
 
@@ -421,48 +461,48 @@ export default {
     const pricePerUnit = ref(0)
 
     const handleConfirm = () => {
-    if (!selectedMaterial.value) {
-      ElMessage.warning('请选择材料')
-      return
+      if (!selectedMaterial.value) {
+        ElMessage.warning('请选择材料')
+        return
+      }
+      
+      const parameters = {
+        material: selectedMaterial.value.materialName,
+        surfaceTreatment: surfaceTreatment.value,
+        tolerance: tolerance.value,
+        roughness: roughness.value,
+        selectedTreatment: selectedTreatment.value,
+        selectedColor: selectedColor.value,
+        glossiness: glossiness.value,
+        uploadedFileName: uploadedFileName.value,
+        selectedTreatment2: selectedTreatment2.value,
+        selectedColor2: selectedColor2.value,
+        glossiness2: glossiness2.value,
+        uploadedFileName2: uploadedFileName2.value,
+        totalPrice: totalPrice.value,
+        pricePerUnit: pricePerUnit.value,
+        quantity: quantity.value,
+        hasThread: hasThread.value,
+        hasAssembly: hasAssembly.value,
+        materialCost: materialCost.value,
+        engineeringCost: engineeringCost.value,
+        clampingCost: clampingCost.value,
+        processingCost: processingCost.value,
+        surfaceCost: surfaceCost.value,
+        materialAccessId: selectedMaterial.value.materialAccessId,
+        craftAccessId1: craftAccessId1.value,
+        craftAttributeColorAccessIds1: craftAttributeColorAccessIds1.value,
+        craftAttributeGlossinessAccessIds1: craftAttributeGlossinessAccessIds1.value,
+        craftAttributeFileAccessIds1: craftAttributeFileAccessIds1.value,
+        craftAccessId2: craftAccessId2.value,
+        craftAttributeColorAccessIds2: craftAttributeColorAccessIds2.value,
+        craftAttributeGlossinessAccessIds2: craftAttributeGlossinessAccessIds2.value,
+        craftAttributeFileAccessIds2: craftAttributeFileAccessIds2.value,
+      }
+      
+      emit('confirm', parameters)
+      dialogVisible.value = false
     }
-    
-    const parameters = {
-      material: selectedMaterial.value.materialName,
-      surfaceTreatment: surfaceTreatment.value,
-      tolerance: tolerance.value,
-      roughness: roughness.value,
-      selectedTreatment: selectedTreatment.value,
-      selectedColor: selectedColor.value,
-      glossiness: glossiness.value,
-      uploadedFileName: uploadedFileName.value,
-      selectedTreatment2: selectedTreatment2.value,
-      selectedColor2: selectedColor2.value,
-      glossiness2: glossiness2.value,
-      uploadedFileName2: uploadedFileName2.value,
-      totalPrice: totalPrice.value,
-      pricePerUnit: pricePerUnit.value,
-      quantity: quantity.value,
-      hasThread: hasThread.value,
-      hasAssembly: hasAssembly.value,
-      materialCost: materialCost.value,
-      engineeringCost: engineeringCost.value,
-      clampingCost: clampingCost.value,
-      processingCost: processingCost.value,
-      surfaceCost: surfaceCost.value,
-      materialAccessId: selectedMaterial.value.materialAccessId,
-      craftAccessId1: craftAccessId1.value,
-      craftAttributeColorAccessIds1: craftAttributeColorAccessIds1.value,
-      craftAttributeGlossinessAccessIds1: craftAttributeGlossinessAccessIds1.value,
-      craftAttributeFileAccessIds1: craftAttributeFileAccessIds1.value,
-      craftAccessId2: craftAccessId2.value,
-      craftAttributeColorAccessIds2: craftAttributeColorAccessIds2.value,
-      craftAttributeGlossinessAccessIds2: craftAttributeGlossinessAccessIds2.value,
-      craftAttributeFileAccessIds2: craftAttributeFileAccessIds2.value,
-    }
-    
-    emit('confirm', parameters)
-    dialogVisible.value = false
-  }
 
     const getSurfaceTreatmentLabel = computed(() => {
       if (surfaceTreatment.value === 'none') {
@@ -750,7 +790,6 @@ export default {
     // 获取价格信息
     const fetchPrices = async () => {
       try {
- 
         const response = await axios.post('http://localhost:8000/api/price/price', {
           materialAccessId: selectedMaterial.value.materialAccessId,
           crafts: [
@@ -775,7 +814,7 @@ export default {
           toleranceAccessId: "4c5b4f8543b34dd2b4c861a270f36ea7",
           roughnessAccessId: "4e6158ff486640ab9c82196c64196fe9",
           deliveryTypeCode: "BD"
-        })
+        },{withCredentials: true})
         console.log('response', response)
         // 正确解析响应数据
         const priceData = response.data
@@ -1257,4 +1296,3 @@ export default {
   color: #c0c4cc;
 }
 </style>
-

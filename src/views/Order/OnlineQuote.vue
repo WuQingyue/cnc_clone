@@ -1,13 +1,5 @@
 <template>
   <div class="online-quote">
-    <!-- 工艺选择部分 -->
-    <div class="quote-section">
-      <h2 class="section-title">选择工艺</h2>
-      <process-selector 
-        :selected-process="currentProcess?.type"
-        @process-change="handleProcessChange"
-      />
-    </div>
 
     <!-- 文件上传部分或文件列表部分 -->
     <div class="quote-section">
@@ -17,20 +9,18 @@
           :currentProcess="currentProcess"
         />
       </template>
-      <template v-else>
-        <div class="upload-header">
-          <h2 class="section-title">上传图纸</h2>
-          <div class="button-group">
-            <button class="blue-button" @click="openGuidance">CNC下单必看</button>
-            <button class="gray-button" @click="openGuidance2D">2D文件转换须知</button>
-            <button class="gray-button" @click="openGuidanceSecret">保密协议</button>
-          </div>
+      <div class="upload-header">
+        <h2 class="section-title">上传图纸</h2>
+        <div class="button-group">
+          <button class="blue-button" @click="openGuidance">CNC下单必看</button>
+          <button class="gray-button" @click="openGuidance2D">2D文件转换须知</button>
+          <button class="gray-button" @click="openGuidanceSecret">保密协议</button>
         </div>
-        <file-uploader 
-          :process-info="currentProcess"
-          @upload-success="handleUploadSuccess"
-        />
-      </template>
+      </div>
+      <file-uploader 
+        :process-info="currentProcess"
+        @upload-success="handleUploadSuccess"
+      />
     </div>
 
     <!-- 历史记录组件 -->
@@ -42,7 +32,7 @@
     />
 
     <!-- 添加客户指引组件 -->
-  <CustomerGuidance ref="guidanceRef" />
+    <CustomerGuidance ref="guidanceRef" />
   </div>
 </template>
 
@@ -50,17 +40,17 @@
 import { ref, onMounted } from 'vue'
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
-import ProcessSelector from '@/components/quote/ProcessSelector.vue'
 import FileUploader from '@/components/quote/FileUploader.vue'
 import HistoryList from '@/components/quote/HistoryList.vue'
 import FileList from '@/components/quote/FileList.vue'
-import CustomerGuidance from '@/views/CustomerGuidance.vue'
+import CustomerGuidance from '@/views/NavHeader/CustomerGuidance/CustomerGuidance.vue'
 import { processList } from '@/components/quote/processList.js'
+import { roughness, tolerance } from '@/components/quote/AutomationTool.js'
 
 const currentProcess = ref(null)
 const historyData = ref([])
-const isOrdering = ref(false)
-const selectedRecords = ref([])
+const isOrdering = ref(false) // 控制是否显示 FileList 组件
+const selectedRecords = ref({}) // 存储选中的记录
 const guidanceVisible = ref(false) // 初始化为 false
 const activeIndex = ref(0) // 初始化为 0
 
@@ -72,11 +62,11 @@ const fetchHistory = async (processType) => {
       `http://localhost:8000/api/upload/history/${processType}`,
       { withCredentials: true }
     )
+    console.log('获取历史记录', response.data)
     if (response.data.success) {
       historyData.value = response.data.data
     }
   } catch (error) {
-    console.error('获取历史记录失败:', error)
     ElMessage.error('获取历史记录失败')
   }
 }
@@ -87,9 +77,51 @@ const handleProcessChange = async (process) => {
 }
 
 const handleOrder = (record) => {
-  isOrdering.value = true
+  isOrdering.value = true // 设置为 true 以显示 FileList 组件
   record.quantity = 1
-  selectedRecords.value.push(record)
+  record.material = '铝合金-6061'
+  record.surfaceTreatment = 'none'
+  record.tolerance = tolerance.type
+  record.toleranceAccessId = tolerance.toleranceAccessId
+  record.roughness = roughness.type
+  record.roughnessAccessId = roughness.roughnessAccessId
+  record.selectedTreatment = ''
+  record.selectedColor = ''
+  record.glossiness = ''
+  record.uploadedFileName = ''
+  record.selectedTreatment2 = ''
+  record.selectedColor2 = ''
+  record.glossiness2 = ''
+  record.uploadedFileName2 = ''
+  record.pricePerUnit = ''
+  record.totalPrice = ''
+  record.quantity = 0
+  record.hasThread = false
+  record.hasAssembly = false
+  record.materialCost = ''
+  record.engineeringCost = ''
+  record.clampingCost = ''
+  record.processingCost = ''
+  record.surfaceCost = ''
+  record.materialAccessId = ''
+  record.craftAccessId1 = ''
+  record.craftAttributeColorAccessIds1 = ''
+  record.craftAttributeGlossinessAccessIds1 = ''
+  record.craftAttributeFileAccessIds1 = ''
+  record.craftAccessId2 = ''
+  record.craftAttributeColorAccessIds2 = ''
+  record.craftAttributeGlossinessAccessIds2 = ''
+  record.craftAttributeFileAccessIds2 = ''
+  record.materialCost = 0
+  record.engineeringCost = 0
+  record.clampingCost = 0
+  record.processingCost = 0
+  record.surfaceCost = 0
+  record.pricePerUnit = 0
+  record.totalPrice = 0
+  record.deliveryType = 'BD'
+  selectedRecords.value = record
+  console.log('selectedRecords.value', selectedRecords.value)
 }
 
 const handleDelete = async (id) => {
@@ -114,6 +146,7 @@ onMounted(() => {
     fetchHistory('cnc');
   }
 })
+
 // 客户指引
 const guidanceRef = ref(null)
 const openGuidance = () => {

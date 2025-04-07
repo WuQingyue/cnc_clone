@@ -47,13 +47,16 @@ import PartAuditInfo from '@/components/SignIn/PartAuditInfo.vue'
 import OrderInfo from '@/components/SignIn/OrderInfo.vue'
 import UserInfo from '@/components/SignIn/UserInfo.vue'
 import LogisticsInfo from '@/components/SignIn/LogisticsInfo.vue'
-
+import CNC_Operation from '@/components/SignIn/CNC_Operation.vue'
+import CNC_Logistics from '@/components/SignIn/CNC_Logistics.vue'
 // 导航项
 const navItems = [
   { name: '零件审核信息', component: PartAuditInfo, icon: Document },
   { name: '订单信息', component: OrderInfo, icon: List },
   { name: '用户信息', component: UserInfo, icon: User },
-  { name: '物流信息', component: LogisticsInfo, icon: Truck }
+  { name: '物流信息', component: LogisticsInfo, icon: Truck },
+  { name: '模拟工厂加工操作', component: CNC_Operation, icon: Truck },
+  { name: '模拟物流轨迹操作', component: CNC_Logistics, icon: Truck }
 ]
 
 const currentComponent = ref(PartAuditInfo)

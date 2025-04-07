@@ -158,7 +158,6 @@ const handleGoogleLogin = async () => {
   }
 }
 
-
 </script>
 
 <style scoped>
