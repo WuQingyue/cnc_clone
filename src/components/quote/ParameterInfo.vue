@@ -353,9 +353,64 @@ export default {
   setup(props, { emit }) {
     const dialogVisible = ref(false)
     const selectedParameterId = ref(currentParameters.value.id)
+    const materialName = ref('')
+    const surfaceTreatment = ref('none')
+    const quantity = ref(1)
+    const toleranceOptions = ref([{ value: 'GB/T 1804-2000 m级', label: 'GB/T 1804-2000 m级' },{ value: '±0.10mm', label: '±0.10mm' },{ value: '±0.05mm', label: '±0.05mm' }])
+    const tolerance = ref('')
+    const roughnessOptions = ref([{ value: 'Ra3.2', label: 'Ra3.2' },{ value: 'Ra1.6', label: 'Ra1.6' }])
+    const roughness = ref('')
+    const hasThread = ref(false)
+    const hasAssembly = ref(false)
+    const notes = ref('')
+    const fileImage = ref('')
+    const fileName = ref('文件名称')
+    const fileDimensions = ref('尺寸信息')
+    const materialCost = ref(0)
+    const engineeringCost = ref(0)
+    const clampingCost = ref(0)
+    const processingCost = ref(0)
+    const surfaceCost = ref(0)
+    const pricePerUnit = ref(0)
+    const materialAccessId = ref('')
+    const currentCategory = ref(null)
+    const selectedMaterial = ref(null)
+    const categoryName = ref('')
 
     watch(() => props.visible, (val) => {
       dialogVisible.value = val
+      materialName.value = props.record.material
+      categoryName.value = props.record.categoryName
+      surfaceTreatment.value = props.record.surfaceTreatment
+      tolerance.value = props.record.tolerance
+      roughness.value = props.record.roughness
+      selectedTreatment.value = props.record.selectedTreatment
+      selectedColor.value = props.record.selectedColor
+      glossiness.value = props.record.glossiness
+      uploadedFileName.value = props.record.uploadedFileName
+      selectedTreatment2.value = props.record.selectedTreatment2
+      selectedColor2.value = props.record.selectedColor2
+      glossiness2.value = props.record.glossiness2
+      uploadedFileName2.value = props.record.uploadedFileName2
+      totalPrice.value = props.record.totalPrice
+      pricePerUnit.value = props.record.pricePerUnit
+      quantity.value = props.record.quantity
+      hasThread.value = props.record.hasThread
+      hasAssembly.value = props.record.hasAssembly
+      materialCost.value = props.record.materialCost
+      engineeringCost.value = props.record.engineeringCost
+      clampingCost.value = props.record.clampingCost
+      processingCost.value = props.record.processingCost
+      surfaceCost.value = props.record.surfaceCost
+      materialAccessId.value = props.record.materialAccessId
+      craftAccessId1.value = props.record.craftAccessId1
+      craftAttributeColorAccessIds1.value = props.record.craftAttributeColorAccessIds1
+      craftAttributeGlossinessAccessIds1.value = props.record.craftAttributeGlossinessAccessIds1
+      craftAttributeFileAccessIds1.value = props.record.craftAttributeFileAccessIds1
+      craftAccessId2.value = props.record.craftAccessId2
+      craftAttributeColorAccessIds2.value = props.record.craftAttributeColorAccessIds2
+      craftAttributeGlossinessAccessIds2.value = props.record.craftAttributeGlossinessAccessIds2
+      craftAttributeFileAccessIds2.value = props.record.craftAttributeFileAccessIds2
       if (val) {
         resetSelection()
       }
@@ -376,6 +431,7 @@ export default {
     const confirmParameters = () => {
       // 将更新后的参数传递给 FileList.vue
       const parameters = {
+        categoryName: categoryName.value,
         material: selectedMaterial.value.materialName,
         surfaceTreatment: surfaceTreatment.value,
         tolerance: tolerance.value,
@@ -407,14 +463,12 @@ export default {
         craftAttributeColorAccessIds2: craftAttributeColorAccessIds2.value,
         craftAttributeGlossinessAccessIds2: craftAttributeGlossinessAccessIds2.value,
         craftAttributeFileAccessIds2: craftAttributeFileAccessIds2.value,
+        getSurfaceTreatmentLabel: getSurfaceTreatmentLabel.value,
       }
       
       emit('confirm', parameters) // 触发 confirm 事件
       dialogVisible.value = false
     }
-
-    const currentCategory = ref(null)
-    const selectedMaterial = ref(null)
 
     // 当前选中分类的材料列表
     const currentMaterials = computed(() => {
@@ -431,6 +485,7 @@ export default {
     // 选择分类
     const selectCategory = (category) => {
       if (!category) return
+      categoryName.value = category.name
       currentCategory.value = category
     }
 
@@ -438,27 +493,8 @@ export default {
     const selectMaterial = (material) => {
       if (!material) return
       selectedMaterial.value = material
+      console.log('selectedMaterial:', selectedMaterial.value);
     }
-
-    // 模拟数据
-    const surfaceTreatment = ref('none')
-    const quantity = ref(1)
-    const toleranceOptions = ref([{ value: 'GB/T 1804-2000 m级', label: 'GB/T 1804-2000 m级' },{ value: '±0.10mm', label: '±0.10mm' },{ value: '±0.05mm', label: '±0.05mm' }])
-    const tolerance = ref('')
-    const roughnessOptions = ref([{ value: 'Ra3.2', label: 'Ra3.2' },{ value: 'Ra1.6', label: 'Ra1.6' }])
-    const roughness = ref('')
-    const hasThread = ref(false)
-    const hasAssembly = ref(false)
-    const notes = ref('')
-    const fileImage = ref('')
-    const fileName = ref('文件名称')
-    const fileDimensions = ref('尺寸信息')
-    const materialCost = ref(0)
-    const engineeringCost = ref(0)
-    const clampingCost = ref(0)
-    const processingCost = ref(0)
-    const surfaceCost = ref(0)
-    const pricePerUnit = ref(0)
 
     const handleConfirm = () => {
       if (!selectedMaterial.value) {
@@ -498,6 +534,8 @@ export default {
         craftAttributeColorAccessIds2: craftAttributeColorAccessIds2.value,
         craftAttributeGlossinessAccessIds2: craftAttributeGlossinessAccessIds2.value,
         craftAttributeFileAccessIds2: craftAttributeFileAccessIds2.value,
+        categoryName: categoryName.value,
+        getSurfaceTreatmentLabel: getSurfaceTreatmentLabel,
       }
       
       emit('confirm', parameters)
@@ -778,11 +816,13 @@ export default {
     // 重置选择
     const resetSelection = () => {
       if (parametersList.length > 0) {
-        // 默认选择"铝合金"分类
-        currentCategory.value = parametersList.find(category => category.name === '铝合金')
-        // 默认选择"铝合金-6061"材料
+        // 默认选择的分类
+        currentCategory.value = parametersList.find(category => category.name === categoryName.value)
+        console.log('categoryName.value:', categoryName.value);
+        console.log('currentCategory.value:', currentCategory.value);
+        // 默认选择的材料
         if (currentCategory.value) {
-          selectedMaterial.value = currentCategory.value.children.find(material => material.materialName === '铝合金-6061')
+          selectedMaterial.value = currentCategory.value.children.find(material => material.materialName === materialName.value)
         }
       }
     }

@@ -75,19 +75,13 @@
       <!-- 右部分：信息框 -->
       <div class="right-section">
         <div class="info-box">
-          <!-- 单选按钮组 -->
-          <div class="delivery-options">
-            <label v-for="option in deliveryOptions" :key="option.code">
-              <input
-                type="radio"
-                :value="option.code"
-                v-model="selectedDeliveryType"  
-              />
-              {{ option.type }}  <!-- 显示选项类型 -->
-            </label>
+          <!-- 添加零件数量和总价的显示 -->
+          <div>
+            <div>零件数量: {{ selectedRecordsCount }}</div>
+            <div>总价: ¥{{ selectedTotalPrice }}</div>
           </div>
           <button class="blue-button">
-            <router-link class="inquiry-link" to="/price-inquiry"  @click="handleConfirm">提交询价</router-link>
+            <div class="inquiry-link" @click="handleConfirm">提交询价</div>
           </button>
           <button class="white-button">
             <el-icon><ShoppingCart /></el-icon>
@@ -108,15 +102,10 @@
 </template>
 
 <script setup>
-import { ref, computed, watch, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
+import { ref, watch, onMounted, computed } from 'vue'
 import { ShoppingCart, Edit } from '@element-plus/icons-vue' // 引入 Edit 图标
-import axios from 'axios'
-const selectedDeliveryType = ref('')  // 用于存储选中的交期类型
-
 import { 
   modelInfo,
-  deliveryOptions
 } from './AutomationTool' 
 import ParameterInfo from './ParameterInfo.vue' // 引入 ParameterInfo 组件
 const props = defineProps({
@@ -163,76 +152,51 @@ const openParameterDialog = (record) => {
 const handleParameterConfirm = (newParameters) => {
   // 更新当前选中的记录的参数
   Object.assign(selectedRecord.value, newParameters);
-}
-
-const handleConfirm = async () => {
-  try {
-    // 确保数据存在且类型正确
-    if (!localRecords.value || !localRecords.value[0]) {
-      ElMessage.error('没有可提交的记录')
-      return
-    }
-
-    const params = localRecords.value[0].parameters
-    const orderData = {
-      order_no: generateOrderNo(),
-      user_email: '3@q.com',
-      // 确保数值类型为数字
-      material_cost: Number(params.materialCost || 0),
-      engineering_cost: Number(params.engineeringCost || 0),
-      clamping_cost: Number(params.clampingCost || 0),
-      processing_cost: Number(params.processingCost || 0),
-      surface_cost: Number(params.surfaceCost || 0),
-      unit_price: Number(params.pricePerUnit || 0),
-      total_price: Number(params.totalPrice || 0),
-      // 字符串类型
-      material: String(params.material || ''),
-      // 布尔类型
-      surface_treatment: params.surfaceTreatment === 'need',
-      // 可选字符串
-      treatment1_option: params.selectedTreatment || null,
-      treatment1_color: params.selectedColor || null,
-      treatment1_gloss: params.glossiness || null,
-      treatment1_drawing: params.uploadedFileName || null,
-      treatment2_option: params.selectedTreatment2 || null,
-      treatment2_color: params.selectedColor2 || null,
-      treatment2_gloss: params.glossiness2 || null,
-      treatment2_drawing: params.uploadedFileName2 || null,
-      // 数值类型
-      quantity: Number(params.quantity || 1),
-      // 字符串类型
-      tolerance: String(params.tolerance || 'GB/T 1804-2000 m级'),
-      roughness: String(params.roughness || 'Ra3.2'),
-      // 布尔类型
-      has_thread: Boolean(params.hasThread),
-      has_assembly: Boolean(params.hasAssembly)
-    }
-
-    console.log('提交的订单数据:', orderData) // 调试用
-
-    const response = await axios.post('http://localhost:8000/api/orders/orders', orderData)
-    if(response.data.message === "订单创建成功") {
-      ElMessage.success('订单提交成功')
-    }
-  } catch (error) {
-    console.error('订单提交失败:', error.response?.data || error)
-    ElMessage.error(`订单提交失败: ${error.response?.data?.detail || '请重试'}`)
-  }
-}
-
-// 生成订单号
-const generateOrderNo = () => {
-  const date = new Date()
-  const year = date.getFullYear()
-  const month = String(date.getMonth() + 1).padStart(2, '0')
-  const day = String(date.getDate()).padStart(2, '0')
-  const random = Math.floor(Math.random() * 10000).toString().padStart(4, '0')
-  return `ORDER${year}${month}${day}${random}`
+  console.log('selectedRecord.value', newParameters.value)
 }
 
 onMounted(() => {
   // fetchPrices()
 })
+// 计算选中的零件数量
+const selectedRecordsCount = computed(() => {
+  return localRecords.value
+    .filter(record => record.selected)
+    .reduce((total, record) => total + record.quantity, 0)
+});
+
+// 计算选中的总价
+const selectedTotalPrice = computed(() => {
+  return localRecords.value
+    .filter(record => record.selected)
+    .reduce((total, record) => total + record.totalPrice, 0)
+    .toFixed(2); // 保留两位小数
+});
+
+import { useSelectedDataStore } from '@/store/PriceInquiryDatas'
+import { useRouter } from 'vue-router'
+// 获取 store 实例
+const selectedDataStore = useSelectedDataStore()
+const router = useRouter()
+const handleConfirm = async () => {
+  // 筛选出被选中的记录
+  const selected = localRecords.value.filter(record => record.selected)
+
+  if (selected.length > 0) {
+    try {
+      // 使用 store 存储数据
+      selectedDataStore.setSelectedData(selected)
+      
+      // 跳转到询价页面
+      router.push('/price-inquiry')
+    } catch (error) {
+      console.error("存储数据时出错:", error)
+      alert('准备询价数据时出错，请稍后重试。')
+    }
+  } else {
+    alert('请至少选择一个零件进行询价')
+  }
+}
 </script>
 
 <style lang="scss" scoped>

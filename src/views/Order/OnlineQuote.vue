@@ -78,6 +78,7 @@ const handleProcessChange = async (process) => {
 
 const handleOrder = (record) => {
   isOrdering.value = true // 设置为 true 以显示 FileList 组件
+  record.selected = true
   record.quantity = 1
   record.material = '铝合金-6061'
   record.surfaceTreatment = 'none'
@@ -93,17 +94,10 @@ const handleOrder = (record) => {
   record.selectedColor2 = ''
   record.glossiness2 = ''
   record.uploadedFileName2 = ''
-  record.pricePerUnit = ''
-  record.totalPrice = ''
-  record.quantity = 0
+  record.quantity = 1
   record.hasThread = false
   record.hasAssembly = false
-  record.materialCost = ''
-  record.engineeringCost = ''
-  record.clampingCost = ''
-  record.processingCost = ''
-  record.surfaceCost = ''
-  record.materialAccessId = ''
+  record.materialAccessId = '0d8a7a799a574b02822e67c48b57bee0'
   record.craftAccessId1 = ''
   record.craftAttributeColorAccessIds1 = ''
   record.craftAttributeGlossinessAccessIds1 = ''
@@ -120,6 +114,8 @@ const handleOrder = (record) => {
   record.pricePerUnit = 0
   record.totalPrice = 0
   record.deliveryType = 'BD'
+  record.categoryName = '铝合金'
+  record.getSurfaceTreatmentLabel = '表面不做处理'
   selectedRecords.value = record
   console.log('selectedRecords.value', selectedRecords.value)
 }

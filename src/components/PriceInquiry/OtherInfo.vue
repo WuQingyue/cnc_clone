@@ -13,14 +13,6 @@
         <el-collapse-transition>
           <div v-show="!isCollapsed">
             <el-form :model="otherForm" label-width="120px">
-              <el-form-item label="特殊要求">
-                <el-checkbox-group v-model="otherForm.specialRequirements">
-                  <el-checkbox label="quality">质量要求</el-checkbox>
-                  <el-checkbox label="package">包装要求</el-checkbox>
-                  <el-checkbox label="surface">表面处理</el-checkbox>
-                </el-checkbox-group>
-              </el-form-item>
-              
               <el-form-item label="补充说明">
                 <el-input
                   v-model="otherForm.remarks"
@@ -28,17 +20,6 @@
                   :rows="4"
                   placeholder="请输入其他补充说明"
                 />
-              </el-form-item>
-  
-              <el-form-item label="附件上传">
-                <el-upload
-                  action="/api/upload"
-                  :on-success="handleUploadSuccess"
-                  :on-error="handleUploadError"
-                  multiple
-                >
-                  <el-button type="primary">点击上传</el-button>
-                </el-upload>
               </el-form-item>
             </el-form>
           </div>

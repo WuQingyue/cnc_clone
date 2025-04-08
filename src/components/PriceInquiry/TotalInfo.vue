@@ -19,7 +19,7 @@
         <div class="section-title">订单费用</div>
         <div class="info-row">
           <span class="label">零件数量</span>
-          <span class="value">{{ partsQuantity }}</span>
+          <span class="value">{{ orderItems.length }}款/{{ orderItems.reduce((total, item) => total + item.quantity, 0) }}件</span>
         </div>
         <div class="info-row">
           <span class="label">运费(含税)</span>
@@ -27,7 +27,7 @@
         </div>
         <div class="info-row">
           <span class="label">商品总额(含税)：</span>
-          <span class="value">¥{{ totalPrice }}</span>
+          <span class="value">¥{{ orderItems.reduce((total, item) => total + item.totalPrice, 0) }}</span>
         </div>
       </div>
 
@@ -58,27 +58,34 @@
   </div>
 </template>
 
-<script>
-export default {
-  name: 'TotalInfo',
-  data() {
-    return {
-      expressName: '顺丰快递',
-      estimatedDeliveryTime: '2020-03-22 23:00',
-      partsQuantity: 1,
-      shippingFee: '5.65',
-      totalPrice: '95.49',
-      finalPrice: '95.49'
-    }
-  },
-  methods: {
-    submitOrder() {
-      this.$router.push('/submitOrderSuccess')
-    },
-    goBack() {
-      this.$router.go(-1)
-    }
+<script setup>
+import { ref, defineProps, watch } from 'vue'
+import { useRouter } from 'vue-router' // 引入 useRouter
+
+const router = useRouter() // 获取 router 实例
+
+// 1. 定义 Props
+const props = defineProps({
+  selectedDatas: {
+    type: Array,
+    required: true,
+    default: () => [] // 提供一个默认值，防止在数据未完全加载时出错
   }
+})
+
+const orderItems = ref([])
+watch(() => props.selectedDatas, (newValue) => {
+  orderItems.value=newValue
+}, { immediate: true })
+
+// 提交订单方法
+const submitOrder = () => {
+  router.push('/submitOrderSuccess') // 使用 router 实例进行跳转
+}
+
+// 返回上一步方法
+const goBack = () => {
+  router.go(-1) // 使用 router 实例进行跳转
 }
 </script>
 
