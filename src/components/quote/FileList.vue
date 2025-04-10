@@ -75,6 +75,27 @@
       <!-- 右部分：信息框 -->
       <div class="right-section">
         <div class="info-box">
+          <div class="delivery-options">
+            <label :class="{ 'selected-option': selectedDelivery === 'ud' }">
+              <input 
+                type="radio" 
+                v-model="selectedDelivery" 
+                value="UD" 
+                name="deliveryOption"
+              />
+              加急交期：5个工作日
+            </label>
+            <label :class="{ 'selected-option': selectedDelivery === 'BD' }">
+              <input 
+                type="radio" 
+                v-model="selectedDelivery" 
+                value="BD" 
+                name="deliveryOption"
+              />
+              标准交期：10个工作日
+            </label>
+          </div>
+
           <!-- 添加零件数量和总价的显示 -->
           <div>
             <div>零件数量: {{ selectedRecordsCount }}</div>
@@ -104,6 +125,16 @@
 <script setup>
 import { ref, watch, onMounted, computed } from 'vue'
 import { ShoppingCart, Edit } from '@element-plus/icons-vue' // 引入 Edit 图标
+
+const selectedDelivery = ref('BD')
+// 新增：监听交期选项的变化
+watch(selectedDelivery, (newDeliveryOption) => {
+  console.log('交期选项已更改为:', newDeliveryOption);
+  localRecords.value.forEach(record => {
+    record.deliveryType = selectedDelivery.value; 
+  });
+});
+
 import { 
   modelInfo,
 } from './AutomationTool' 
@@ -119,7 +150,6 @@ const emit = defineEmits(['update:selectedRecords'])
 
 // 创建本地数据副本
 const localRecords = ref([])
-
 // 监听 props 变化更新本地数据
 watch(() => props.selectedRecords, (record) => {
   record = JSON.parse(JSON.stringify(record))
@@ -156,7 +186,7 @@ const handleParameterConfirm = (newParameters) => {
 }
 
 onMounted(() => {
-  // fetchPrices()
+  fetchPrices()
 })
 // 计算选中的零件数量
 const selectedRecordsCount = computed(() => {
@@ -178,15 +208,26 @@ import { useRouter } from 'vue-router'
 // 获取 store 实例
 const selectedDataStore = useSelectedDataStore()
 const router = useRouter()
+watch(localRecords.value, () => {
+  const selected = localRecords.value.filter(record => record.selected)
+  console.log('selected', selected)
+  if (selected.length > 0) {
+    try {
+      // 使用 store 存储数据
+      selectedDataStore.setSelectedData(selected)
+      fetchPrices()
+    } catch (error) {
+      console.error("存储数据时出错:", error)
+      alert('准备询价数据时出错，请稍后重试。')
+    }
+  }
+})
 const handleConfirm = async () => {
   // 筛选出被选中的记录
   const selected = localRecords.value.filter(record => record.selected)
 
   if (selected.length > 0) {
     try {
-      // 使用 store 存储数据
-      selectedDataStore.setSelectedData(selected)
-      
       // 跳转到询价页面
       router.push('/price-inquiry')
     } catch (error) {
@@ -197,6 +238,81 @@ const handleConfirm = async () => {
     alert('请至少选择一个零件进行询价')
   }
 }
+import axios from 'axios'
+import { ElMessage } from 'element-plus'
+
+const fetchPrices = async () => {
+  const selected = selectedDataStore.getSelectedData();
+  console.log('selected', selected);
+
+  try {
+    const requestData = selected.map(item => ({
+      materialAccessId: item.materialAccessId,
+      crafts: [
+        {
+          craftAccessId: item.craftAccessId1,
+          craftAttributeAccessIds: [
+            item.craftAttributeColorAccessIds1,
+            item.craftAttributeGlossinessAccessIds1,
+            item.craftAttributeFileAccessIds1
+          ].filter(Boolean)
+        },
+        {
+          craftAccessId: item.craftAccessId2,
+          craftAttributeAccessIds: [
+            item.craftAttributeColorAccessIds2,
+            item.craftAttributeGlossinessAccessIds2,
+            item.craftAttributeFileAccessIds2
+          ].filter(Boolean)
+        }
+      ],
+      goodsQuantity: item.quantity,
+      toleranceAccessId: item.toleranceAccessId,
+      roughnessAccessId: item.roughnessAccessId,
+      deliveryTypeCode: item.deliveryType
+    }));
+    console.log('requestData', requestData);
+
+    const response = await axios.post('http://localhost:8000/api/price/price', requestData, { withCredentials: true });
+    console.log('response', response);
+    const priceData = response.data;
+    
+    if (priceData.success && priceData.code === 200 && priceData.data && priceData.data.quoteInfos.length > 0) {
+      // 假设我们只处理第一个报价信息（如果需要处理多个，可以遍历 quoteInfos）
+      const quoteInfos = priceData.data;
+      
+      selected.forEach(record => {
+        const quoteInfo = quoteInfos.find(info => info.productModelAccessId === record.productModelAccessId); // 假设 quoteInfos 中有与 record 匹配的唯一键
+        // if (quoteInfo) {
+        //   record.pricePerUnit = quoteInfo.price; // 更新单价
+        //   record.totalPrice = quoteInfo.price * record.quantity; // 更新总价
+        // }
+      });
+
+      // 更新 localRecords 中的数据
+      localRecords.value = localRecords.value.map(record => {
+        const updatedRecord = selected.find(selRecord => selRecord.id === record.id); // 假设记录中有唯一标识符 id
+        if (updatedRecord) {
+          return {
+            ...record,
+            pricePerUnit: updatedRecord.pricePerUnit,
+            totalPrice: updatedRecord.totalPrice
+          };
+        }
+        return record;
+      });
+
+      // 更新 store 中的数据
+      selectedDataStore.setSelectedData(selected);
+    } else {
+      console.error('Unexpected response format:', priceData);
+      ElMessage.error('获取价格信息失败，返回数据格式不正确');
+    }
+  } catch (error) {
+    console.error('请求失败:', error.response?.data || error.message);
+    ElMessage.error('获取价格信息失败，请检查网络连接');
+  }
+};
 </script>
 
 <style lang="scss" scoped>
@@ -308,7 +424,27 @@ const handleConfirm = async () => {
       background: #f5f7fa;
       padding: 20px;
       border-radius: 8px;
+      .delivery-options {
+          margin-bottom: 15px; // 与下方内容间距
 
+          label {
+            display: block; // 每个选项占一行
+            margin-bottom: 8px; // 选项之间的间距
+            cursor: pointer;
+            color: #606266; // 默认文字颜色
+            transition: color 0.3s; // 平滑颜色过渡
+
+            input[type="radio"] {
+              margin-right: 5px; // 单选按钮和文字的间距
+              vertical-align: middle; // 垂直居中对齐
+            }
+          }
+
+          // 选中状态的样式
+          .selected-option {
+            color: #409eff; // 选中的文字颜色为蓝色
+          }
+          }
       .info-text {
         margin-bottom: 10px;
       }

@@ -111,6 +111,7 @@ const handleOrder = (record) => {
   record.clampingCost = 0
   record.processingCost = 0
   record.surfaceCost = 0
+  record.expeditedPrice = 0
   record.pricePerUnit = 0
   record.totalPrice = 0
   record.deliveryType = 'BD'

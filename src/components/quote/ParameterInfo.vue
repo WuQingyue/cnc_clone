@@ -304,6 +304,10 @@
             <span>表面处理费</span>
             <span class="price">¥{{ surfaceCost }}</span>
           </div>
+          <div class="price-item">
+            <span>加急费</span>
+            <span class="price">¥{{ expeditedPrice }}</span>
+          </div>
         </div>
 
         <el-divider />
@@ -371,6 +375,10 @@ export default {
     const clampingCost = ref(0)
     const processingCost = ref(0)
     const surfaceCost = ref(0)
+    const expeditedPrice = ref(0)
+    const deliveryType = ref('BD')
+    const roughnessAccessId = ref('')
+    const toleranceAccessId = ref('')
     const pricePerUnit = ref(0)
     const materialAccessId = ref('')
     const currentCategory = ref(null)
@@ -411,6 +419,10 @@ export default {
       craftAttributeColorAccessIds2.value = props.record.craftAttributeColorAccessIds2
       craftAttributeGlossinessAccessIds2.value = props.record.craftAttributeGlossinessAccessIds2
       craftAttributeFileAccessIds2.value = props.record.craftAttributeFileAccessIds2
+      expeditedPrice.value = props.record.expeditedPrice
+      deliveryType.value = props.record.deliveryType
+      roughnessAccessId.value = props.record.roughnessAccessId
+      toleranceAccessId.value = props.record.toleranceAccessId
       if (val) {
         resetSelection()
       }
@@ -454,6 +466,10 @@ export default {
         clampingCost: clampingCost.value,
         processingCost: processingCost.value,
         surfaceCost: surfaceCost.value,
+        expeditedPrice: expeditedPrice.value,
+        deliveryType: deliveryType.value,
+        roughnessAccessId: roughnessAccessId.value,
+        toleranceAccessId: toleranceAccessId.value,
         materialAccessId: selectedMaterial.value.materialAccessId,
         craftAccessId1: craftAccessId1.value,
         craftAttributeColorAccessIds1: craftAttributeColorAccessIds1.value,
@@ -830,31 +846,34 @@ export default {
     // 获取价格信息
     const fetchPrices = async () => {
       try {
-        const response = await axios.post('http://localhost:8000/api/price/price', {
-          materialAccessId: selectedMaterial.value.materialAccessId,
-          crafts: [
-            {
-              craftAccessId: craftAccessId1.value,
-              craftAttributeAccessIds: [
-                craftAttributeColorAccessIds1.value,
-                craftAttributeGlossinessAccessIds1.value,
-                craftAttributeFileAccessIds1.value
-              ].filter(Boolean) // 过滤空值
-            },
-            {
-              craftAccessId: craftAccessId2.value,
-              craftAttributeAccessIds: [
-                craftAttributeColorAccessIds2.value,
-                craftAttributeGlossinessAccessIds2.value,
-                craftAttributeFileAccessIds2.value
-              ].filter(Boolean)
-            }
-          ], 
-          goodsQuantity: quantity.value,
-          toleranceAccessId: "4c5b4f8543b34dd2b4c861a270f36ea7",
-          roughnessAccessId: "4e6158ff486640ab9c82196c64196fe9",
-          deliveryTypeCode: "BD"
-        },{withCredentials: true})
+        const requestData = [
+          {
+            materialAccessId: selectedMaterial.value.materialAccessId,
+            crafts: [
+              {
+                craftAccessId: craftAccessId1.value,
+                craftAttributeAccessIds: [
+                  craftAttributeColorAccessIds1.value,
+                  craftAttributeGlossinessAccessIds1.value,
+                  craftAttributeFileAccessIds1.value
+                ].filter(Boolean)
+              },
+              {
+                craftAccessId: craftAccessId2.value,
+                craftAttributeAccessIds: [
+                  craftAttributeColorAccessIds2.value,
+                  craftAttributeGlossinessAccessIds2.value,
+                  craftAttributeFileAccessIds2.value
+                ].filter(Boolean)
+              }
+            ],
+            goodsQuantity: quantity.value,
+            toleranceAccessId: toleranceAccessId.value,
+            roughnessAccessId: roughnessAccessId.value,
+            deliveryTypeCode: deliveryType.value
+          }
+        ];
+        const response = await axios.post('http://localhost:8000/api/price/price', requestData,{withCredentials: true})
         console.log('response', response)
         // 正确解析响应数据
         const priceData = response.data
@@ -865,6 +884,7 @@ export default {
         processingCost.value = priceData.processPrice
         surfaceCost.value = priceData.craftPrice
         pricePerUnit.value = priceData.price
+        expeditedPrice.value = priceData.expeditedPrice
       } catch (error) {
         console.error('请求失败:', error.response?.data || error.message)
         ElMessage.error('获取价格信息失败，请检查网络连接')
@@ -963,6 +983,10 @@ export default {
       surfaceCost,
       totalPrice,
       pricePerUnit,
+      expeditedPrice,
+      deliveryType,
+      roughnessAccessId,
+      toleranceAccessId,
       handleConfirm,
       getSelectedMaterialLabel,
       getSurfaceTreatmentLabel,

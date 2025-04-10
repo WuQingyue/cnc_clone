@@ -52,10 +52,9 @@
       <!-- 预览图列 -->
       <el-table-column label="预览" width="80" align="center">
         <template #default="scope">
-          <a v-if="scope.row.preview_url" :href="getPreviewUrl(scope.row.preview_url)" target="_blank">
+          <a v-if="scope.row.preview_url" :href="scope.row.preview_url" target="_blank">
             <el-image 
-              :src="getPreviewUrl(scope.row.preview_url)"
-              :preview-src-list="[getPreviewUrl(scope.row.preview_url)]"
+              :src="scope.row.preview_url"
               fit="cover"
               class="preview-image"
             >
@@ -131,10 +130,7 @@ const formatFileSize = (bytes) => {
   return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`
 }
 
-// 获取预览URL
-const getPreviewUrl = (previewPath) => {
-  return 'https://www.jlc-cnc.com/cncCommon/#/forfacePreview3D?modelName=03.008.BZ-GJ-0016%E5%A4%9A%E5%8A%9F%E8%83%BD%E6%89%B3%E6%89%8B&previewUrl=https%3A%2F%2Fattachment.forface3d.com%2FforfaceModelResource%2F2025032206592368rf%2FMetadata.f3d%3FfileAccessId%3D8591681733364899840&fType=f3d'
-}
+
 </script>
 
 <style scoped>

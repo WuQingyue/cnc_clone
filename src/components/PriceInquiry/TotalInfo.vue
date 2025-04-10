@@ -59,8 +59,10 @@
 </template>
 
 <script setup>
-import { ref, defineProps, watch } from 'vue'
+import { ref, defineProps, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router' // 引入 useRouter
+import axios from 'axios'
+import { ElMessage } from 'element-plus'
 
 const router = useRouter() // 获取 router 实例
 
@@ -87,6 +89,28 @@ const submitOrder = () => {
 const goBack = () => {
   router.go(-1) // 使用 router 实例进行跳转
 }
+
+const priceResult = ref([])
+const fastestTime = ref({})
+const fetchPrice = async () => {
+  try {
+    const response = await axios.get('http://localhost:8000/api/logistics/price-trial', {
+      params: {
+        country_code: 'US',
+        weight: 1
+      }
+    })
+    priceResult.value = response.data.result
+    console.log('priceResult', priceResult.value)
+    ElMessage.success('获取价格信息成功')
+  } catch (error) {
+    console.error('请求失败:', error)
+    ElMessage.error('获取价格信息失败')
+  }
+}
+onMounted(() => {
+  fetchPrice()
+})
 </script>
 
 <style scoped>

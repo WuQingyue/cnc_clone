@@ -80,6 +80,7 @@ const handleExceed = (files) => {
 
 // 上传前检查
 const handleBeforeUpload = (file) => {
+  console.log('文件大小为', file.size)
   if (!props.processInfo) {
     ElMessage.error('请先选择工艺类型!')
     return false
@@ -92,12 +93,28 @@ const handleBeforeUpload = (file) => {
     return false
   }
 
+  // 获取文件的.file属性
+  const fileReader = new FileReader()
+  fileReader.onload = (e) => {
+    // 将文件内容转换为ArrayBuffer
+    const arrayBuffer = e.target.result
+    // 将ArrayBuffer转换为Blob
+    const blob = new Blob([arrayBuffer], { type: file.type })
+    // 将Blob转换为File对象
+    const fileWithFileProperty = new File([blob], file.name, { type: file.type })
+    // 添加.file属性
+    fileWithFileProperty.file = arrayBuffer
+    // 将处理后的文件对象赋值给原始文件
+    Object.assign(file, fileWithFileProperty)
+  }
+  fileReader.readAsArrayBuffer(file)
+
   // 检查文件类型
   const extension = file.name.split('.').pop().toLowerCase()
   const acceptTypes = props.processInfo.acceptTypes
     .split(',')
     .map(type => type.replace('.', '').toLowerCase())
-  
+  console.log('文件的类型为', extension)
   if (!acceptTypes.includes(extension)) {
     ElMessage.error(`不支持的文件格式: ${extension}`)
     return false
@@ -109,6 +126,7 @@ const handleBeforeUpload = (file) => {
 const handleUploadSuccess = (response, file) => {
   if (response.success) {
     emit('upload-success', response)
+    console.log('文件内容file.file:', file.file) // 这里可以访问到.file属性
     ElMessage.success('上传成功')
   } else {
     ElMessage.error(response.detail || '上传失败')

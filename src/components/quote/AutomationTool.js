@@ -1490,7 +1490,7 @@ export const surfaceTreatmentData = [
 
 export const roughness = {
     type: "Ra3.2",
-    roughnessAccessId: "3440240be18e4d0fa92399b12fb37e8c",
+    roughnessAccessId: "4e6158ff486640ab9c82196c64196fe9",
 }
 export const tolerance = {
     type: "GB/T 18.4-2000 m级",

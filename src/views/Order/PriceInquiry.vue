@@ -8,7 +8,7 @@
         <!-- 左侧表单区域 -->
         <div class="form-section">
           <DeliveryInfo />
-          <ExpressInfo />
+          <!-- <ExpressInfo /> -->
           <OrderInfo :selectedDatas="selectedDatas"/>
           <InvoiceInfo />
           <OtherInfo />
