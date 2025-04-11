@@ -75,13 +75,17 @@ const handleProcessChange = async (process) => {
   currentProcess.value = process
   fetchHistory(process.type)
 }
-
+const fileInfoAccessId = ref('')
 const handleOrder = (record) => {
   isOrdering.value = true // 设置为 true 以显示 FileList 组件
   record.selected = true
-  record.quantity = 1
-  record.material = '铝合金-6061'
-  record.surfaceTreatment = 'none'
+  record.size = '' // 尺寸
+  record.volume = '' // 体积
+  record.surfaceArea = '' // 表面积
+  record.remarks = '' // 备注
+  record.quantity = 1 // 数量
+  record.material = '铝合金-6061' // 材料
+  record.surfaceTreatment = 'none' // 表面处理
   record.tolerance = tolerance.type
   record.toleranceAccessId = tolerance.toleranceAccessId
   record.roughness = roughness.type
@@ -118,6 +122,7 @@ const handleOrder = (record) => {
   record.categoryName = '铝合金'
   record.getSurfaceTreatmentLabel = '表面不做处理'
   selectedRecords.value = record
+  record.fileInfoAccessId = fileInfoAccessId.value
   console.log('selectedRecords.value', selectedRecords.value)
 }
 
@@ -125,7 +130,11 @@ const handleDelete = async (id) => {
   console.log('删除:', id)
 }
 
-const handleUploadSuccess = () => {
+const handleUploadSuccess = (response) => {
+  fileInfoAccessId.value = response.jlc_response[0].fileInfoAccessId
+  console.log('fileInfoAccessId', fileInfoAccessId.value)
+  const react = axios.post('http://localhost:8000/api/upload/get_analysis_result', { data: fileInfoAccessId.value },{withCredentials: true});
+  console.log('react', react)
   if (currentProcess.value?.type) {
     fetchHistory(currentProcess.value.type)
   }

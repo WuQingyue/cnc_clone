@@ -69,7 +69,6 @@ const uploadHeaders = computed(() => ({
 const uploadData = computed(() => ({
   process_type: props.processInfo?.type || ''
 }))
-
 // 文件数量限制
 const fileLimit = 20
 
@@ -93,22 +92,6 @@ const handleBeforeUpload = (file) => {
     return false
   }
 
-  // 获取文件的.file属性
-  const fileReader = new FileReader()
-  fileReader.onload = (e) => {
-    // 将文件内容转换为ArrayBuffer
-    const arrayBuffer = e.target.result
-    // 将ArrayBuffer转换为Blob
-    const blob = new Blob([arrayBuffer], { type: file.type })
-    // 将Blob转换为File对象
-    const fileWithFileProperty = new File([blob], file.name, { type: file.type })
-    // 添加.file属性
-    fileWithFileProperty.file = arrayBuffer
-    // 将处理后的文件对象赋值给原始文件
-    Object.assign(file, fileWithFileProperty)
-  }
-  fileReader.readAsArrayBuffer(file)
-
   // 检查文件类型
   const extension = file.name.split('.').pop().toLowerCase()
   const acceptTypes = props.processInfo.acceptTypes
@@ -122,11 +105,13 @@ const handleBeforeUpload = (file) => {
 
   return true
 }
-
+const fileInfoAccessId = ref('')
 const handleUploadSuccess = (response, file) => {
+  fileInfoAccessId.value = response.jlc_response[0].fileInfoAccessId
   if (response.success) {
+    // fileInfoAccessId.value = response.data.jlc_response
+    // console.log('fileInfoAccessId', fileInfoAccessId.value)
     emit('upload-success', response)
-    console.log('文件内容file.file:', file.file) // 这里可以访问到.file属性
     ElMessage.success('上传成功')
   } else {
     ElMessage.error(response.detail || '上传失败')

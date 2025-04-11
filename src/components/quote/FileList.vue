@@ -27,10 +27,10 @@
               <td>{{ index + 1 }}</td> 
               <td>{{ record.file_name }}</td>
               <td>
-                尺寸: {{ modelInfo.size }}<br>
-                体积: {{ modelInfo.volume }}<br>
-                表面积: {{ modelInfo.surfaceArea }}<br>
-                备注: {{ modelInfo.remarks }}
+                尺寸: {{ record.size }}<br>
+                体积: {{ record.volume }}<br>
+                表面积: {{ record.surfaceArea }}<br>
+                备注: {{ record.remarks }}
               </td>
               <td class="parameter-info-cell" @click="openParameterDialog(record)">
                 <div class="parameter-details">
@@ -134,10 +134,6 @@ watch(selectedDelivery, (newDeliveryOption) => {
     record.deliveryType = selectedDelivery.value; 
   });
 });
-
-import { 
-  modelInfo,
-} from './AutomationTool' 
 import ParameterInfo from './ParameterInfo.vue' // 引入 ParameterInfo 组件
 const props = defineProps({
   selectedRecords: {
