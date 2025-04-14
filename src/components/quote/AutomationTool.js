@@ -64,14 +64,6 @@ export const loading = ref(false)
 // 错误信息
 export const error = ref(null)
 
-// 模型信息
-export const modelInfo = ref({
-  size: '100mm x 50mm x 20mm',
-  volume: '100000mm³',
-  surfaceArea: '16000mm²',
-  remarks: '这是一个示例模型'
-})
-
 
 // 更新参数配置
 export function updateParameters(parameterId) {

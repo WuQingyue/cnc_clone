@@ -2911,3 +2911,2004 @@ export const countryList = [
         UpdateDate: "11/07/2022 14:22:28"
     }
 ]
+export const productGroupList= [
+    {
+        "ProductGroupCode": "C-024-001",
+        "ProductGroupName": "中转-中转"
+    },
+    {
+        "ProductGroupCode": "C-020-001",
+        "ProductGroupName": "末端-正向"
+    },
+    {
+        "ProductGroupCode": "C-019-002",
+        "ProductGroupName": "代理-邮政小包"
+    },
+    { 
+        "ProductGroupCode": "C-019-001",
+        "ProductGroupName": "代理-国际快递"
+    },
+    {
+        "ProductGroupCode": "C-018-002",
+        "ProductGroupName": "B2B-海派"
+    },
+    {
+        "ProductGroupCode": "C-018-001",
+        "ProductGroupName": "B2B-空派"
+    },
+    {
+        "ProductGroupCode": "C-017-002",
+        "ProductGroupName": "专线-经济"
+    },
+    {
+        "ProductGroupCode": "C-017-001",
+        "ProductGroupName": "专线-快速"
+    },
+    {
+        "ProductGroupCode": "C-016-002",
+        "ProductGroupName": "电商快递-经济"
+    },
+    {
+        "ProductGroupCode": "C-016-001",
+        "ProductGroupName": "电商快递-快速"
+    },
+    {
+        "ProductGroupCode": "C-014-005",
+        "ProductGroupName": "尾程运输-自营快递"
+    },
+    {
+        "ProductGroupCode": "C-014-001",
+        "ProductGroupName": "尾程运输-Parcel"
+    },
+    {
+        "ProductGroupCode": "C-013-001",
+        "ProductGroupName": "口岸服务-清关"
+    },
+    {
+        "ProductGroupCode": "C-011-001",
+        "ProductGroupName": "定制仓储-操作"
+    },
+    {
+        "ProductGroupCode": "C-009-001",
+        "ProductGroupName": "全程代理-代理国际包裹"
+    }
+]
+export const productList = [
+    {
+        "StatusCode": 0,
+        "MsgCode": null,
+        "IsSucceed": true,
+        "Message": null,
+        "Entity": [
+            {
+                "ShippingMethodCode": "THZXR",
+                "ShippingMethodName": "云途全球专线挂号（特惠带电）",
+                "ShippingMethodEnName": "YunExpress Registered Standard",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "266",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "BKPHR",
+                "ShippingMethodName": "云途全球专线挂号（标快普货）",
+                "ShippingMethodEnName": "YunExpress Registered Priority General",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "401",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "US-ISLAND",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-001",
+                "proTocName02": "快速",
+                "proTocEnName02": "Fast",
+                "proTocCode03": "C-017-001-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "CNDWA",
+                "ShippingMethodName": "华南快速小包平邮(DG)",
+                "ShippingMethodEnName": "China Post Unregistered Air Mail-DongGuan",
+                "ProductGroupCode": "EM",
+                "ProductGroupName": "平邮-经济（邮政）",
+                "ProductGroupEnName": "Ping Post-Economy",
+                "ProductNumberCode": "110",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "N",
+                "TrackType": "0",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [],
+                "proTocCode01": "C-019",
+                "proTocName01": "代理",
+                "proTocEnName01": "Agent",
+                "proTocCode02": "C-019-002",
+                "proTocName02": "邮政小包",
+                "proTocEnName02": "Postal parcel",
+                "proTocCode03": "C-019-002-0002",
+                "proTocName03": "邮政小包平邮",
+                "proTocEnName03": "Mail"
+            },
+            {
+                "ShippingMethodCode": "EUB-SZ",
+                "ShippingMethodName": "省内EUB",
+                "ShippingMethodEnName": "Guangdong EUB",
+                "ProductGroupCode": "UP",
+                "ProductGroupName": "标准-EUB",
+                "ProductGroupEnName": "Standard -EUB",
+                "ProductNumberCode": "102",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "N",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [],
+                "proTocCode01": "C-019",
+                "proTocName01": "代理",
+                "proTocEnName01": "Agent",
+                "proTocCode02": "C-019-002",
+                "proTocName02": "邮政小包",
+                "proTocEnName02": "Postal parcel",
+                "proTocCode03": "C-019-002-0003",
+                "proTocName03": "邮政小包挂号",
+                "proTocEnName03": "Registered"
+            },
+            {
+                "ShippingMethodCode": "CNDWR",
+                "ShippingMethodName": "华南快速小包挂号(DG)",
+                "ShippingMethodEnName": "China Post Registered Air Mail-DongGuan",
+                "ProductGroupCode": "MA",
+                "ProductGroupName": "标准-挂号",
+                "ProductGroupEnName": "Standard - Registrat",
+                "ProductNumberCode": "109",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "N",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [],
+                "proTocCode01": "C-019",
+                "proTocName01": "代理",
+                "proTocEnName01": "Agent",
+                "proTocCode02": "C-019-002",
+                "proTocName02": "邮政小包",
+                "proTocEnName02": "Postal parcel",
+                "proTocCode03": "C-019-002-0003",
+                "proTocName03": "邮政小包挂号",
+                "proTocEnName03": "Registered"
+            },
+            {
+                "ShippingMethodCode": "FZZXR",
+                "ShippingMethodName": "云途全球服装专线挂号",
+                "ShippingMethodEnName": "YunExpress Clothing Registered",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "403",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "BKZXR",
+                "ShippingMethodName": "云途全球专线挂号（标快带电）",
+                "ShippingMethodEnName": "YunExpress Registered Priority",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "404",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-001",
+                "proTocName02": "快速",
+                "proTocEnName02": "Fast",
+                "proTocCode03": "C-017-001-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "CAFBA",
+                "ShippingMethodName": "加拿大大货-空派普货",
+                "ShippingMethodEnName": "CAB2B-AIR-EXP",
+                "ProductGroupCode": "FB",
+                "ProductGroupName": "FBA",
+                "ProductGroupEnName": "FBA",
+                "ProductNumberCode": "230",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "N",
+                "TrackType": "0",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "CA-JF-PY",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "10",
+                        "ExtraServiceCnname": "出口退税"
+                    }
+                ],
+                "proTocCode01": "C-018",
+                "proTocName01": "B2B",
+                "proTocEnName01": "B2B",
+                "proTocCode02": "C-018-001",
+                "proTocName02": "空派",
+                "proTocEnName02": "Air Freight",
+                "proTocCode03": "C-018-001-0001",
+                "proTocName03": "空派",
+                "proTocEnName03": "Air Freight"
+            },
+            {
+                "ShippingMethodCode": "THPHR",
+                "ShippingMethodName": "云途全球专线挂号（特惠普货）",
+                "ShippingMethodEnName": "YunExpress Registered Standard General",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "272",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "THPHU",
+                "ShippingMethodName": "云途全球专线平邮（特惠普货）",
+                "ShippingMethodEnName": "YunExpress Standard General",
+                "ProductGroupCode": "PY",
+                "ProductGroupName": "平邮-优先（商业）",
+                "ProductGroupEnName": "Flat Mail - Priority",
+                "ProductNumberCode": "271",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "0",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "THZXU",
+                "ShippingMethodName": "云途全球专线平邮（特惠带电）",
+                "ShippingMethodEnName": "YunExpress Standard Direct",
+                "ProductGroupCode": "PY",
+                "ProductGroupName": "平邮-优先（商业）",
+                "ProductGroupEnName": "Flat Mail - Priority",
+                "ProductNumberCode": "277",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "0",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "MUZXR",
+                "ShippingMethodName": "云途全球化妆品类专线挂号",
+                "ShippingMethodEnName": "YunExpress Cosmetics Registered",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "406",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "MEXICO2",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "SZEMS",
+                "ShippingMethodName": "省内EMS",
+                "ShippingMethodEnName": "China Post EMS-SN",
+                "ProductGroupCode": "DH",
+                "ProductGroupName": "快速-快递",
+                "ProductGroupEnName": "Fast-Express",
+                "ProductNumberCode": "163",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "N",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [],
+                "proTocCode01": "C-019",
+                "proTocName01": "代理",
+                "proTocEnName01": "Agent",
+                "proTocCode02": "C-019-002",
+                "proTocName02": "邮政小包",
+                "proTocEnName02": "Postal parcel",
+                "proTocCode03": "C-019-002-0003",
+                "proTocName03": "邮政小包挂号",
+                "proTocEnName03": "Registered"
+            },
+            {
+                "ShippingMethodCode": "TDZXR",
+                "ShippingMethodName": "云途全球精选专线挂号（特惠带电）",
+                "ShippingMethodEnName": "Yunexpress Driect Economical Line",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "269",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0002",
+                "proTocName03": "精选",
+                "proTocEnName03": "Featured"
+            },
+            {
+                "ShippingMethodCode": "TDPHR",
+                "ShippingMethodName": "云途全球精选专线挂号（特惠普货）",
+                "ShippingMethodEnName": "Yunexpress Driect Economical Line（general）",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "272",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0002",
+                "proTocName03": "精选",
+                "proTocEnName03": "Featured"
+            },
+            {
+                "ShippingMethodCode": "USFBA",
+                "ShippingMethodName": "美国大货-空派普货",
+                "ShippingMethodEnName": "USB2B-AIR-EXP",
+                "ProductGroupCode": "FB",
+                "ProductGroupName": "FBA",
+                "ProductGroupEnName": "FBA",
+                "ProductNumberCode": "275",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "N",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "US-UPS",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "10",
+                        "ExtraServiceCnname": "出口退税"
+                    }
+                ],
+                "proTocCode01": "C-018",
+                "proTocName01": "B2B",
+                "proTocEnName01": "B2B",
+                "proTocCode02": "C-018-001",
+                "proTocName02": "空派",
+                "proTocEnName02": "Air Freight",
+                "proTocCode03": "C-018-001-0001",
+                "proTocName03": "空派",
+                "proTocEnName03": "Air Freight"
+            },
+            {
+                "ShippingMethodCode": "SNETK",
+                "ShippingMethodName": "省内E特快",
+                "ShippingMethodEnName": "China Post  Ems-SN",
+                "ProductGroupCode": "DH",
+                "ProductGroupName": "快速-快递",
+                "ProductGroupEnName": "Fast-Express",
+                "ProductNumberCode": "164",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "N",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [],
+                "proTocCode01": "C-019",
+                "proTocName01": "代理",
+                "proTocEnName01": "Agent",
+                "proTocCode02": "C-019-002",
+                "proTocName02": "邮政小包",
+                "proTocEnName02": "Postal parcel",
+                "proTocCode03": "C-019-002-0003",
+                "proTocName03": "邮政小包挂号",
+                "proTocEnName03": "Registered"
+            },
+            {
+                "ShippingMethodCode": "DHZXR",
+                "ShippingMethodName": "云途大货18000专线挂号（特惠带电）",
+                "ShippingMethodEnName": "Yunexpress Bulky Goods Service Line",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "211",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "US-UPS-DH",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "DHZXRPH",
+                "ShippingMethodName": "云途大货18000专线挂号（特惠普货）",
+                "ShippingMethodEnName": "Yunexpress Bulky Goods",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "211",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "US-UPS-DH",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "AUFBAAIR-N",
+                "ShippingMethodName": "中澳FBA空派普货-自税",
+                "ShippingMethodEnName": "AUFBAAIR-N",
+                "ProductGroupCode": "FB",
+                "ProductGroupName": "FBA",
+                "ProductGroupEnName": "FBA",
+                "ProductNumberCode": "253",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "N",
+                "TrackType": "0",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [],
+                "proTocCode01": "C-018",
+                "proTocName01": "B2B",
+                "proTocEnName01": "B2B",
+                "proTocCode02": "C-018-001",
+                "proTocName02": "空派",
+                "proTocEnName02": "Air Freight",
+                "proTocCode03": "C-018-001-0001",
+                "proTocName03": "空派",
+                "proTocEnName03": "Air Freight"
+            },
+            {
+                "ShippingMethodCode": "FBASEA-MS",
+                "ShippingMethodName": "美国大货-美森极速达",
+                "ShippingMethodEnName": "USFBA-CLX-EXP",
+                "ProductGroupCode": "FB",
+                "ProductGroupName": "FBA",
+                "ProductGroupEnName": "FBA",
+                "ProductNumberCode": "281",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "US-UPS",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "10",
+                        "ExtraServiceCnname": "出口退税"
+                    }
+                ],
+                "proTocCode01": "C-018",
+                "proTocName01": "B2B",
+                "proTocEnName01": "B2B",
+                "proTocCode02": "C-018-002",
+                "proTocName02": "海派",
+                "proTocEnName02": "Ocean Freight",
+                "proTocCode03": "C-018-002-0001",
+                "proTocName03": "海派",
+                "proTocEnName03": "Ocean Freight"
+            },
+            {
+                "ShippingMethodCode": "AUB2BAIR-N",
+                "ShippingMethodName": "中澳B2B空派普货-自税",
+                "ShippingMethodEnName": "AUB2BAIR-N",
+                "ProductGroupCode": "FB",
+                "ProductGroupName": "FBA",
+                "ProductGroupEnName": "FBA",
+                "ProductNumberCode": "253",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "N",
+                "TrackType": "0",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [],
+                "proTocCode01": "C-018",
+                "proTocName01": "B2B",
+                "proTocEnName01": "B2B",
+                "proTocCode02": "C-018-001",
+                "proTocName02": "空派",
+                "proTocEnName02": "Air Freight",
+                "proTocCode03": "C-018-001-0001",
+                "proTocName03": "空派",
+                "proTocEnName03": "Air Freight"
+            },
+            {
+                "ShippingMethodCode": "WMBKZXR",
+                "ShippingMethodName": "WM云途全球专线挂号（标快带电）",
+                "ShippingMethodEnName": "WMYunExpress Registered Priority",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "201",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "N",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-001",
+                "proTocName02": "快速",
+                "proTocEnName02": "Fast",
+                "proTocCode03": "C-017-001-0003",
+                "proTocName03": "云选",
+                "proTocEnName03": "Yun-selected"
+            },
+            {
+                "ShippingMethodCode": "WMBKPHR",
+                "ShippingMethodName": "WM云途全球专线挂号（标快普货）",
+                "ShippingMethodEnName": "WMYunExpress Registered Priority General",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "202",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "N",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-001",
+                "proTocName02": "快速",
+                "proTocEnName02": "Fast",
+                "proTocCode03": "C-017-001-0003",
+                "proTocName03": "云选",
+                "proTocEnName03": "Yun-selected"
+            },
+            {
+                "ShippingMethodCode": "AGPHR",
+                "ShippingMethodName": "AG云途全球专线挂号（特惠普货）",
+                "ShippingMethodEnName": "AG YunExpress Registered Standard General",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "156",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "BKDDTK",
+                "ShippingMethodName": "云途全球专线挂号（特快带电）",
+                "ShippingMethodEnName": "YunExpress Faster Registered Priority",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "225",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-001",
+                "proTocName02": "快速",
+                "proTocEnName02": "Fast",
+                "proTocCode03": "C-017-001-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "BKPHTK",
+                "ShippingMethodName": "云途全球专线挂号（特快普货）",
+                "ShippingMethodEnName": "YunExpress Faster Registered Priority General",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "226",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "US-ISLAND",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-001",
+                "proTocName02": "快速",
+                "proTocEnName02": "Fast",
+                "proTocCode03": "C-017-001-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "ZBZXRDD",
+                "ShippingMethodName": "云途中包专线挂号（特惠带电）",
+                "ShippingMethodEnName": "YunExpress Medium Parcel Registered",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "255",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "NL-DHL-PY",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "ZBZXRPH",
+                "ShippingMethodName": "云途中包专线挂号（特惠普货）",
+                "ShippingMethodEnName": "YunExpress Medium Parcel Registered",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "255",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "NL-DHL-PY",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "THPDYPY",
+                "ShippingMethodName": "云途岛屿专线（特惠普货）",
+                "ShippingMethodEnName": "Yunexpress Islands & remote areas Standard General",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "211",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "THZDYPY",
+                "ShippingMethodName": "云途岛屿专线（特惠带电）",
+                "ShippingMethodEnName": "Yunexpress Islands & remote areas Standard",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "212",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "YTLSPN",
+                "ShippingMethodName": "云途轻小件专线挂号（特惠普货）",
+                "ShippingMethodEnName": "Yunexpress Light And Small Parcel Normal",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "159",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "YTLSPC",
+                "ShippingMethodName": "云途轻小件专线挂号（特惠带电）",
+                "ShippingMethodEnName": "Yunexpress Light And Small Parcel Charged",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "289",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "AGZXR",
+                "ShippingMethodName": "AG云途全球专线挂号（特惠带电）",
+                "ShippingMethodEnName": "AG YunExpress Registered Standard",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "425",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "AGBKZXR",
+                "ShippingMethodName": "AG云途全球专线挂号（标快带电）",
+                "ShippingMethodEnName": "AG YunExpress Registered Priority",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "189",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-001",
+                "proTocName02": "快速",
+                "proTocEnName02": "Fast",
+                "proTocCode03": "C-017-001-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "AGBKPHR",
+                "ShippingMethodName": "AG云途全球专线挂号（标快普货）",
+                "ShippingMethodEnName": "AG YunExpress Registered Priority General",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "178",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-001",
+                "proTocName02": "快速",
+                "proTocEnName02": "Fast",
+                "proTocCode03": "C-017-001-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "AGMUZXR",
+                "ShippingMethodName": "AG云途全球化妆品类专线挂号",
+                "ShippingMethodEnName": "AG YunExpress Cosmetics Registered",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "145",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "MEXICO2",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "SCZXR",
+                "ShippingMethodName": "云途全球特货专线",
+                "ShippingMethodEnName": "YunExpress Registered Special",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "167",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "N",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "USB2B-MAX2",
+                "ShippingMethodName": "美国大货-美森限时达",
+                "ShippingMethodEnName": "USB2B-MAX2",
+                "ProductGroupCode": "FB",
+                "ProductGroupName": "FBA",
+                "ProductGroupEnName": "FBA",
+                "ProductNumberCode": "282",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "N",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "US-UPS-DH",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "10",
+                        "ExtraServiceCnname": "出口退税"
+                    }
+                ],
+                "proTocCode01": "C-018",
+                "proTocName01": "B2B",
+                "proTocEnName01": "B2B",
+                "proTocCode02": "C-018-002",
+                "proTocName02": "海派",
+                "proTocEnName02": "Ocean Freight",
+                "proTocCode03": "C-018-002-0001",
+                "proTocName03": "海派",
+                "proTocEnName03": "Ocean Freight"
+            },
+            {
+                "ShippingMethodCode": "USB2B-OA",
+                "ShippingMethodName": "美国大货-普船快递派",
+                "ShippingMethodEnName": "USB2B-OA",
+                "ProductGroupCode": "FB",
+                "ProductGroupName": "FBA",
+                "ProductGroupEnName": "FBA",
+                "ProductNumberCode": "283",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "US-UPS-DH",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "10",
+                        "ExtraServiceCnname": "出口退税"
+                    }
+                ],
+                "proTocCode01": "C-018",
+                "proTocName01": "B2B",
+                "proTocEnName01": "B2B",
+                "proTocCode02": "C-018-002",
+                "proTocName02": "海派",
+                "proTocEnName02": "Ocean Freight",
+                "proTocCode03": "C-018-002-0001",
+                "proTocName03": "海派",
+                "proTocEnName03": "Ocean Freight"
+            },
+            {
+                "ShippingMethodCode": "USB2B-AIRELEC",
+                "ShippingMethodName": "美国大货-空派带电",
+                "ShippingMethodEnName": "USB2B AIRELECTRICITY",
+                "ProductGroupCode": "FB",
+                "ProductGroupName": "FBA",
+                "ProductGroupEnName": "FBA",
+                "ProductNumberCode": "123",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "N",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "UPS-FBA",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "10",
+                        "ExtraServiceCnname": "出口退税"
+                    }
+                ],
+                "proTocCode01": "C-018",
+                "proTocName01": "B2B",
+                "proTocEnName01": "B2B",
+                "proTocCode02": "C-018-001",
+                "proTocName02": "空派",
+                "proTocEnName02": "Air Freight",
+                "proTocCode03": "C-018-001-0001",
+                "proTocName03": "空派",
+                "proTocEnName03": "Air Freight"
+            },
+            {
+                "ShippingMethodCode": "YTYCPREC",
+                "ShippingMethodName": "云途全球云选专线挂号（带电）",
+                "ShippingMethodEnName": "Yunexprss Yun Choice Premium Charged Parcel",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "123",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-001",
+                "proTocName02": "快速",
+                "proTocEnName02": "Fast",
+                "proTocCode03": "C-017-001-0003",
+                "proTocName03": "云选",
+                "proTocEnName03": "Yun-selected"
+            },
+            {
+                "ShippingMethodCode": "YTYCPREG",
+                "ShippingMethodName": "云途全球云选专线挂号（普货）",
+                "ShippingMethodEnName": "Yunexpress Yun Choice Premium General Parcel",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "123",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-001",
+                "proTocName02": "快速",
+                "proTocEnName02": "Fast",
+                "proTocCode03": "C-017-001-0003",
+                "proTocName03": "云选",
+                "proTocEnName03": "Yun-selected"
+            },
+            {
+                "ShippingMethodCode": "MUZXRF2P",
+                "ShippingMethodName": "云途全球F2P化妆品类专线挂号",
+                "ShippingMethodEnName": "YunExpress F2P Cosmetics Registered",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "123",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0001",
+                "proTocName03": "标准",
+                "proTocEnName03": "Standard"
+            },
+            {
+                "ShippingMethodCode": "TDZXRYMT",
+                "ShippingMethodName": "云途精选专线挂号（特惠带电）-日本黑猫",
+                "ShippingMethodEnName": "Yunexpress Driect Economical Line-JP Yamato",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "303",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0002",
+                "proTocName03": "精选",
+                "proTocEnName03": "Featured"
+            },
+            {
+                "ShippingMethodCode": "TDPHRYMT",
+                "ShippingMethodName": "云途精选专线挂号（特惠普货）-日本黑猫",
+                "ShippingMethodEnName": "Yunexpress Direct Economical Line general-JPYamato",
+                "ProductGroupCode": "SP",
+                "ProductGroupName": "快速-专线",
+                "ProductGroupEnName": "Fast-dedicated line",
+                "ProductNumberCode": "304",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "V1",
+                        "ExtraServiceCnname": "代缴VAT"
+                    },
+                    {
+                        "ServeCode": "V2",
+                        "ExtraServiceCnname": "美元代缴"
+                    },
+                    {
+                        "ServeCode": "V3",
+                        "ExtraServiceCnname": "欧元代缴"
+                    }
+                ],
+                "proTocCode01": "C-017",
+                "proTocName01": "专线",
+                "proTocEnName01": "Direct Line",
+                "proTocCode02": "C-017-002",
+                "proTocName02": "经济",
+                "proTocEnName02": "Economic",
+                "proTocCode03": "C-017-002-0002",
+                "proTocName03": "精选",
+                "proTocEnName03": "Featured"
+            },
+            {
+                "ShippingMethodCode": "USB2B-AIRGC",
+                "ShippingMethodName": "美国大货-空卡谷仓专线",
+                "ShippingMethodEnName": "USB2B-AIRGC",
+                "ProductGroupCode": "FB",
+                "ProductGroupName": "FBA",
+                "ProductGroupEnName": "FBA",
+                "ProductNumberCode": "123",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "N",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "10",
+                        "ExtraServiceCnname": "出口退税"
+                    }
+                ],
+                "proTocCode01": "C-018",
+                "proTocName01": "B2B",
+                "proTocEnName01": "B2B",
+                "proTocCode02": "C-018-001",
+                "proTocName02": "空派",
+                "proTocEnName02": "Air Freight",
+                "proTocCode03": "C-018-001-0001",
+                "proTocName03": "空派",
+                "proTocEnName03": "Air Freight"
+            },
+            {
+                "ShippingMethodCode": "AP-KR-FBA",
+                "ShippingMethodName": "YunExpress KR FBA AIR FREIGHT",
+                "ShippingMethodEnName": "YunExpress KR FBA AIR FREIGHT",
+                "ProductGroupCode": "FB",
+                "ProductGroupName": "FBA",
+                "ProductGroupEnName": "FBA",
+                "ProductNumberCode": "420",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "N",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "10",
+                        "ExtraServiceCnname": "出口退税"
+                    }
+                ],
+                "proTocCode01": "C-018",
+                "proTocName01": "B2B",
+                "proTocEnName01": "B2B",
+                "proTocCode02": "C-018-001",
+                "proTocName02": "空派",
+                "proTocEnName02": "Air Freight",
+                "proTocCode03": "C-018-001-0001",
+                "proTocName03": "空派",
+                "proTocEnName03": "Air Freight"
+            },
+            {
+                "ShippingMethodCode": "AP-KR-FBA-SEA",
+                "ShippingMethodName": "YunExpress KR FBA SEA FREIGHT",
+                "ShippingMethodEnName": "YunExpress KR FBA SEA FREIGHT",
+                "ProductGroupCode": "FB",
+                "ProductGroupName": "FBA",
+                "ProductGroupEnName": "FBA",
+                "ProductNumberCode": "421",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "N",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "10",
+                        "ExtraServiceCnname": "出口退税"
+                    }
+                ],
+                "proTocCode01": "C-018",
+                "proTocName01": "B2B",
+                "proTocEnName01": "B2B",
+                "proTocCode02": "C-018-002",
+                "proTocName02": "海派",
+                "proTocEnName02": "Ocean Freight",
+                "proTocCode03": "C-018-002-0001",
+                "proTocName03": "海派",
+                "proTocEnName03": "Ocean Freight"
+            },
+            {
+                "ShippingMethodCode": "USB2B-HD-EXP",
+                "ShippingMethodName": "美国大货-合德海派",
+                "ShippingMethodEnName": "USB2B-HD-EXP",
+                "ProductGroupCode": "FB",
+                "ProductGroupName": "FBA",
+                "ProductGroupEnName": "FBA",
+                "ProductNumberCode": "282",
+                "ProductgroupNumberCode": null,
+                "IsRecommend": "Y",
+                "TrackType": "1",
+                "AuditSkuSign": "N",
+                "ForecastType": "N",
+                "WebDocumentRule": "N",
+                "OdaCode": "UPS-FBA",
+                "NeedPublicAddress": false,
+                "RuleId": "",
+                "IsWeb": "Y",
+                "ExtraServiceList": [
+                    {
+                        "ServeCode": "10",
+                        "ExtraServiceCnname": "出口退税"
+                    }
+                ],
+                "proTocCode01": "C-018",
+                "proTocName01": "B2B",
+                "proTocEnName01": "B2B",
+                "proTocCode02": "C-018-002",
+                "proTocName02": "海派",
+                "proTocEnName02": "Ocean Freight",
+                "proTocCode03": "C-018-002-0001",
+                "proTocName03": "海派",
+                "proTocEnName03": "Ocean Freight"
+            }
+        ]
+    }
+]
