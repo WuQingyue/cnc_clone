@@ -5,14 +5,10 @@
         v-if="processInfo"
         class="upload-area"
         drag
-        :action="uploadUrl"
-        :headers="uploadHeaders"
-        :data="uploadData"
         :limit="fileLimit"
         :accept="processInfo.acceptTypes"
         :before-upload="handleBeforeUpload"
         :on-success="handleUploadSuccess"
-        :on-error="handleUploadError"
         :on-exceed="handleExceed"
         :with-credentials="true"
         multiple
@@ -44,7 +40,7 @@ import { ref, computed } from 'vue'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/store/user'
-
+import axios from 'axios'
 // 检查用户是否登录
 const isUserLoggedIn = useUserStore().isLoggedIn
 
@@ -55,20 +51,6 @@ const props = defineProps({
   }
 })
 const emit = defineEmits(['upload-success'])
-
-// 上传地址
-const uploadUrl = 'http://localhost:8000/api/upload/upload'
-
-// 修改上传请求头
-const uploadHeaders = computed(() => ({
-  'X-Requested-With': 'XMLHttpRequest',
-  'Accept': 'application/json'
-}))
-
-// 上传时附带的数据
-const uploadData = computed(() => ({
-  process_type: props.processInfo?.type || ''
-}))
 // 文件数量限制
 const fileLimit = 20
 
@@ -102,25 +84,41 @@ const handleBeforeUpload = (file) => {
     ElMessage.error(`不支持的文件格式: ${extension}`)
     return false
   }
+  const formData = new FormData();
+  formData.append('file', file); // 确保 file 是一个 File 对象
+  formData.append('process_type', props.processInfo?.type || '');
 
+  // 使用 axios 发送上传请求
+  axios.post('http://localhost:8000/api/upload/upload', formData, {
+    headers: {
+      'Content-Type': 'multipart/form-data'
+    }
+  })
+  .then(response => {
+    handleUploadSuccess(response.data, file); // 调用 handleUploadSuccess 并传递响应数据
+  })
   return true
 }
 const fileInfoAccessId = ref('')
+
 const handleUploadSuccess = (response, file) => {
-  fileInfoAccessId.value = response.jlc_response[0].fileInfoAccessId
+  const data = new FormData();
+  data.append('file', file); 
   if (response.success) {
-    // fileInfoAccessId.value = response.data.jlc_response
-    // console.log('fileInfoAccessId', fileInfoAccessId.value)
+     // 使用 axios 发送获取fileInfoAccessId请求
+    axios.post('http://localhost:8000/api/upload/uploadDrawFile', data)
+    .then(response2 => {
+      if(response2.status === 200){
+        console.log('response2',response2.data.data)
+        fileInfoAccessId.value = response2.data.data[0].fileInfoAccessId
+        console.log('文件fileInfoAccessId',fileInfoAccessId.value)
+      }
+    })
     emit('upload-success', response)
     ElMessage.success('上传成功')
   } else {
     ElMessage.error(response.detail || '上传失败')
   }
-}
-
-const handleUploadError = (error) => {
-  console.error('上传失败:', error)
-  ElMessage.error('上传失败，请重试')
 }
 
 // 重定向到登录页面
