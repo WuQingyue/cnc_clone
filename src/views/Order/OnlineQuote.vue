@@ -76,12 +76,15 @@ const handleProcessChange = async (process) => {
   fetchHistory(process.type)
 }
 const fileInfoAccessId = ref('')
+const productModelAccessId = ref('')
+const sizeX = ref('')
+const sizeY = ref('')
+const sizeZ = ref('')
+const modelVolume = ref('')
+const modelSurfaceArea = ref('')
 const handleOrder = (record) => {
   isOrdering.value = true // 设置为 true 以显示 FileList 组件
   record.selected = true
-  record.size = '' // 尺寸
-  record.volume = '' // 体积
-  record.surfaceArea = '' // 表面积
   record.remarks = '' // 备注
   record.quantity = 1 // 数量
   record.material = '铝合金-6061' // 材料
@@ -118,11 +121,17 @@ const handleOrder = (record) => {
   record.expeditedPrice = 0
   record.pricePerUnit = 0
   record.totalPrice = 0
-  record.deliveryType = 'BD'
+  record.deliveryTypeCode = 'BD'
   record.categoryName = '铝合金'
   record.getSurfaceTreatmentLabel = '表面不做处理'
   selectedRecords.value = record
   record.fileInfoAccessId = fileInfoAccessId.value
+  record.productModelAccessId = productModelAccessId.value
+  record.sizeX = sizeX.value
+  record.sizeY = sizeY.value
+  record.sizeZ = sizeZ.value
+  record.modelVolume = modelVolume.value
+  record.modelSurfaceArea = modelSurfaceArea.value
   console.log('selectedRecords.value', selectedRecords.value)
 }
 
@@ -131,10 +140,17 @@ const handleDelete = async (id) => {
 }
 
 const handleUploadSuccess = (response) => {
-  fileInfoAccessId.value = response.jlc_response[0].fileInfoAccessId
+  fileInfoAccessId.value = response.data.data[0].fileInfoAccessId
   console.log('fileInfoAccessId', fileInfoAccessId.value)
-  const react = axios.post('http://localhost:8000/api/upload/get_analysis_result', { data: fileInfoAccessId.value },{withCredentials: true});
-  console.log('react', react)
+  axios.post(`http://localhost:8000/api/upload/get_analysis_result?data=${fileInfoAccessId.value}`)
+  .then(response => {
+      productModelAccessId.value = response.data.data.productModelAccessId
+      sizeX.value = response.data.data.sizeX
+      sizeY.value = response.data.data.sizeY
+      sizeZ.value = response.data.data.sizeZ
+      modelVolume.value = response.data.data.modelVolume
+      modelSurfaceArea.value =response.data.data.modelSurfaceArea
+    })
   if (currentProcess.value?.type) {
     fetchHistory(currentProcess.value.type)
   }

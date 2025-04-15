@@ -109,12 +109,15 @@ const handleUploadSuccess = (response, file) => {
     axios.post('http://localhost:8000/api/upload/uploadDrawFile', data)
     .then(response2 => {
       if(response2.status === 200){
-        console.log('response2',response2.data.data)
-        fileInfoAccessId.value = response2.data.data[0].fileInfoAccessId
-        console.log('文件fileInfoAccessId',fileInfoAccessId.value)
-      }
-    })
-    emit('upload-success', response)
+        // console.log('response2',response2.data.data)
+        // fileInfoAccessId.value = response2.data.data[0].fileInfoAccessId
+        // axios.post(`http://localhost:8000/api/upload/get_analysis_result?data=${fileInfoAccessId.value}`)
+        // .then(response => {
+        //     console.log('分析结果:', response);
+
+        //   })
+      emit('upload-success', response2)
+    }})
     ElMessage.success('上传成功')
   } else {
     ElMessage.error(response.detail || '上传失败')

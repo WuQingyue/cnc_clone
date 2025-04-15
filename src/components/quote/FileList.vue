@@ -27,9 +27,9 @@
               <td>{{ index + 1 }}</td> 
               <td>{{ record.file_name }}</td>
               <td>
-                尺寸: {{ record.size }}<br>
-                体积: {{ record.volume }}<br>
-                表面积: {{ record.surfaceArea }}<br>
+                尺寸: {{ record.sizeX }}*{{ record.sizeY }}*{{ record.sizeZ }}<br>
+                体积: {{ record.modelVolume }}<br>
+                表面积: {{ record.modelSurfaceArea }}<br>
                 备注: {{ record.remarks }}
               </td>
               <td class="parameter-info-cell" @click="openParameterDialog(record)">
@@ -76,7 +76,7 @@
       <div class="right-section">
         <div class="info-box">
           <div class="delivery-options">
-            <label :class="{ 'selected-option': selectedDelivery === 'ud' }">
+            <label :class="{ 'selected-option': selectedDelivery === 'UD' }">
               <input 
                 type="radio" 
                 v-model="selectedDelivery" 
@@ -125,15 +125,26 @@
 <script setup>
 import { ref, watch, onMounted, computed } from 'vue'
 import { ShoppingCart, Edit } from '@element-plus/icons-vue' // 引入 Edit 图标
-
+import { useSelectedDataStore } from '@/store/PriceInquiryDatas'
+import { useRouter } from 'vue-router'
+// 获取 store 实例
+const selectedDataStore = useSelectedDataStore()
+const router = useRouter()
 const selectedDelivery = ref('BD')
 // 新增：监听交期选项的变化
 watch(selectedDelivery, (newDeliveryOption) => {
-  console.log('交期选项已更改为:', newDeliveryOption);
+  console.log('交期选项已更改为:', selectedDelivery.value);
   localRecords.value.forEach(record => {
-    record.deliveryType = selectedDelivery.value; 
+    record.deliveryTypeCode = newDeliveryOption; 
   });
+  const selectedDatas = selectedDataStore.getSelectedData()
+  selectedDatas.forEach(record => {
+    record.deliveryTypeCode = newDeliveryOption; 
+  });
+  selectedDataStore.setSelectedData(selectedDatas)
+  fetchPrices()
 });
+
 import ParameterInfo from './ParameterInfo.vue' // 引入 ParameterInfo 组件
 const props = defineProps({
   selectedRecords: {
@@ -199,18 +210,14 @@ const selectedTotalPrice = computed(() => {
     .toFixed(2); // 保留两位小数
 });
 
-import { useSelectedDataStore } from '@/store/PriceInquiryDatas'
-import { useRouter } from 'vue-router'
-// 获取 store 实例
-const selectedDataStore = useSelectedDataStore()
-const router = useRouter()
+//将被选中的数据存储在store中
 watch(localRecords.value, () => {
-  const selected = localRecords.value.filter(record => record.selected)
-  console.log('selected', selected)
-  if (selected.length > 0) {
+  const selectedDatas = localRecords.value.filter(record => record.selected)
+  console.log('被选中的数据', selectedDatas)
+  if (selectedDatas.length > 0) {
     try {
       // 使用 store 存储数据
-      selectedDataStore.setSelectedData(selected)
+      selectedDataStore.setSelectedData(selectedDatas)
       fetchPrices()
     } catch (error) {
       console.error("存储数据时出错:", error)
@@ -220,9 +227,9 @@ watch(localRecords.value, () => {
 })
 const handleConfirm = async () => {
   // 筛选出被选中的记录
-  const selected = localRecords.value.filter(record => record.selected)
+  const selectedDatas = localRecords.value.filter(record => record.selected)
 
-  if (selected.length > 0) {
+  if (selectedDatas.length > 0) {
     try {
       // 跳转到询价页面
       router.push('/price-inquiry')
@@ -238,11 +245,11 @@ import axios from 'axios'
 import { ElMessage } from 'element-plus'
 
 const fetchPrices = async () => {
-  const selected = selectedDataStore.getSelectedData();
-  console.log('selected', selected);
+  const selectedDatas = selectedDataStore.getSelectedData();
+  console.log('获取勾选的数据', selectedDatas);
 
   try {
-    const requestData = selected.map(item => ({
+    const requestData = selectedDatas.map(item => ({
       materialAccessId: item.materialAccessId,
       crafts: [
         {
@@ -265,32 +272,42 @@ const fetchPrices = async () => {
       goodsQuantity: item.quantity,
       toleranceAccessId: item.toleranceAccessId,
       roughnessAccessId: item.roughnessAccessId,
-      deliveryTypeCode: item.deliveryType
+      deliveryTypeCode: item.deliveryTypeCode
     }));
     console.log('requestData', requestData);
 
     const response = await axios.post('http://localhost:8000/api/price/price', requestData, { withCredentials: true });
     console.log('response', response);
     const priceData = response.data;
-    
-    if (priceData.success && priceData.code === 200 && priceData.data && priceData.data.quoteInfos.length > 0) {
+    console.log('FileList中的priceData', priceData)
+    if (response.status === 200) {
       // 假设我们只处理第一个报价信息（如果需要处理多个，可以遍历 quoteInfos）
-      const quoteInfos = priceData.data;
-      
-      selected.forEach(record => {
-        const quoteInfo = quoteInfos.find(info => info.productModelAccessId === record.productModelAccessId); // 假设 quoteInfos 中有与 record 匹配的唯一键
-        // if (quoteInfo) {
-        //   record.pricePerUnit = quoteInfo.price; // 更新单价
-        //   record.totalPrice = quoteInfo.price * record.quantity; // 更新总价
-        // }
+      const quoteInfos = priceData;
+      console.log('quoteInfos', quoteInfos)
+      selectedDatas.forEach((record, index) => {
+        if (index < quoteInfos.length) {
+          record.materialCost = quoteInfos[index].materialPrice;
+          record.engineeringCost = quoteInfos[index].programPrice;
+          record.processingCost = quoteInfos[index].processPrice;
+          record.clampingCost = quoteInfos[index].clampPrice;
+          record.surfaceCost = quoteInfos[index].craftPrice;
+          record.expeditedPrice = quoteInfos[index].expeditedPrice;
+          record.pricePerUnit = quoteInfos[index].price; // 更新单价
+          record.totalPrice = quoteInfos[index].price * record.quantity; // 更新总价
+        }
       });
-
       // 更新 localRecords 中的数据
       localRecords.value = localRecords.value.map(record => {
-        const updatedRecord = selected.find(selRecord => selRecord.id === record.id); // 假设记录中有唯一标识符 id
+        const updatedRecord = selectedDatas.find(selRecord => selRecord.fileInfoAccessId === record.fileInfoAccessId); // 假设记录中有唯一标识符 id
         if (updatedRecord) {
           return {
             ...record,
+            materialCost: updatedRecord.materialCost,
+            engineeringCost: updatedRecord.engineeringCost,
+            processingCost: updatedRecord.processingCost,
+            clampingCost: updatedRecord.clampingCost,
+            surfaceCost: updatedRecord.surfaceCost,
+            expeditedPrice: updatedRecord.expeditedPrice,
             pricePerUnit: updatedRecord.pricePerUnit,
             totalPrice: updatedRecord.totalPrice
           };
@@ -299,7 +316,8 @@ const fetchPrices = async () => {
       });
 
       // 更新 store 中的数据
-      selectedDataStore.setSelectedData(selected);
+      selectedDataStore.setSelectedData(selectedDatas);
+      console.log('更新store中的数据', selectedDataStore.getSelectedData())
     } else {
       console.error('Unexpected response format:', priceData);
       ElMessage.error('获取价格信息失败，返回数据格式不正确');

@@ -376,7 +376,7 @@ export default {
     const processingCost = ref(0)
     const surfaceCost = ref(0)
     const expeditedPrice = ref(0)
-    const deliveryType = ref('BD')
+    const deliveryTypeCode = ref('')
     const roughnessAccessId = ref('')
     const toleranceAccessId = ref('')
     const pricePerUnit = ref(0)
@@ -420,7 +420,7 @@ export default {
       craftAttributeGlossinessAccessIds2.value = props.record.craftAttributeGlossinessAccessIds2
       craftAttributeFileAccessIds2.value = props.record.craftAttributeFileAccessIds2
       expeditedPrice.value = props.record.expeditedPrice
-      deliveryType.value = props.record.deliveryType
+      deliveryTypeCode.value = props.record.deliveryTypeCode
       roughnessAccessId.value = props.record.roughnessAccessId
       toleranceAccessId.value = props.record.toleranceAccessId
       if (val) {
@@ -467,7 +467,7 @@ export default {
         processingCost: processingCost.value,
         surfaceCost: surfaceCost.value,
         expeditedPrice: expeditedPrice.value,
-        deliveryType: deliveryType.value,
+        deliveryTypeCode: deliveryTypeCode.value,
         roughnessAccessId: roughnessAccessId.value,
         toleranceAccessId: toleranceAccessId.value,
         materialAccessId: selectedMaterial.value.materialAccessId,
@@ -552,6 +552,7 @@ export default {
         craftAttributeFileAccessIds2: craftAttributeFileAccessIds2.value,
         categoryName: categoryName.value,
         getSurfaceTreatmentLabel: getSurfaceTreatmentLabel,
+        deliveryTypeCode: deliveryTypeCode.value,
       }
       
       emit('confirm', parameters)
@@ -870,21 +871,21 @@ export default {
             goodsQuantity: quantity.value,
             toleranceAccessId: toleranceAccessId.value,
             roughnessAccessId: roughnessAccessId.value,
-            deliveryTypeCode: deliveryType.value
+            deliveryTypeCode: deliveryTypeCode.value
           }
         ];
         const response = await axios.post('http://localhost:8000/api/price/price', requestData,{withCredentials: true})
-        console.log('response', response)
+        console.log('参数对话框中的response', response)
         // 正确解析响应数据
         const priceData = response.data
-        console.log('priceData', priceData)
-        materialCost.value = priceData.materialPrice
-        engineeringCost.value = priceData.programPrice
-        clampingCost.value = priceData.clampPrice
-        processingCost.value = priceData.processPrice
-        surfaceCost.value = priceData.craftPrice
-        pricePerUnit.value = priceData.price
-        expeditedPrice.value = priceData.expeditedPrice
+        console.log('参数对话框中的priceData', priceData)
+        materialCost.value = priceData[0].materialPrice
+        engineeringCost.value = priceData[0].programPrice
+        clampingCost.value = priceData[0].clampPrice
+        processingCost.value = priceData[0].processPrice
+        surfaceCost.value = priceData[0].craftPrice
+        pricePerUnit.value = priceData[0].price
+        expeditedPrice.value = priceData[0].expeditedPrice
       } catch (error) {
         console.error('请求失败:', error.response?.data || error.message)
         ElMessage.error('获取价格信息失败，请检查网络连接')
@@ -984,7 +985,7 @@ export default {
       totalPrice,
       pricePerUnit,
       expeditedPrice,
-      deliveryType,
+      deliveryTypeCode,
       roughnessAccessId,
       toleranceAccessId,
       handleConfirm,
