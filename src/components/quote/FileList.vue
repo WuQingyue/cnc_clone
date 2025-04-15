@@ -127,122 +127,18 @@ import { ref, watch, onMounted, computed } from 'vue'
 import { ShoppingCart, Edit } from '@element-plus/icons-vue' // 引入 Edit 图标
 import { useSelectedDataStore } from '@/store/PriceInquiryDatas'
 import { useRouter } from 'vue-router'
+import axios from 'axios'
+import { ElMessage } from 'element-plus'
+
 // 获取 store 实例
 const selectedDataStore = useSelectedDataStore()
 const router = useRouter()
 const selectedDelivery = ref('BD')
-// 新增：监听交期选项的变化
-watch(selectedDelivery, (newDeliveryOption) => {
-  console.log('交期选项已更改为:', selectedDelivery.value);
-  localRecords.value.forEach(record => {
-    record.deliveryTypeCode = newDeliveryOption; 
-  });
-  const selectedDatas = selectedDataStore.getSelectedData()
-  selectedDatas.forEach(record => {
-    record.deliveryTypeCode = newDeliveryOption; 
-  });
-  selectedDataStore.setSelectedData(selectedDatas)
-  fetchPrices()
-});
-
-import ParameterInfo from './ParameterInfo.vue' // 引入 ParameterInfo 组件
-const props = defineProps({
-  selectedRecords: {
-    type: Array,
-    default: () => []
-  }
-})
-
-const emit = defineEmits(['update:selectedRecords'])
-
 // 创建本地数据副本
 const localRecords = ref([])
-// 监听 props 变化更新本地数据
-watch(() => props.selectedRecords, (record) => {
-  record = JSON.parse(JSON.stringify(record))
-  console.log('record', record)
-  // 将 record 对象加入到 localRecords.value 中
-  localRecords.value.push(record);
-  console.log('下单localRecords.value', localRecords.value)
-}, { immediate: true, deep: true })
-
-const copyPart = (index) => {
-  const newRecord = JSON.parse(JSON.stringify(localRecords.value[index]))
-  console.log('newRecord', newRecord)
-  localRecords.value.push(newRecord)
-  console.log('复制localRecords.value', localRecords.value)
-}
-
-const deletePart = (index) => {
-  localRecords.value.splice(index, 1)
-  console.log('localRecords.value', localRecords.value)
-}
-
 const showParameterDialog = ref(false) // 控制 ParameterInfo 对话框的显示与隐藏
 const selectedRecord = ref(null) // 用于存储当前选中的记录
 
-const openParameterDialog = (record) => {
-  selectedRecord.value = record; // 设置当前选中的记录
-  showParameterDialog.value = true; // 显示对话框
-}
-
-const handleParameterConfirm = (newParameters) => {
-  // 更新当前选中的记录的参数
-  Object.assign(selectedRecord.value, newParameters);
-  console.log('selectedRecord.value', newParameters.value)
-}
-
-onMounted(() => {
-  fetchPrices()
-})
-// 计算选中的零件数量
-const selectedRecordsCount = computed(() => {
-  return localRecords.value
-    .filter(record => record.selected)
-    .reduce((total, record) => total + record.quantity, 0)
-});
-
-// 计算选中的总价
-const selectedTotalPrice = computed(() => {
-  return localRecords.value
-    .filter(record => record.selected)
-    .reduce((total, record) => total + record.totalPrice, 0)
-    .toFixed(2); // 保留两位小数
-});
-
-//将被选中的数据存储在store中
-watch(localRecords.value, () => {
-  const selectedDatas = localRecords.value.filter(record => record.selected)
-  console.log('被选中的数据', selectedDatas)
-  if (selectedDatas.length > 0) {
-    try {
-      // 使用 store 存储数据
-      selectedDataStore.setSelectedData(selectedDatas)
-      fetchPrices()
-    } catch (error) {
-      console.error("存储数据时出错:", error)
-      alert('准备询价数据时出错，请稍后重试。')
-    }
-  }
-})
-const handleConfirm = async () => {
-  // 筛选出被选中的记录
-  const selectedDatas = localRecords.value.filter(record => record.selected)
-
-  if (selectedDatas.length > 0) {
-    try {
-      // 跳转到询价页面
-      router.push('/price-inquiry')
-    } catch (error) {
-      console.error("存储数据时出错:", error)
-      alert('准备询价数据时出错，请稍后重试。')
-    }
-  } else {
-    alert('请至少选择一个零件进行询价')
-  }
-}
-import axios from 'axios'
-import { ElMessage } from 'element-plus'
 
 const fetchPrices = async () => {
   const selectedDatas = selectedDataStore.getSelectedData();
@@ -327,6 +223,122 @@ const fetchPrices = async () => {
     ElMessage.error('获取价格信息失败，请检查网络连接');
   }
 };
+//将被选中的数据存储在store中
+watch(() => localRecords.value, () => {
+  const selectedDatas = localRecords.value.filter(record => record.selected)
+  console.log('被选中的数据', selectedDatas)
+  if (selectedDatas.length > 0) {
+    try {
+      // 使用 store 存储数据
+      selectedDataStore.setSelectedData(selectedDatas)
+      fetchPrices()
+    } catch (error) {
+      console.error("存储数据时出错:", error)
+      alert('准备询价数据时出错，请稍后重试。')
+    }
+  }
+}, { immediate: true, deep: true })
+// 新增：监听交期选项的变化
+watch(selectedDelivery, (newDeliveryOption) => {
+  console.log('交期选项已更改为:', selectedDelivery.value);
+  if(selectedDelivery.value === 'UD'){
+    localRecords.value.forEach(record => {
+    record.deliveryTypeCode = newDeliveryOption; 
+    record.EstimatedDeliveryTime = '5个工作日'
+  })
+  }else{
+    localRecords.value.forEach(record => {
+    record.deliveryTypeCode = newDeliveryOption; 
+    record.EstimatedDeliveryTime = "10个工作日"
+  })
+  }
+  const selectedDatas = selectedDataStore.getSelectedData()
+  selectedDatas.forEach(record => {
+    record.deliveryTypeCode = newDeliveryOption; 
+  });
+  selectedDataStore.setSelectedData(selectedDatas)
+  fetchPrices()
+});
+
+import ParameterInfo from './ParameterInfo.vue' // 引入 ParameterInfo 组件
+const props = defineProps({
+  selectedRecords: {
+    type: Array,
+    default: () => []
+  }
+})
+
+const emit = defineEmits(['update:selectedRecords'])
+
+// 监听 props 变化更新本地数据
+watch(() => props.selectedRecords, (record) => {
+  record = JSON.parse(JSON.stringify(record))
+  console.log('record', record)
+  // 将 record 对象加入到 localRecords.value 中
+  localRecords.value.push(record);
+  console.log('下单localRecords.value', localRecords.value)
+}, { immediate: true, deep: true })
+
+const copyPart = (index) => {
+  const newRecord = JSON.parse(JSON.stringify(localRecords.value[index]))
+  console.log('newRecord', newRecord)
+  localRecords.value.push(newRecord)
+  console.log('复制localRecords.value', localRecords.value)
+}
+
+const deletePart = (index) => {
+  localRecords.value.splice(index, 1)
+  console.log('localRecords.value', localRecords.value)
+}
+
+
+const openParameterDialog = (record) => {
+  selectedRecord.value = record; // 设置当前选中的记录
+  showParameterDialog.value = true; // 显示对话框
+}
+
+const handleParameterConfirm = (newParameters) => {
+  // 更新当前选中的记录的参数
+  Object.assign(selectedRecord.value, newParameters);
+  console.log('selectedRecord.value', newParameters.value)
+}
+
+onMounted(() => {
+  // fetchPrices()
+})
+// 计算选中的零件数量
+const selectedRecordsCount = computed(() => {
+  return localRecords.value
+    .filter(record => record.selected)
+    .reduce((total, record) => total + record.quantity, 0)
+});
+
+// 计算选中的总价
+const selectedTotalPrice = computed(() => {
+  return localRecords.value
+    .filter(record => record.selected)
+    .reduce((total, record) => total + record.totalPrice, 0)
+    .toFixed(2); // 保留两位小数
+});
+
+
+const handleConfirm = async () => {
+  // 筛选出被选中的记录
+  const selectedDatas = localRecords.value.filter(record => record.selected)
+  console.log('准备提交的数据:',selectedDatas)
+  if (selectedDatas.length > 0) {
+    try {
+      // 跳转到询价页面
+      router.push('/price-inquiry')
+    } catch (error) {
+      console.error("存储数据时出错:", error)
+      alert('准备询价数据时出错，请稍后重试。')
+    }
+  } else {
+    alert('请至少选择一个零件进行询价')
+  }
+}
+
 </script>
 
 <style lang="scss" scoped>

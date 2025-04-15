@@ -50,7 +50,7 @@ const props = defineProps({
     default: null
   }
 })
-const emit = defineEmits(['upload-success'])
+const emit = defineEmits(['update-history'])
 // 文件数量限制
 const fileLimit = 20
 
@@ -84,41 +84,37 @@ const handleBeforeUpload = (file) => {
     ElMessage.error(`不支持的文件格式: ${extension}`)
     return false
   }
-  const formData = new FormData();
-  formData.append('file', file); // 确保 file 是一个 File 对象
-  formData.append('process_type', props.processInfo?.type || '');
-
-  // 使用 axios 发送上传请求
-  axios.post('http://localhost:8000/api/upload/upload', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data'
-    }
-  })
+  const data = new FormData();
+  data.append('file', file); 
+  // 使用 axios 发送获取fileInfoAccessId请求
+  axios.post('http://localhost:8000/api/upload/uploadDrawFile', data)
   .then(response => {
-    handleUploadSuccess(response.data, file); // 调用 handleUploadSuccess 并传递响应数据
+      handleUploadSuccess(response.data, file); // 调用 handleUploadSuccess 并传递响应数据
   })
   return true
 }
-const fileInfoAccessId = ref('')
 
 const handleUploadSuccess = (response, file) => {
-  const data = new FormData();
-  data.append('file', file); 
+  console.log('handleUploadSuccess中的response:',response)
   if (response.success) {
-     // 使用 axios 发送获取fileInfoAccessId请求
-    axios.post('http://localhost:8000/api/upload/uploadDrawFile', data)
-    .then(response2 => {
-      if(response2.status === 200){
-        // console.log('response2',response2.data.data)
-        // fileInfoAccessId.value = response2.data.data[0].fileInfoAccessId
-        // axios.post(`http://localhost:8000/api/upload/get_analysis_result?data=${fileInfoAccessId.value}`)
-        // .then(response => {
-        //     console.log('分析结果:', response);
 
-        //   })
-      emit('upload-success', response2)
+    const formData = new FormData();
+    formData.append('file', file); // 确保 file 是一个 File 对象
+    formData.append('process_type', props.processInfo?.type || '');
+    console.log('fileInfoAccessId', response.data[0].fileInfoAccessId)
+    formData.append('fileInfoAccessId', response.data[0].fileInfoAccessId);
+     // 使用 axios 发送上传请求
+    axios.post('http://localhost:8000/api/upload/upload', formData, {
+      headers: {
+        'Content-Type': 'multipart/form-data'
+      }
+    })
+    .then(response => {
+      if(response.status === 200){
+        // 触发更新事件
+        emit('update-history')
+        ElMessage.success('上传成功')
     }})
-    ElMessage.success('上传成功')
   } else {
     ElMessage.error(response.detail || '上传失败')
   }

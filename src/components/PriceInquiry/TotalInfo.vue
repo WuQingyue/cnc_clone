@@ -6,11 +6,15 @@
         <div class="section-title">交期&快递</div>
         <div class="info-row">
           <span class="label">快递</span>
-          <span class="value">{{ expressName }}</span>
+          <span class="value">{{ selectedAddress?.postName }}</span>
         </div>
         <div class="info-row">
           <span class="label">预计发货时间：</span>
-          <span class="value">{{ estimatedDeliveryTime }}（以实际支付时间为准）</span>
+          <span class="value">{{ deliveryDate }}（以实际支付时间为准）</span>
+        </div>
+        <div class="info-row">
+          <span class="label">物流运输时间:</span>
+          <span class="value"> {{ShippingTime}} 个工作日</span>
         </div>
       </div>
 
@@ -22,8 +26,11 @@
           <span class="value">{{ orderItems.length }}款/{{ orderItems.reduce((total, item) => total + item.quantity, 0) }}件</span>
         </div>
         <div class="info-row">
-          <span class="label">运费(含税)</span>
+          <span class="label">运费</span>
           <span class="value">¥{{ shippingFee }}</span>
+          <el-tooltip content="`运费: ${price_E1.value}元 挂号费: ${price_E2.value}元`" placement="top" effect="dark">
+            <el-icon class="question-icon"><QuestionFilled /></el-icon>
+          </el-tooltip>
         </div>
         <div class="info-row">
           <span class="label">商品总额(含税)：</span>
@@ -40,7 +47,7 @@
       <!-- 第四部分：应付款 -->
       <div class="total-section">
         <span class="label bold">应付款（含税）：</span>
-        <span class="value price">¥{{ finalPrice }}</span>
+        <span class="value price">¥{{ shippingFee+orderItems.reduce((total, item) => total + item.totalPrice, 0) }}</span>
       </div>
 
       <el-divider class="divider" />
@@ -63,17 +70,33 @@ import { ref, defineProps, watch, onMounted } from 'vue'
 import { useRouter } from 'vue-router' // 引入 useRouter
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
-
+import { QuestionFilled } from '@element-plus/icons-vue'
+const shippingFee = ref(0)
+const ShippingTime = ref(0)
+const price_E1 = ref(0)
+const price_E2 = ref(0)
 const router = useRouter() // 获取 router 实例
 
-// 1. 定义 Props
 const props = defineProps({
   selectedDatas: {
     type: Array,
     required: true,
-    default: () => [] // 提供一个默认值，防止在数据未完全加载时出错
+    default: () => []
+  },
+  selectedAddress: {
+    type: Object,
+    default: null
   }
 })
+
+// 监听地址变化
+watch(() => props.selectedAddress, (newAddress) => {
+  if (newAddress) {
+    console.log('TotalInfo收到新的地址：', newAddress)
+    // 这里可以添加地址变化后的处理逻辑
+    fetchPrice()
+  }
+}, { immediate: true })
 
 const orderItems = ref([])
 watch(() => props.selectedDatas, (newValue) => {
@@ -91,17 +114,24 @@ const goBack = () => {
 }
 
 const priceResult = ref([])
-const fastestTime = ref({})
 const fetchPrice = async () => {
   try {
     const response = await axios.get('http://localhost:8000/api/logistics/price-trial', {
       params: {
-        country_code: 'US',
+        country_code: props.selectedAddress?.countryCode,
         weight: 1
       }
     })
     priceResult.value = response.data.result
     console.log('priceResult', priceResult.value)
+    const priceE1 = priceResult.value.find(price => price.product_name === props.selectedAddress?.postName && price.fee_name === 'E1')
+    console.log('E1的priceE1', priceE1)
+    const priceE2 = priceResult.value.find(price => price.product_name === props.selectedAddress?.postName && price.fee_name === 'E2')
+    console.log('E1的priceE2', priceE2)
+    shippingFee.value = priceE1.convert_amount + priceE2.convert_amount
+    ShippingTime.value = priceE2.interval_day
+    price_E1.value = priceE1.convert_amount 
+    price_E2.value = priceE2.convert_amount 
     ElMessage.success('获取价格信息成功')
   } catch (error) {
     console.error('请求失败:', error)
@@ -208,6 +238,15 @@ onMounted(() => {
   height: 40px;
   border: 1px solid #303133;
   color: #303133;
+}
+
+.question-icon {
+  margin-left: 5px;
+  color: #909399;
+}
+
+.question-icon:hover {
+  color: #409EFF;
 }
 
 :deep(.el-card__body) {

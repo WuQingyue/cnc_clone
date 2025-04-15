@@ -79,7 +79,7 @@
               type="primary"
               size="small"
               :disabled="scope.row.status !== 'success'"
-              @click="$emit('order', scope.row)"
+              @click="handleOrder(scope.row)"
             >
               下单
             </el-button>
@@ -108,7 +108,7 @@
 
 <script setup>
 import { Refresh, PictureFilled, Document } from '@element-plus/icons-vue'
-
+import { ref } from 'vue'
 // 定义props
 const props = defineProps({
   historyData: {
@@ -119,7 +119,7 @@ const props = defineProps({
 })
 
 // 定义事件
-const emit = defineEmits(['refresh', 'order', 'delete'])
+const emit = defineEmits(['refresh', 'fileInfoAccessId', 'delete'])
 
 // 格式化文件大小
 const formatFileSize = (bytes) => {
@@ -129,8 +129,37 @@ const formatFileSize = (bytes) => {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`
 }
+import axios from 'axios'
+const fileInfoAccessId = ref('')
+// 处理下单点击事件
+const handleOrder = async (row) => {
+  console.log('row:', row)
+  // 发送请求到后端查询数据
+  const response = await axios.get(`http://localhost:8000/api/upload/get_file_info/${row.id}`)
+  console.log('fileInfoAccessId:', response.data)
 
+  fileInfoAccessId.value = response.data
+  axios.post(`http://localhost:8000/api/upload/get_analysis_result?data=${fileInfoAccessId.value}`)
+  .then(response => {
+      // 发射事件，将数据传递给父组件
+      emit('fileInfo', { fileInfoAccessId: fileInfoAccessId.value, 
+      productModelAccessId:response.data.data.productModelAccessId,
+      sizeX:response.data.data.sizeX,
+      sizeY:response.data.data.sizeY,
+      sizeZ:response.data.data.sizeZ,
+      modelVolume:response.data.data.modelVolume,
+      modelSurfaceArea:response.data.data.modelSurfaceArea,
+      file_name: row.file_name  // 添加文件名
+    })
+    })
+}
 
+import { watch } from 'vue'
+
+// 监听historyData的变化
+watch(() => props.historyData, (newVal) => {
+  console.log('历史记录已更新:', newVal)
+}, { deep: true })
 </script>
 
 <style scoped>

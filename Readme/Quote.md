@@ -27,8 +27,9 @@ src
 │   │   ├── processList.js # 加工工艺列表
 │   │   ├── AutomationTool.js # 自动化工具参数
 │   │   ├── ParameterInfo.vue # 参数信息弹出框
+
 ├── views
-│   ├── CustomerGuidance.vue  #包含所有组件的视图
+│   ├── OnlineQuote.vue  #包含所有组件的视图
 ├── router
 │   └── index.js # 路由
 Readme

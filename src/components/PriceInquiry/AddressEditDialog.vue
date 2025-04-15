@@ -92,6 +92,12 @@
               placeholder="请选择城市"
               @change="handleCityChange"
             />
+            <el-cascader
+              v-model="addressForm.region.postCode"
+              :options="postCodeOptions"
+              placeholder="请选择邮编"
+              @change="handlePostCodeChange"
+            />
           </div>
         </el-form-item>
         
@@ -141,7 +147,8 @@ export default {
         postway: '',
         country: '',
         province: '',
-        city: ''
+        city: '',
+        postCode:''
       },
       detail: ''
     })
@@ -153,6 +160,7 @@ export default {
       'region.country': [{ required: true, message: '请选择收件国家', trigger: 'change' }],
       'region.province': [{ required: true, message: '请选择州/省', trigger: 'change' }],
       'region.city': [{ required: true, message: '请选择城市', trigger: 'change' }],
+      'region.postCode': [{ required: true, message: '请选择邮编', trigger: 'change' }],
       detail: [{ required: true, message: '请输入详细地址', trigger: 'blur' }]
     }
     
@@ -163,7 +171,8 @@ export default {
       provinceName: '',
       cityName: '',
       detail: '',
-      postCode:''
+      postCode:'',
+      postName:''
     })
     const productGroupsList = ref(
       productList[0].Entity.map(productGroup =>({
@@ -183,6 +192,8 @@ export default {
         label: country.CountryCNname
       }))
       regionDetail.value.postway = value[0]
+      const productGroup = productGroupsList.value.find(productGroup => productGroup.value === value[0])
+      regionDetail.value.postName = productGroup.label
       console.log('value[0]',value[0])
       console.log('productGroupsList.value',productGroupsList.value)
       const country = productGroupsList.value.find(country => country.value === value[0])
@@ -226,10 +237,30 @@ export default {
       // regionDetail.value.cityName = city.value
       console.log('regionDetail',regionDetail.value)
     }
+    const postCodeOptions = ref([])
     const handleCityChange = async (value) => {
       regionDetail.value.cityName = value[0]
+      const response = await axios.get('http://localhost:8000/api/logistics/get_postcode', {
+            params: { country: regionDetail.value.countryCode,region1:regionDetail.value.provinceName,region2:regionDetail.value.cityName },
+          })
+      console.log('response',response)
+      postCodeOptions.value = response.data.Data.map(postcode =>({
+        value:postcode,
+        label: postcode
+      }))
+      console.log('postCodeOptions',postCodeOptions.value)
       console.log('regionDetail',regionDetail.value)
       }
+    const handlePostCodeChange = async (value) => {
+    regionDetail.value.postCode = value[0]
+    console.log('regionDetail',regionDetail.value)
+    }
+    
+    watch(() => addressForm.value.detail, (val) => {
+      regionDetail.value.detail = val
+      console.log('regionDetail',regionDetail.value)
+    })
+
     watch(() => props.visible, (val) => {
       dialogVisible.value = val
     })
@@ -270,14 +301,17 @@ export default {
       
       await addressFormRef.value.validate((valid) => {
         if (valid) {
-          const { postway, country, province, city } = addressForm.value.region;
-          const fullRegion = [postway, country, province, city].filter(Boolean).join(' ');
+          // const { postway, country, province, city } = addressForm.value.region;
+          // const fullRegion = [postway, country, province, city].filter(Boolean).join(' ');
 
           const address = { 
             ...addressForm.value,
-            fullAddress: fullRegion + ' ' + addressForm.value.detail,
+            // fullAddress: fullRegion + ' ' + addressForm.value.detail,
+            fullAddress: regionDetail.value.detail + ' ' + regionDetail.value.cityName+ ','+regionDetail.value.provinceName + ' '+ regionDetail.value.postCode + ' '+regionDetail.value.countryCode,
             isDefault: savedAddresses.value.length === 0,
-            isUsing: savedAddresses.value.length === 0
+            isUsing: savedAddresses.value.length === 0,
+            postName: regionDetail.value.postName,
+            countryCode:regionDetail.value.countryCode
           }
           savedAddresses.value.push(address)
           showForm.value = false
@@ -304,6 +338,7 @@ export default {
       countryOptions,
       provinceOptions,
       cityOptions,
+      postCodeOptions,
       rules,
       showAddForm,
       saveAddress,
@@ -314,6 +349,7 @@ export default {
       handleCountryChange,
       handleProvinceChange,
       handleCityChange,
+      handlePostCodeChange,
       regionDetail
     }
   }

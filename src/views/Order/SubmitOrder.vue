@@ -5,8 +5,7 @@
         <div class="success-header">
           <el-icon class="success-icon"><CircleCheckFilled /></el-icon>
           <div class="success-text">
-            <h2>提交成功</h2>
-            <p>您的订单已提交成功，我们会尽快为您审核</p>
+            <h2>订单下单成功，等待审核中</h2>
           </div>
         </div>
   
@@ -36,9 +35,13 @@
             <span>温馨提示</span>
           </div>
           <div class="notice-content">
-            <p>1. 订单提交后，请等待客服审核，审核通过后可进行支付；</p>
-            <p>2. 您可以在订单中心查看订单进度；</p>
-            <p>3. 如有疑问，请联系在线客服。</p>
+            <p>1. 您的订单预计将在1~3小时审核完成。您可前往 [CNC订单] 查看审核结果。为避免耽误您的交期，请第一时间确认订单并支付；</p>
+            <p><strong class="title">2. 审单处理时间：</strong></p>
+            <p>周一至周六： 上午9:00 - 12:00 下午:13:30 - 18:00</p>
+            <p>法定节假日审单时间另行通告。</p>
+            <p><strong class="title">3. 生产安排时间</strong></p>
+            <p>19:00前支付，当天开始计算交期并安排排单</p>
+            <p>19:00后支付，次日开始计算交期</p>
           </div>
         </div>
   
@@ -189,9 +192,16 @@
   }
   
   .notice-content {
-    color: #606266;
-    font-size: 14px;
-    line-height: 1.8;
+    .title {
+    color: #000;  /* 设置为黑色 */
+    font-weight: bold;  /* 设置为粗体 */
+    font-size: 14px;  /* 可以根据需要调整字体大小 */
+  }
+  
+  p {
+    margin-bottom: 8px;  /* 添加段落间距 */
+    line-height: 1.5;  /* 设置行高 */
+  }
   }
   
   .notice-content p {

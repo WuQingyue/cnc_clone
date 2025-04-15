@@ -53,7 +53,7 @@
                   <span class="label">下单联系人：</span>
                   <span class="value" :class="{ 'hidden': orderContactHidden }">
                     {{ selectedContact.orderName }} {{ selectedContact.orderPhone }}
-                  </span>
+                 </span>
                   <el-icon class="hide-icon" @click="orderContactHidden = !orderContactHidden">
                     <Hide v-if="!orderContactHidden" />
                     <View v-else />
@@ -136,7 +136,8 @@
       AddressEditDialog,
       ContactEditDialog
     },
-    setup() {
+    emits: ['address-selected'], // 添加emit
+    setup(props, { emit }) {  // 添加emit参数
       const deliveryForm = ref({
         address: {
           region: [],
@@ -199,11 +200,13 @@
   
       const handleAddressSelected = (address) => {
         selectedAddress.value = address
+        console.log('收货地址：',selectedAddress.value)
         addressDialogVisible.value = false
         // 重置隐藏状态
         addressHidden.value = false
         contactHidden.value = false
         phoneHidden.value = false
+        emit('address-selected', address)
       }
   
       const handleContactSelected = (contact) => {

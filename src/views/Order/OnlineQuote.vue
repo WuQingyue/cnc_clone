@@ -19,15 +19,16 @@
       </div>
       <file-uploader 
         :process-info="currentProcess"
-        @upload-success="handleUploadSuccess"
+        @update-history="handleUpdateHistory"
       />
+    
     </div>
 
     <!-- 历史记录组件 -->
     <history-list
       :history-data="historyData"
       @refresh="fetchHistory(currentProcess?.type)"
-      @order="handleOrder"
+      @fileInfo="handleOrder"
       @delete="handleDelete"
     />
 
@@ -51,8 +52,7 @@ const currentProcess = ref(null)
 const historyData = ref([])
 const isOrdering = ref(false) // 控制是否显示 FileList 组件
 const selectedRecords = ref({}) // 存储选中的记录
-const guidanceVisible = ref(false) // 初始化为 false
-const activeIndex = ref(0) // 初始化为 0
+
 
 const fetchHistory = async (processType) => {
   if (!processType) return
@@ -71,94 +71,73 @@ const fetchHistory = async (processType) => {
   }
 }
 
-const handleProcessChange = async (process) => {
-  currentProcess.value = process
-  fetchHistory(process.type)
-}
-const fileInfoAccessId = ref('')
-const productModelAccessId = ref('')
-const sizeX = ref('')
-const sizeY = ref('')
-const sizeZ = ref('')
-const modelVolume = ref('')
-const modelSurfaceArea = ref('')
-const handleOrder = (record) => {
+const handleOrder = ({fileInfoAccessId, 
+      productModelAccessId,
+      sizeX,
+      sizeY,
+      sizeZ,
+      modelVolume,
+      modelSurfaceArea,
+      file_name}) => {
+  console.log('productModelAccessId', productModelAccessId)
   isOrdering.value = true // 设置为 true 以显示 FileList 组件
-  record.selected = true
-  record.remarks = '' // 备注
-  record.quantity = 1 // 数量
-  record.material = '铝合金-6061' // 材料
-  record.surfaceTreatment = 'none' // 表面处理
-  record.tolerance = tolerance.type
-  record.toleranceAccessId = tolerance.toleranceAccessId
-  record.roughness = roughness.type
-  record.roughnessAccessId = roughness.roughnessAccessId
-  record.selectedTreatment = ''
-  record.selectedColor = ''
-  record.glossiness = ''
-  record.uploadedFileName = ''
-  record.selectedTreatment2 = ''
-  record.selectedColor2 = ''
-  record.glossiness2 = ''
-  record.uploadedFileName2 = ''
-  record.quantity = 1
-  record.hasThread = false
-  record.hasAssembly = false
-  record.materialAccessId = '0d8a7a799a574b02822e67c48b57bee0'
-  record.craftAccessId1 = ''
-  record.craftAttributeColorAccessIds1 = ''
-  record.craftAttributeGlossinessAccessIds1 = ''
-  record.craftAttributeFileAccessIds1 = ''
-  record.craftAccessId2 = ''
-  record.craftAttributeColorAccessIds2 = ''
-  record.craftAttributeGlossinessAccessIds2 = ''
-  record.craftAttributeFileAccessIds2 = ''
-  record.materialCost = 0
-  record.engineeringCost = 0
-  record.clampingCost = 0
-  record.processingCost = 0
-  record.surfaceCost = 0
-  record.expeditedPrice = 0
-  record.pricePerUnit = 0
-  record.totalPrice = 0
-  record.deliveryTypeCode = 'BD'
-  record.categoryName = '铝合金'
-  record.getSurfaceTreatmentLabel = '表面不做处理'
+  // 设置记录的其他属性
+  const record = {
+    selected: true,
+    fileName:file_name,
+    remarks: '',
+    quantity: 1,
+    material: '铝合金-6061',
+    surfaceTreatment: 'none',
+    tolerance: tolerance.type,
+    toleranceAccessId: tolerance.toleranceAccessId,
+    roughness: roughness.type,
+    roughnessAccessId: roughness.roughnessAccessId,
+    selectedTreatment: '',
+    selectedColor: '',
+    glossiness: '',
+    uploadedFileName: '',
+    selectedTreatment2: '',
+    selectedColor2: '',
+    glossiness2: '',
+    uploadedFileName2: '',
+    hasThread: false,
+    hasAssembly: false,
+    materialAccessId: '0d8a7a799a574b02822e67c48b57bee0',
+    craftAccessId1: '',
+    craftAttributeColorAccessIds1: '',
+    craftAttributeGlossinessAccessIds1: '',
+    craftAttributeFileAccessIds1: '',
+    craftAccessId2: '',
+    craftAttributeColorAccessIds2: '',
+    craftAttributeGlossinessAccessIds2: '',
+    craftAttributeFileAccessIds2: '',
+    materialCost: 0,
+    engineeringCost: 0,
+    clampingCost: 0,
+    processingCost: 0,
+    surfaceCost: 0,
+    expeditedPrice: 0,
+    pricePerUnit: 0,
+    totalPrice: 0,
+    deliveryTypeCode: 'BD',
+    categoryName: '铝合金',
+    getSurfaceTreatmentLabel: '表面不做处理',
+    fileInfoAccessId: fileInfoAccessId,
+    productModelAccessId: productModelAccessId,
+    sizeX: sizeX,
+    sizeY: sizeY,
+    sizeZ: sizeZ,
+    modelVolume:modelVolume,
+    modelSurfaceArea: modelSurfaceArea,
+    EstimatedDeliveryTime:'10个工作日'
+  }
   selectedRecords.value = record
-  record.fileInfoAccessId = fileInfoAccessId.value
-  record.productModelAccessId = productModelAccessId.value
-  record.sizeX = sizeX.value
-  record.sizeY = sizeY.value
-  record.sizeZ = sizeZ.value
-  record.modelVolume = modelVolume.value
-  record.modelSurfaceArea = modelSurfaceArea.value
   console.log('selectedRecords.value', selectedRecords.value)
 }
 
 const handleDelete = async (id) => {
   console.log('删除:', id)
-}
-
-const handleUploadSuccess = (response) => {
-  fileInfoAccessId.value = response.data.data[0].fileInfoAccessId
-  console.log('fileInfoAccessId', fileInfoAccessId.value)
-  axios.post(`http://localhost:8000/api/upload/get_analysis_result?data=${fileInfoAccessId.value}`)
-  .then(response => {
-      productModelAccessId.value = response.data.data.productModelAccessId
-      sizeX.value = response.data.data.sizeX
-      sizeY.value = response.data.data.sizeY
-      sizeZ.value = response.data.data.sizeZ
-      modelVolume.value = response.data.data.modelVolume
-      modelSurfaceArea.value =response.data.data.modelSurfaceArea
-    })
-  if (currentProcess.value?.type) {
-    fetchHistory(currentProcess.value.type)
-  }
-}
-
-const showGuidance = (index = 0) => {
-  activeIndex.value = index
-  guidanceVisible.value = true // 设置为 true 以显示对话框
 }
 
 onMounted(() => {
@@ -184,6 +163,10 @@ const openGuidanceSecret = () => {
   guidanceRef.value?.openDialog()
   // 切换到保密协议
   guidanceRef.value?.switchComponent('SecretGuidance')
+}
+
+const handleUpdateHistory = () => {
+    fetchHistory('cnc')
 }
 </script>
 

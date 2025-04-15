@@ -7,7 +7,7 @@
       <div class="main-content">
         <!-- 左侧表单区域 -->
         <div class="form-section">
-          <DeliveryInfo />
+          <DeliveryInfo  @address-selected="handleAddressSelected"/>
           <!-- <ExpressInfo /> -->
           <OrderInfo :selectedDatas="selectedDatas"/>
           <InvoiceInfo />
@@ -16,7 +16,10 @@
         
         <!-- 右侧统计信息 -->
         <div class="total-section">
-          <TotalInfo :selectedDatas="selectedDatas" /> <!-- 传递选中的记录 -->
+          <TotalInfo 
+          :selectedDatas="selectedDatas"
+          :selectedAddress="selectedAddress"
+           /> <!-- 传递选中的记录 -->
         </div>
       </div>
     </div>
@@ -30,7 +33,7 @@ import OrderInfo from '@/components/PriceInquiry/OrderInfo.vue'
 import InvoiceInfo from '@/components/PriceInquiry/InvoiceInfo.vue'
 import OtherInfo from '@/components/PriceInquiry/OtherInfo.vue'
 import TotalInfo from '@/components/PriceInquiry/TotalInfo.vue'
-import { onMounted, onUnmounted, computed } from 'vue'
+import { ref,onMounted, onUnmounted, computed } from 'vue'
 import { useSelectedDataStore } from '@/store/PriceInquiryDatas'
 
 // 获取 store 实例
@@ -39,6 +42,14 @@ const selectedDataStore = useSelectedDataStore()
 // 使用计算属性获取数据
 const selectedDatas = computed(() => selectedDataStore.getSelectedData())
 
+// 添加选中地址的响应式引用
+const selectedAddress = ref(null)
+
+// 处理地址选择
+const handleAddressSelected = (address) => {
+  selectedAddress.value = address
+  console.log('选中的地址：', address)
+}
 onUnmounted(() => {
   // 如果需要，可以在组件卸载时清除数据
   // selectedDataStore.clearSelectedData()

@@ -37,7 +37,10 @@
             <el-table-column label="文件信息" width="180">
               <template #default="scope">
                 <div class="file-info">
-                  <div class="file-name">{{ scope.row.file_name }}</div>
+                  <div class="file-name">{{ scope.row.fileName }}</div>
+                  <div class="file-name">尺寸:{{ scope.row.sizeX }} * {{ scope.row.sizeY }} * {{ scope.row.sizeZ }} </div>
+                  <div class="file-name">体积:{{ scope.row.modelVolume }}</div>
+                  <div class="file-name">表面积:{{ scope.row.modelSurfaceArea }}</div>
                 </div>
               </template>
             </el-table-column>
@@ -53,7 +56,7 @@
 
             <el-table-column label="预计交期" width="80" align="center">
               <template #default="scope">
-                <div>{{ scope.row.deliveryTime }}</div>
+                <div>{{ scope.row.EstimatedDeliveryTime }}</div>
               </template>
             </el-table-column>
 
