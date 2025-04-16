@@ -223,21 +223,6 @@ const fetchPrices = async () => {
     ElMessage.error('获取价格信息失败，请检查网络连接');
   }
 };
-//将被选中的数据存储在store中
-watch(() => localRecords.value, () => {
-  const selectedDatas = localRecords.value.filter(record => record.selected)
-  console.log('被选中的数据', selectedDatas)
-  if (selectedDatas.length > 0) {
-    try {
-      // 使用 store 存储数据
-      selectedDataStore.setSelectedData(selectedDatas)
-      fetchPrices()
-    } catch (error) {
-      console.error("存储数据时出错:", error)
-      alert('准备询价数据时出错，请稍后重试。')
-    }
-  }
-}, { immediate: true, deep: true })
 // 新增：监听交期选项的变化
 watch(selectedDelivery, (newDeliveryOption) => {
   console.log('交期选项已更改为:', selectedDelivery.value);
@@ -277,6 +262,18 @@ watch(() => props.selectedRecords, (record) => {
   // 将 record 对象加入到 localRecords.value 中
   localRecords.value.push(record);
   console.log('下单localRecords.value', localRecords.value)
+  const selectedDatas = localRecords.value.filter(record => record.selected)
+  console.log('被选中的数据', selectedDatas)
+  if (selectedDatas.length > 0) {
+    try {
+      // 使用 store 存储数据
+      selectedDataStore.setSelectedData(selectedDatas)
+      fetchPrices()
+    } catch (error) {
+      console.error("存储数据时出错:", error)
+      alert('准备询价数据时出错，请稍后重试。')
+    }
+  }
 }, { immediate: true, deep: true })
 
 const copyPart = (index) => {
@@ -300,7 +297,7 @@ const openParameterDialog = (record) => {
 const handleParameterConfirm = (newParameters) => {
   // 更新当前选中的记录的参数
   Object.assign(selectedRecord.value, newParameters);
-  console.log('selectedRecord.value', newParameters.value)
+  console.log('selectedRecord.value', newParameters)
 }
 
 onMounted(() => {

@@ -66,7 +66,7 @@
 </template>
 
 <script setup>
-import { ref, defineProps, watch, onMounted } from 'vue'
+import { ref, defineProps, watch, onMounted,computed } from 'vue'
 import { useRouter } from 'vue-router' // 引入 useRouter
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
@@ -76,12 +76,11 @@ const ShippingTime = ref(0)
 const price_E1 = ref(0)
 const price_E2 = ref(0)
 const router = useRouter() // 获取 router 实例
-
+import { useSelectedDataStore } from '@/store/PriceInquiryDatas'
 const props = defineProps({
   selectedDatas: {
     type: Array,
-    required: true,
-    default: () => []
+    required: true
   },
   selectedAddress: {
     type: Object,
@@ -104,7 +103,45 @@ watch(() => props.selectedDatas, (newValue) => {
 }, { immediate: true })
 
 // 提交订单方法
-const submitOrder = () => {
+const submitOrder = async () => {
+  console.log('props.selectedDatas:',props.selectedDatas)
+  const formData = props.selectedDatas.map(selectedData => ({
+    "order_no": "123456789",
+    "user_email": "3@q.com",
+    "material_cost": selectedData.materialCost,
+    "engineering_cost": selectedData.engineeringCost,
+    "clamping_cost": selectedData.clampingCost,
+    "processing_cost": selectedData.processingCost,
+    "surface_cost": selectedData.surfaceCost,
+    "unit_price": selectedData.pricePerUnit,
+    "total_price": selectedData.totalPrice,
+    "material": selectedData.material,
+    "surface_treatment": selectedData.surfaceTreatment === 0 ? "none" : true,
+    "treatment1_option": selectedData.selectedTreatment,
+    "treatment1_color": selectedData.selectedColor,
+    "treatment1_gloss": selectedData.glossiness,
+    "treatment1_drawing": selectedData.uploadedFileName,
+    "treatment2_option": selectedData.selectedTreatment2,
+    "treatment2_color": selectedData.selectedColor2,
+    "treatment2_gloss": selectedData.glossiness2,
+    "treatment2_drawing": selectedData.uploadedFileName2,
+    "quantity": selectedData.quantity,
+    "tolerance": selectedData.tolerance,
+    "roughness": selectedData.roughness,
+    "has_thread": selectedData.hasThread === "false" ? 0 : 1 ,
+    "has_assembly": selectedData.hasAssembly === "false" ? 0 : 1
+}));
+  console.log('formData',formData)
+
+  const response = await fetch('http://localhost:8000/api/orders/orders', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  credentials: 'include', // equivalent to withCredentials: true
+  body: JSON.stringify(formData)
+});
+  console.log('response:',response)
   router.push('/submitOrderSuccess') // 使用 router 实例进行跳转
 }
 
