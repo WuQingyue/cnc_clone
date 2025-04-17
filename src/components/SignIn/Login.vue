@@ -106,9 +106,10 @@ const handleEmailLogin = async () => {
     loading.value = true
 
     // // 检查是否是管理员账号
-    // if (form.email === 'admin@tongtron.com' && form.password === 'admin') {
+    // if (form.email === 'admin@tongtron.com') {
     //   // 在新标签页打开管理员界面
-    //   window.open('/admin', '_blank', 'noopener,noreferrer');
+    //   console.log('管理员账号登录',form)
+    //   // userStore.setUser(userData)
     //   return
     // }
 

@@ -82,7 +82,7 @@ const userStore = useUserStore()
 const { user } = storeToRefs(userStore)
 
 const orders = [
-    { text: 'CNC订单', link: '/order1',icon: require('@/assets/images/CNC订单.png') },
+    { text: 'CNC订单', link: '/cnc_order',icon: require('@/assets/images/CNC订单.png') },
     { text: '钣金订单', link: '/order2',icon: require('@/assets/images/钣金订单.png') },
     { text: '复模订单', link: '/order3',icon: require('@/assets/images/复模订单.png') }
 ]

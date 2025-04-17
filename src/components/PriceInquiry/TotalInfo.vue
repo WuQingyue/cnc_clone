@@ -102,35 +102,60 @@ watch(() => props.selectedDatas, (newValue) => {
   orderItems.value=newValue
 }, { immediate: true })
 
+//生成订单编号
+const orderNumber = ref('')
+// 生成8位随机数
+const generateRandomNumber = () => {
+  return Math.floor(10000000 + Math.random() * 90000000)
+}
+
+// 获取当前日期
+const getCurrentDate = () => {
+  const now = new Date()
+  const day = now.getDate().toString().padStart(2, '0')
+  const month = (now.getMonth() + 1).toString().padStart(2, '0')
+  const year = now.getFullYear().toString().slice(-2)
+  return `${day}${month}${year}`
+}
+
+// 生成订单编号
+const generateOrderNumber = () => {
+  const date = getCurrentDate()
+  const randomNumber = generateRandomNumber()
+  orderNumber.value = `US-SC-${date}-${randomNumber}`
+}
 // 提交订单方法
 const submitOrder = async () => {
   console.log('props.selectedDatas:',props.selectedDatas)
-  const formData = props.selectedDatas.map(selectedData => ({
-    "order_no": "123456789",
-    "user_email": "3@q.com",
-    "material_cost": selectedData.materialCost,
-    "engineering_cost": selectedData.engineeringCost,
-    "clamping_cost": selectedData.clampingCost,
-    "processing_cost": selectedData.processingCost,
-    "surface_cost": selectedData.surfaceCost,
-    "unit_price": selectedData.pricePerUnit,
-    "total_price": selectedData.totalPrice,
-    "material": selectedData.material,
-    "surface_treatment": selectedData.surfaceTreatment === 0 ? "none" : true,
-    "treatment1_option": selectedData.selectedTreatment,
-    "treatment1_color": selectedData.selectedColor,
-    "treatment1_gloss": selectedData.glossiness,
-    "treatment1_drawing": selectedData.uploadedFileName,
-    "treatment2_option": selectedData.selectedTreatment2,
-    "treatment2_color": selectedData.selectedColor2,
-    "treatment2_gloss": selectedData.glossiness2,
-    "treatment2_drawing": selectedData.uploadedFileName2,
-    "quantity": selectedData.quantity,
-    "tolerance": selectedData.tolerance,
-    "roughness": selectedData.roughness,
-    "has_thread": selectedData.hasThread === "false" ? 0 : 1 ,
-    "has_assembly": selectedData.hasAssembly === "false" ? 0 : 1
-}));
+  const formData = props.selectedDatas.map(selectedData =>{
+    const orderNo = generateOrderNumber()
+    return {
+      "order_no": orderNo,
+      "user_email": "3@q.com",
+      "material_cost": selectedData.materialCost,
+      "engineering_cost": selectedData.engineeringCost,
+      "clamping_cost": selectedData.clampingCost,
+      "processing_cost": selectedData.processingCost,
+      "surface_cost": selectedData.surfaceCost,
+      "unit_price": selectedData.pricePerUnit,
+      "total_price": selectedData.totalPrice,
+      "material": selectedData.material,
+      "surface_treatment": selectedData.surfaceTreatment === 0 ? "none" : true,
+      "treatment1_option": selectedData.selectedTreatment,
+      "treatment1_color": selectedData.selectedColor,
+      "treatment1_gloss": selectedData.glossiness,
+      "treatment1_drawing": selectedData.uploadedFileName,
+      "treatment2_option": selectedData.selectedTreatment2,
+      "treatment2_color": selectedData.selectedColor2,
+      "treatment2_gloss": selectedData.glossiness2,
+      "treatment2_drawing": selectedData.uploadedFileName2,
+      "quantity": selectedData.quantity,
+      "tolerance": selectedData.tolerance,
+      "roughness": selectedData.roughness,
+      "has_thread": selectedData.hasThread === "false" ? 0 : 1 ,
+      "has_assembly": selectedData.hasAssembly === "false" ? 0 : 1
+    }
+  })
   console.log('formData',formData)
 
   const response = await fetch('http://localhost:8000/api/orders/orders', {
@@ -142,7 +167,18 @@ const submitOrder = async () => {
   body: JSON.stringify(formData)
 });
   console.log('response:',response)
-  router.push('/submitOrderSuccess') // 使用 router 实例进行跳转
+  if (response.ok) {
+      const orderNos = formData.map(item => item.order_no); // 获取所有的 order_no
+      router.push({
+        name: 'submitOrderSuccess',
+        query: {
+          orderNos: orderNos.join(',') // 将 order_no 数组转换为逗号分隔的字符串
+        }
+      });
+    } else {
+      console.error('提交订单失败:', response.statusText);
+      ElMessage.error('提交订单失败，请稍后重试');
+    }
 }
 
 // 返回上一步方法
@@ -175,9 +211,7 @@ const fetchPrice = async () => {
     ElMessage.error('获取价格信息失败')
   }
 }
-onMounted(() => {
-  fetchPrice()
-})
+
 </script>
 
 <style scoped>

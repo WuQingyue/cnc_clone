@@ -1,28 +1,35 @@
 <template>
   <div id="app">
-    <!-- 顶部导航栏 -->
-    <nav-header />
+    <!-- 管理员界面 -->
+    <Admin v-if="userStore.checkIsAdmin()" />
+    
+    <!-- 普通用户界面 -->
+    <div v-else>
+      <!-- 顶部导航栏 -->
+      <nav-header />
 
-    <!-- 路由视图 -->
-    <router-view v-slot="{ Component }">
-      <transition name="fade" mode="out-in">
-        <component :is="Component" />
-      </transition>
-    </router-view>
+      <!-- 路由视图 -->
+      <router-view v-slot="{ Component }">
+        <transition name="fade" mode="out-in">
+          <component :is="Component" />
+        </transition>
+      </router-view>
 
-    <!-- 页脚 -->
-    <nav-footer />
+      <!-- 页脚 -->
+      <nav-footer />
+    </div>
   </div>
 </template>
 
 <script setup>
-import { watch, onMounted } from 'vue'
+import { ref,watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
 import NavHeader from '@/components/NavHeader/NavHeader.vue'
 import NavFooter from '@/components/Footer.vue'
+import Admin from '@/views/Admin/Admin.vue'
 
 const route = useRoute()
 const router = useRouter()
@@ -35,17 +42,14 @@ onMounted(() => {
   if (savedUser) {
     try {
       const userData = JSON.parse(savedUser)
-      userStore.setUser(userData)
       console.log('已从本地存储恢复用户信息:', userData)
     } catch (error) {
       console.error('解析本地存储的用户信息失败:', error)
       localStorage.removeItem('user')
       userStore.clearUser()
     }
-  }
+  } 
 })
-
-
 // 监听路由变化
 watch(
   () => route.query,
@@ -73,7 +77,6 @@ watch(
 
         if (response.data) {
           // 保存用户信息到 localStorage
-        
           localStorage.setItem('userInfo', JSON.stringify(response.data))
           // 保存用户信息到 store
           userStore.setUser(response.data)

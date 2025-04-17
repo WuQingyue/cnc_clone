@@ -137,7 +137,7 @@ const selectedDelivery = ref('BD')
 // 创建本地数据副本
 const localRecords = ref([])
 const showParameterDialog = ref(false) // 控制 ParameterInfo 对话框的显示与隐藏
-const selectedRecord = ref(null) // 用于存储当前选中的记录
+const selectedRecord = ref(null) // 用于存储当前选中的需要修改参数的记录
 
 
 const fetchPrices = async () => {
@@ -264,6 +264,7 @@ watch(() => props.selectedRecords, (record) => {
   console.log('下单localRecords.value', localRecords.value)
   const selectedDatas = localRecords.value.filter(record => record.selected)
   console.log('被选中的数据', selectedDatas)
+  // selectedDataStore.setSelectedData(selectedDatas)
   if (selectedDatas.length > 0) {
     try {
       // 使用 store 存储数据
@@ -297,7 +298,7 @@ const openParameterDialog = (record) => {
 const handleParameterConfirm = (newParameters) => {
   // 更新当前选中的记录的参数
   Object.assign(selectedRecord.value, newParameters);
-  console.log('selectedRecord.value', newParameters)
+  console.log('修改参数后的selectedRecord.value', selectedRecord.value)
 }
 
 onMounted(() => {

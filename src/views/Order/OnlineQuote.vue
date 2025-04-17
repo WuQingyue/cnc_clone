@@ -133,7 +133,7 @@ const handleOrder = ({fileInfoAccessId,
     EstimatedDeliveryTime:'10个工作日'
   }
   selectedRecords.value = record
-  console.log('selectedRecords.value', selectedRecords.value)
+  console.log('OnlineQuote组件的selectedRecords.value', selectedRecords.value)
 }
 
 const handleDelete = async (id) => {
