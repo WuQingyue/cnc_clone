@@ -86,7 +86,7 @@
           <el-button
             link
             type="primary"
-            @click="openShippingDialog(scope.row.order_no, scope.row.shipping_cost)"
+            @click="openShippingDialog(scope.row)"
           >
             查看详情
           </el-button>
@@ -127,8 +127,7 @@
     <!-- 运费对话框 -->
     <shipping-dialog
       v-model:visible="shippingDialogVisible"
-      :order-no="selectedShippingOrderNo"
-      :shipping-cost="selectedShippingCost"
+      :ship-data="selectedShipping"
     />
   </div>
 </template>
@@ -139,7 +138,7 @@ import { useRouter } from 'vue-router' // 引入 Vue Router
 import { ElMessage } from 'element-plus'
 import ModelInfoDialog from '@/components/SignIn/ModelInfoDialog.vue'
 import AmountDialog from '@/components/SignIn/AmountDialog.vue'
-import ShippingDialog from '@/components/Order/ShippingCostDialog.vue' // 引入运费对话框组件
+import ShippingDialog from '@/components/SignIn/ShippingDialog.vue' // 引入运费对话框组件
 import { EventBus,EventBus_message } from '@/components/SignIn/eventBus.js';
 // 数据状态
 const searchQuery = ref('')
@@ -151,7 +150,8 @@ const modelInfoDialogVisible = ref(false)
 const amountDialogVisible = ref(false)
 const selectedModel = ref(null)
 const selectedAmount = ref(null)
-
+const selectedShipping = ref('')
+const shippingDialogVisible = ref(false)
 // 使用 Vue Router
 const router = useRouter()
 
@@ -238,7 +238,7 @@ const initiatePayment = (record) => {
 const openModelInfoDialog = async (row) => {
   console.log('打开模型信息对话框，数据:', row)
   try {
-    const response = await fetch(`http://localhost:8000/api/orders/get_order_info/${row.order_no}`)
+    const response = await fetch(`http://localhost:8000/api/orders/get_order_info/${row.order_no}`, { withCredentials: true })
     if (!response.ok) {
       throw new Error('网络响应不是 OK')
     }
@@ -256,7 +256,7 @@ const openModelInfoDialog = async (row) => {
 const openAmountDialog = async (row) => {
   console.log('打开加工金额对话框，数据:', row)   
   try {
-    const response = await fetch(`http://localhost:8000/api/orders/get_order_info/${row.order_no}`)
+    const response = await fetch(`http://localhost:8000/api/orders/get_order_info/${row.order_no}`, { withCredentials: true })
     if (!response.ok) {
       throw new Error('网络响应不是 OK')
     }
@@ -269,10 +269,15 @@ const openAmountDialog = async (row) => {
     ElMessage.error('获取订单信息失败')
   }
 }
-
+// 打开物流信息对话框
+const openShippingDialog = (row) => {
+  console.log('打开物流信息对话框',row)
+  selectedShipping.value = row
+  shippingDialogVisible.value = true
+}
 const fetchPartAuditData = async () => {
   try {
-    const response = await fetch('http://localhost:8000/api/orders/get_paid_allOrders')
+    const response = await fetch('http://localhost:8000/api/orders/get_paid_allOrders', { withCredentials: true })
     console.log('response', response)
     if (!response.ok) {
       throw new Error('网络响应不是 OK')

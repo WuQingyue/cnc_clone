@@ -291,7 +291,7 @@ const fetchPrice = async () => {
         country_code: selectedCountryCode.value,
         weight: weight.value
       }
-    })
+    }, { withCredentials: true })
     priceResult.value = response.data.result
     ElMessage.success('获取价格信息成功')
   } catch (error) {

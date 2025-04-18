@@ -47,7 +47,7 @@ const handleClose = () => {
 // 获取费用详情
 const fetchFeeDetails = async (processingFeeId) => {
   try {
-    const response = await fetch(`http://localhost:8000/api/orders/processing_fees/${processingFeeId}`)
+    const response = await fetch(`http://localhost:8000/api/orders/processing_fees/${processingFeeId}`, { withCredentials: true })
     if (!response.ok) {
       throw new Error('网络响应不是 OK')
     }

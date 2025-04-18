@@ -166,7 +166,8 @@ const submitOrder = async () => {
         'Content-Type': 'application/json'
       },
       credentials: 'include',
-      body: JSON.stringify(formData)
+      body: JSON.stringify(formData),
+      withCredentials: true
     });
     
     console.log('response:', response)
@@ -206,7 +207,7 @@ const fetchPrice = async () => {
         country_code: props.selectedAddress?.countryCode,
         weight: 1
       }
-    })
+    }, { withCredentials: true })
     priceResult.value = response.data.result
     console.log('priceResult', priceResult.value)
     const priceE1 = priceResult.value.find(price => price.product_name === props.selectedAddress?.postName && price.fee_name === 'E1')

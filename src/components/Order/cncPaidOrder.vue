@@ -138,7 +138,7 @@
   import { ElMessage } from 'element-plus'
   import ModelInfoDialog from '@/components/SignIn/ModelInfoDialog.vue'
   import AmountDialog from '@/components/SignIn/AmountDialog.vue'
-  import ShippingDialog from '@/components/Order/ShippingCostDialog.vue' // 引入运费对话框组件
+  import ShippingDialog from '@/components/SignIn/ShippingDialog.vue' // 引入运费对话框组件
   import { EventBus } from '@/components/SignIn/eventBus.js';
   // 数据状态
   const searchQuery = ref('')
@@ -246,7 +246,7 @@
   
   const fetchPartAuditData = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/orders/get_paid_orders')
+      const response = await fetch('http://localhost:8000/api/orders/get_paid_orders', { withCredentials: true })
       console.log('response', response)
       if (!response.ok) {
         throw new Error('网络响应不是 OK')

@@ -133,7 +133,7 @@
   import { ElMessage } from 'element-plus'
   import ModelInfoDialog from '@/components/SignIn/ModelInfoDialog.vue'
   import AmountDialog from '@/components/SignIn/AmountDialog.vue'
-  import ShippingDialog from '@/components/Order/ShippingCostDialog.vue' // 引入运费对话框组件
+  import ShippingDialog from '@/components/SignIn/ShippingDialog.vue' // 引入运费对话框组件
   import { EventBus,EventBus_message } from '@/components/SignIn/eventBus.js';
   // 数据状态
   const searchQuery = ref('')
@@ -202,7 +202,7 @@
 const openModelInfoDialog = async (row) => {
   console.log('打开模型信息对话框，数据:', row)
   try {
-    const response = await fetch(`http://localhost:8000/api/orders/get_order_info/${row.order_no}`)
+    const response = await fetch(`http://localhost:8000/api/orders/get_order_info/${row.order_no}`, { withCredentials: true })
     if (!response.ok) {
       throw new Error('网络响应不是 OK')
     }
@@ -220,7 +220,7 @@ const openModelInfoDialog = async (row) => {
 const openAmountDialog = async (row) => {
   console.log('打开加工金额对话框，数据:', row)   
   try {
-    const response = await fetch(`http://localhost:8000/api/orders/get_order_info/${row.order_no}`)
+    const response = await fetch(`http://localhost:8000/api/orders/get_order_info/${row.order_no}`, { withCredentials: true })
     if (!response.ok) {
       throw new Error('网络响应不是 OK')
     }
@@ -236,7 +236,7 @@ const openAmountDialog = async (row) => {
   
   const fetchPartAuditData = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/orders/get_paid_allOrders')
+      const response = await fetch('http://localhost:8000/api/orders/get_paid_allOrders', { withCredentials: true })
       console.log('response', response)
       if (!response.ok) {
         throw new Error('网络响应不是 OK')
@@ -269,7 +269,7 @@ const updataRecord = async (record) => {
       body: JSON.stringify({ // 将对象转换为 JSON 字符串
         "status": record.status
       })
-    });
+    }, { withCredentials: true });
     console.log('response', response)
     // 检查响应状态
     if (response.ok) {

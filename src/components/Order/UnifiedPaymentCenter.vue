@@ -203,7 +203,8 @@ const updataRecord = async () => {
         "status": record.status,
         "model_info_id": record.model_info_id,
         "operation": record.operation
-      })
+      }),
+      withCredentials: true
     });
 
     // 检查响应状态

@@ -87,7 +87,7 @@ const handleBeforeUpload = (file) => {
   const data = new FormData();
   data.append('file', file); 
   // 使用 axios 发送获取fileInfoAccessId请求
-  axios.post('http://localhost:8000/api/upload/uploadDrawFile', data)
+  axios.post('http://localhost:8000/api/upload/uploadDrawFile', data, { withCredentials: true })
   .then(response => {
       handleUploadSuccess(response.data, file); // 调用 handleUploadSuccess 并传递响应数据
   })
@@ -107,7 +107,8 @@ const handleUploadSuccess = (response, file) => {
     axios.post('http://localhost:8000/api/upload/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
-      }
+      },
+      withCredentials: true
     })
     .then(response => {
       if(response.status === 200){

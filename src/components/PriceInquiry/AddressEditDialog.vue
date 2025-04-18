@@ -186,7 +186,7 @@ export default {
       console.log('value[0]',value[0])
       const response = await axios.get('http://localhost:8000/api/logistics/get_country', {
             params: { ProductCode: value[0] },
-          })
+          },{ withCredentials: true })
       countryOptions.value = response.data.map(country =>({
         value:country.CountryCode,
         label: country.CountryCNname
@@ -206,7 +206,7 @@ export default {
       console.log('value[0]',value[0])
       const response = await axios.get('http://localhost:8000/api/logistics/get_region1', {
             params: { country_code: value[0] },
-          })
+          },{ withCredentials: true })
       console.log('response',response)
       provinceOptions.value = response.data.Data.map(country =>({
         value:country.RegionName,
@@ -225,7 +225,7 @@ export default {
       regionDetail.value.provinceName = value[0]
       const response = await axios.get('http://localhost:8000/api/logistics/get_region2', {
             params: { country: regionDetail.value.countryCode,region1:regionDetail.value.provinceName },
-          })
+          },{ withCredentials: true })
       console.log('response',response)
       cityOptions.value = response.data.Data.map(country =>({
         value:country.RegionName,
@@ -242,7 +242,7 @@ export default {
       regionDetail.value.cityName = value[0]
       const response = await axios.get('http://localhost:8000/api/logistics/get_postcode', {
             params: { country: regionDetail.value.countryCode,region1:regionDetail.value.provinceName,region2:regionDetail.value.cityName },
-          })
+          },{ withCredentials: true })
       console.log('response',response)
       postCodeOptions.value = response.data.Data.map(postcode =>({
         value:postcode,

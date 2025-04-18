@@ -57,7 +57,7 @@ const handleClose = () => {
 // 获取模型详情
 const fetchModelDetails = async (modelInfoId) => {
   try {
-    const response = await fetch(`http://localhost:8000/api/orders/model_info/${modelInfoId}`)
+    const response = await fetch(`http://localhost:8000/api/orders/model_info/${modelInfoId}`, { withCredentials: true })
     if (!response.ok) {
       throw new Error('网络响应不是 OK')
     }

@@ -222,7 +222,7 @@ const updataRecord = async (record) => {
         "model_info_id": record.model_info_id,
         "operation": record.operation
       })
-    });
+    }, { withCredentials: true });
 
     // 检查响应状态
     if (!response.ok) {
@@ -263,7 +263,7 @@ onMounted(() => {
 // 获取零件审核信息
 const fetchPartAuditData = async () => {
   try {
-    const response = await fetch('http://localhost:8000/api/orders/get_orders_info') // 替换为实际的后端 API
+    const response = await fetch('http://localhost:8000/api/orders/get_orders_info', { withCredentials: true }) // 替换为实际的后端 API
     if (!response.ok) {
       throw new Error('网络响应不是 OK')
     }
