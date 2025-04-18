@@ -244,7 +244,7 @@ const updataRecord = async (record) => {
 
 // 打开模型信息对话框
 const openModelInfoDialog = (row) => {
-  selectedModel.value = row.model_info
+  selectedModel.value = row
   modelInfoDialogVisible.value = true
 }
 

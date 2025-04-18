@@ -85,7 +85,7 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column prop="shipping_cost" label="运费" width="200" align="center">
+      <el-table-column prop="shipping_cost" label="物流信息" width="200" align="center">
         <template #default="scope">
           <el-button
             link
@@ -99,7 +99,7 @@
       <el-table-column label="操作" fixed="right" width="280" align="center">
         <template #default="scope">
           <div class="button-group">
-            <template v-if="scope.row.status === 'pass'">
+            <template v-if="scope.row.status === 'pass'" >
               <el-button
                 type="primary"
                 style="color: white; background-color: blue;"
@@ -110,11 +110,10 @@
             </template>
             <template v-else>
               <el-button
-                link
-                type="primary"
-                @click="viewDetails(scope.row)"
+                disabled
+                style="color: white; background-color: #909399;"
               >
-                查看详情
+                已支付
               </el-button>
             </template>
           </div>
@@ -144,12 +143,13 @@
 </template>
 
 <script setup>
-import { ref, onMounted } from 'vue'
-import { useRouter } from 'vue-router' // 引入 Vue Router
+import { ref, onMounted, watch } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import ModelInfoDialog from '@/components/SignIn/ModelInfoDialog.vue'
 import AmountDialog from '@/components/SignIn/AmountDialog.vue'
-import ShippingDialog from '@/components/Order/ShippingCostDialog.vue' // 引入运费对话框组件
+import ShippingDialog from '@/components/Order/ShippingCostDialog.vue'
+import { EventBus } from '@/components/SignIn/eventBus.js'
 
 // 数据状态
 const searchQuery = ref('')
@@ -164,6 +164,16 @@ const selectedAmount = ref(null)
 
 // 使用 Vue Router
 const router = useRouter()
+const route = useRoute()
+
+// 监听路由变化
+watch(() => route.query, (newQuery) => {
+  console.log('newQuery', newQuery)
+  if (newQuery.message === '支付成功') {
+    // 更新订单状态
+   fetchPartAuditData()
+  }
+}, { immediate: true })
 
 // 格式化日期
 const formatDate = (date) => {
@@ -227,7 +237,20 @@ const handleSearch = () => {
 const viewDetails = (record) => {
   ElMessage.info(`查看详情: ${record.order_no}`)
 }
-import { EventBus } from '@/components/SignIn/eventBus.js';
+
+// 打开模型信息对话框
+const openModelInfoDialog = (row) => {
+  selectedModel.value = row
+  modelInfoDialogVisible.value = true
+}
+
+// 打开加工金额对话框
+const openAmountDialog = (row) => {
+  selectedAmount.value = row
+  console.log('打开加工金额对话框，数据:', row)
+  amountDialogVisible.value = true
+}
+
 // 初始化支付
 const initiatePayment = (record) => {
   EventBus.data = { 
@@ -239,32 +262,42 @@ const initiatePayment = (record) => {
     model_info_id: record.model_info_id,
     operation: record.operation 
   }
-  // 跳转到 UnifiedPaymentCenter 组件
-  router.push({ name: 'UnifiedPaymentCenter' 
-  })
-}
-
-// 打开模型信息对话框
-const openModelInfoDialog = (row) => {
-  selectedModel.value = row.model_info
-  modelInfoDialogVisible.value = true
-}
-
-// 打开加工金额对话框
-const openAmountDialog = (row) => {
-  selectedAmount.value = row
-  amountDialogVisible.value = true
+  router.push({ name: 'UnifiedPaymentCenter' })
 }
 
 // 获取零件审核信息
 const fetchPartAuditData = async () => {
   try {
-    const response = await fetch('http://localhost:8000/api/orders/get_orders_info') // 替换为实际的后端 API
+    // 获取所有订单信息
+    const response = await fetch('http://localhost:8000/api/orders/get_orders_info')
     if (!response.ok) {
       throw new Error('网络响应不是 OK')
     }
-    filteredRecords.value = await response.json() // 获取数据并存储
-    console.log('filteredRecords.value', filteredRecords.value)
+    const data = await response.json()
+    
+    // 获取已支付订单信息
+    const response_paid = await fetch('http://localhost:8000/api/orders/get_paid_orders')
+    if (!response_paid.ok) {
+      throw new Error('网络响应不是 OK')
+    }
+    const data_paid = await response_paid.json()
+
+    // 创建已支付订单的映射，用于快速查找
+    const paidOrdersMap = new Map()
+    data_paid.forEach(order => {
+      paidOrdersMap.set(order.order_no, order)
+    })
+
+    // 合并数据，如果订单号相同，优先使用已支付的数据
+    const mergedData = data.map(order => {
+      const paidOrder = paidOrdersMap.get(order.order_no)
+      return paidOrder || order
+    })
+
+    // 更新 filteredRecords
+    filteredRecords.value = mergedData
+    console.log('合并后的订单数据:', filteredRecords.value)
+
   } catch (error) {
     console.error('请求失败:', error)
     ElMessage.error('获取零件审核信息失败')

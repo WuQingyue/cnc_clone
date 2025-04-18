@@ -103,7 +103,6 @@ watch(() => props.selectedDatas, (newValue) => {
 }, { immediate: true })
 
 //生成订单编号
-const orderNumber = ref('')
 // 生成8位随机数
 const generateRandomNumber = () => {
   return Math.floor(10000000 + Math.random() * 90000000)
@@ -122,13 +121,14 @@ const getCurrentDate = () => {
 const generateOrderNumber = () => {
   const date = getCurrentDate()
   const randomNumber = generateRandomNumber()
-  orderNumber.value = `US-SC-${date}-${randomNumber}`
+  return `SC-${date}-${randomNumber}`
 }
 // 提交订单方法
 const submitOrder = async () => {
   console.log('props.selectedDatas:',props.selectedDatas)
   const formData = props.selectedDatas.map(selectedData =>{
     const orderNo = generateOrderNumber()
+    console.log('订单编号:',orderNo)
     return {
       "order_no": orderNo,
       "user_email": "3@q.com",
@@ -136,6 +136,7 @@ const submitOrder = async () => {
       "engineering_cost": selectedData.engineeringCost,
       "clamping_cost": selectedData.clampingCost,
       "processing_cost": selectedData.processingCost,
+      "expedited_price": selectedData.expeditedPrice,
       "surface_cost": selectedData.surfaceCost,
       "unit_price": selectedData.pricePerUnit,
       "total_price": selectedData.totalPrice,
@@ -152,33 +153,44 @@ const submitOrder = async () => {
       "quantity": selectedData.quantity,
       "tolerance": selectedData.tolerance,
       "roughness": selectedData.roughness,
-      "has_thread": selectedData.hasThread === "false" ? 0 : 1 ,
+      "has_thread": selectedData.hasThread === "false" ? 0 : 1,
       "has_assembly": selectedData.hasAssembly === "false" ? 0 : 1
     }
   })
   console.log('formData',formData)
 
-  const response = await fetch('http://localhost:8000/api/orders/orders', {
-  method: 'POST',
-  headers: {
-    'Content-Type': 'application/json'
-  },
-  credentials: 'include', // equivalent to withCredentials: true
-  body: JSON.stringify(formData)
-});
-  console.log('response:',response)
-  if (response.ok) {
-      const orderNos = formData.map(item => item.order_no); // 获取所有的 order_no
+  try {
+    const response = await fetch('http://localhost:8000/api/orders/orders', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      credentials: 'include',
+      body: JSON.stringify(formData)
+    });
+    
+    console.log('response:', response)
+    
+    if (response.ok) {
+      const orderNos = formData.map(item => item.order_no)
+      console.log('orderNos', orderNos)
+      
+      // 使用 path 而不是 name 进行路由跳转
       router.push({
-        name: 'submitOrderSuccess',
+        path: '/SubmitOrderSuccess',
         query: {
-          orderNos: orderNos.join(',') // 将 order_no 数组转换为逗号分隔的字符串
+          orderNos: orderNos.join(','),
+          totalFee: shippingFee.value+orderItems.value.reduce((total, item) => total + item.totalPrice, 0)
         }
-      });
+      })
     } else {
-      console.error('提交订单失败:', response.statusText);
-      ElMessage.error('提交订单失败，请稍后重试');
+      console.error('提交订单失败:', response.statusText)
+      ElMessage.error('提交订单失败，请稍后重试')
     }
+  } catch (error) {
+    console.error('提交订单出错:', error)
+    ElMessage.error('提交订单出错，请稍后重试')
+  }
 }
 
 // 返回上一步方法

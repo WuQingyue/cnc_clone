@@ -198,17 +198,41 @@
     ElMessage.info(`查看详情: ${record.order_no}`)
   }
   
-  // 打开模型信息对话框
-  const openModelInfoDialog = (row) => {
-    selectedModel.value = row.model_info
+// 打开模型信息对话框
+const openModelInfoDialog = async (row) => {
+  console.log('打开模型信息对话框，数据:', row)
+  try {
+    const response = await fetch(`http://localhost:8000/api/orders/get_order_info/${row.order_no}`)
+    if (!response.ok) {
+      throw new Error('网络响应不是 OK')
+    }
+    const data = await response.json()
+    console.log('该订单模型信息response数据:', data)
+    selectedModel.value = data
     modelInfoDialogVisible.value = true
+  } catch (error) {
+    console.error('获取订单信息失败:', error)
+    ElMessage.error('获取订单信息失败')
   }
-  
-  // 打开加工金额对话框
-  const openAmountDialog = (row) => {
-    selectedAmount.value = row
+}
+
+// 打开加工金额对话框
+const openAmountDialog = async (row) => {
+  console.log('打开加工金额对话框，数据:', row)   
+  try {
+    const response = await fetch(`http://localhost:8000/api/orders/get_order_info/${row.order_no}`)
+    if (!response.ok) {
+      throw new Error('网络响应不是 OK')
+    }
+    const data = await response.json()
+    console.log('该订单加工金额response数据:', data)
+    selectedAmount.value = data
     amountDialogVisible.value = true
+  } catch (error) {
+    console.error('获取订单信息失败:', error)
+    ElMessage.error('获取订单信息失败')
   }
+}
   
   const fetchPartAuditData = async () => {
     try {

@@ -11,16 +11,16 @@
   
         <!-- 订单信息区域 -->
         <div class="order-info">
-          <div class="info-row">
+          <div class="info-row" v-for="(orderNo, index) in orderNos" :key="index">
             <span class="label">订单编号：</span>
             <span class="value">{{ orderNo }}</span>
-            <el-button type="text" class="copy-btn" @click="copyOrderNo">
+            <el-button type="text" class="copy-btn" @click="copyOrderNo(orderNo)">
               复制
             </el-button>
           </div>
           <div class="info-row">
             <span class="label">订单金额：</span>
-            <span class="value price">¥{{ orderAmount }}</span>
+            <span class="value price">¥{{ totalFee }}</span>
           </div>
           <div class="info-row">
             <span class="label">支付方式：</span>
@@ -54,49 +54,40 @@
     </div>
   </template>
   
-  <script>
-  import { ref } from 'vue'
+  <script setup>
+  import { ref, onMounted } from 'vue'
   import { CircleCheckFilled, InfoFilled } from '@element-plus/icons-vue'
   import { ElMessage } from 'element-plus'
-  import { useRouter } from 'vue-router'
+  import { useRouter, useRoute } from 'vue-router'
   
-  export default {
-    name: 'SubmitOrder',
-    components: {
-      CircleCheckFilled,
-      InfoFilled
-    },
-    setup() {
-      const router = useRouter()
-      const orderNo = ref('CNC20240315001')
-      const orderAmount = ref('95.49')
-      const paymentMethod = ref('在线支付')
+  const router = useRouter()
+  const route = useRoute()
+  const orderNos = ref([])
+  const totalFee = ref('0')
+  const paymentMethod = ref('paypal支付')
   
-      const copyOrderNo = () => {
-        navigator.clipboard.writeText(orderNo.value)
-        ElMessage.success('复制成功')
-      }
-  
-      const viewOrder = () => {
-        // 跳转到订单详情页
-        router.push('/cnc_order')
-      }
-  
-      const backToHome = () => {
-        // 跳转到首页
-        router.push('/')
-      }
-      
-  
-      return {
-        orderNo,
-        orderAmount,
-        paymentMethod,
-        copyOrderNo,
-        viewOrder,
-        backToHome
-      }
+  // 从路由参数中获取订单编号和总金额
+  onMounted(() => {
+    const orderNosStr = route.query.orderNos
+    if (orderNosStr) {
+      orderNos.value = orderNosStr.split(',')
     }
+    totalFee.value = route.query.totalFee || '0'
+  })
+  
+  const copyOrderNo = (orderNo) => {
+    navigator.clipboard.writeText(orderNo)
+    ElMessage.success('复制成功')
+  }
+  
+  const viewOrder = () => {
+    // 跳转到订单详情页
+    router.push('/cnc_order')
+  }
+  
+  const backToHome = () => {
+    // 跳转到首页
+    router.push('/')
   }
   </script>
   
@@ -194,15 +185,15 @@
   
   .notice-content {
     .title {
-    color: #000;  /* 设置为黑色 */
-    font-weight: bold;  /* 设置为粗体 */
-    font-size: 14px;  /* 可以根据需要调整字体大小 */
-  }
+      color: #000;
+      font-weight: bold;
+      font-size: 14px;
+    }
   
-  p {
-    margin-bottom: 8px;  /* 添加段落间距 */
-    line-height: 1.5;  /* 设置行高 */
-  }
+    p {
+      margin-bottom: 8px;
+      line-height: 1.5;
+    }
   }
   
   .notice-content p {

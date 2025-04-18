@@ -299,6 +299,22 @@ const handleParameterConfirm = (newParameters) => {
   // 更新当前选中的记录的参数
   Object.assign(selectedRecord.value, newParameters);
   console.log('修改参数后的selectedRecord.value', selectedRecord.value)
+  
+  // 更新 localRecords 中的相应记录
+  const index = localRecords.value.findIndex(record => 
+    record.fileInfoAccessId === selectedRecord.value.fileInfoAccessId
+  );
+  
+  if (index !== -1) {
+    // 更新 localRecords 中的记录
+    localRecords.value[index] = { ...localRecords.value[index], ...newParameters };
+    console.log('更新后的 localRecords:', localRecords.value);
+    
+    // 更新 store 中的数据
+    const selectedDatas = localRecords.value.filter(record => record.selected);
+    selectedDataStore.setSelectedData(selectedDatas);
+    console.log('更新后的store中的数据', selectedDataStore.getSelectedData())
+  }
 }
 
 onMounted(() => {

@@ -171,13 +171,10 @@ const handlePaymentSuccess = async (paypalOrder) => {
     })
     if(response.status === 200) {
       ElMessage.success('支付成功！')
-      // updataRecord()
-      router.push({ path: '/cnc_order' })
-      
+      updataRecord()
     } else {
       ElMessage.error('支付失败！')
     }
-
   } catch (error) {
     console.error('更新订单状态失败:', error)
     throw new Error('订单状态更新失败')
@@ -187,6 +184,10 @@ const initiatePayment = async () => {
   console.log('record', record)
   initPayment()
 }
+import { onMounted } from 'vue'
+onMounted(() => {
+  initPayment()
+})
 const updataRecord = async () => {
   try {
     const response = await fetch(`http://localhost:8000/api/orders/orders_info/${record.id}`, {
@@ -214,95 +215,18 @@ const updataRecord = async () => {
     // 可选：如果需要处理响应数据，可以在这里获取
     const responseData = await response.json();
     console.log('更新成功:', responseData);
+    router.push({ 
+      path: '/cnc_order',
+      query: {
+        order_no: record.order_no,
+        message: '支付成功'
+      }
+    })
   } catch (error) {
     console.error('请求失败:', error);
   }
 }
 
-//   // 处理支付方式改变
-//   const handlePaymentMethodChange = (method) => {
-//     if (selectedPaymentMethod.value === method) {
-//       selectedPaymentMethod.value = ''
-//     } else {
-//       selectedPaymentMethod.value = method
-
-//     }
-//   }
-  
-//   const initiatePayment = async () => {
-//     if (selectedPaymentMethod.value === 'paypal') {
-//         initPayment()
-//     } else {
-//         ElMessage.warning('请先选择支付方式');
-//     }
-// }
-
-//   // PayPal 支付初始化
-//   const initPayment = async () => {
-//     try {
-//       await loadPayPalScript()
-//       renderPayPalButton()
-//     } catch (error) {
-//       console.error('PayPal 初始化失败:', error)
-//       ElMessage.error('支付初始化失败，请重试')
-//     }
-//   }
-//   // 加载 PayPal SDK
-//   const loadPayPalScript = () => {
-//     return new Promise((resolve, reject) => {
-//       if (document.getElementById('paypal-sdk')) {
-//         resolve()
-//         return
-//       }
-//       const script = document.createElement('script')
-//       script.id = 'paypal-sdk'
-//       script.src = `https://www.paypal.com/sdk/js?client-id=AeYOVmvt0ysW_Pu20_Q8nJKqHIICdN9eVwG-K4A9dR0VCVK5-xVAM-2ANTdVOEZza19rapQNYRE9mkCz&currency=USD`
-//       script.onload = resolve
-//       script.onerror = reject
-//       document.body.appendChild(script)
-//     })
-//   }
-//   // 创建订单的函数
-//   const createOrder = async () => {
-//     return {
-//       id: Date.now().toString(), // 添加订单ID
-//       purchase_units: [{
-//         amount: {
-//           currency_code: 'USD',
-//           value: (totalAmount.value / 6.5).toFixed(2) // 动态金额，假设汇率6.5
-//         }
-//       }]
-//     };
-//   }
-
-//   // 渲染 PayPal 按钮
-//   const renderPayPalButton = async () => {
-//     if (!window.paypal) return
-//     try {
-//         const order = await createOrder()
-//         await handlePaymentSuccess(order)
-//         ElMessage.success('支付成功！')
-//         } catch (error) {
-//         console.error('支付处理失败:', error)
-//         ElMessage.error('支付处理失败，请联系客服')
-//     }
-//   }
-//   // 处理支付成功
-//   const handlePaymentSuccess = async (paypalOrder) => {
-//     try {
-//       // 调用后端 API 处理支付成功逻辑
-//       await axios.post('http://localhost:8000/api/payment/success', {
-//         paypalOrder,
-//         records: 100
-//       }, {
-//         withCredentials: true
-//       })
-//     } catch (error) {
-//       console.error('更新订单状态失败:', error)
-//       throw new Error('订单状态更新失败')
-//     }
-//   }
-  
   </script>
   <style scoped>
   .payment-center {

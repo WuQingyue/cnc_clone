@@ -191,17 +191,41 @@
   const viewDetails = (record) => {
     ElMessage.info(`查看详情: ${record.order_no}`)
   }
-  // 打开模型信息对话框
-  const openModelInfoDialog = (row) => {
-    selectedModel.value = row.model_info
+// 打开模型信息对话框
+const openModelInfoDialog = async (row) => {
+  console.log('打开模型信息对话框，数据:', row)
+  try {
+    const response = await fetch(`http://localhost:8000/api/orders/get_order_info/${row.order_no}`)
+    if (!response.ok) {
+      throw new Error('网络响应不是 OK')
+    }
+    const data = await response.json()
+    console.log('该订单模型信息response数据:', data)
+    selectedModel.value = data
     modelInfoDialogVisible.value = true
+  } catch (error) {
+    console.error('获取订单信息失败:', error)
+    ElMessage.error('获取订单信息失败')
   }
-  
-  // 打开加工金额对话框
-  const openAmountDialog = (row) => {
-    selectedAmount.value = row
+}
+
+// 打开加工金额对话框
+const openAmountDialog = async (row) => {
+  console.log('打开加工金额对话框，数据:', row)   
+  try {
+    const response = await fetch(`http://localhost:8000/api/orders/get_order_info/${row.order_no}`)
+    if (!response.ok) {
+      throw new Error('网络响应不是 OK')
+    }
+    const data = await response.json()
+    console.log('该订单加工金额response数据:', data)
+    selectedAmount.value = data
     amountDialogVisible.value = true
+  } catch (error) {
+    console.error('获取订单信息失败:', error)
+    ElMessage.error('获取订单信息失败')
   }
+}
   
   const fetchPartAuditData = async () => {
     try {
@@ -222,10 +246,23 @@
   onMounted(() => {
     fetchPartAuditData(); // 直接调用获取数据的方法
   })
-
+import axios from 'axios'
   // 处理状态变化
-const handleStatusChange = (row) => {
-  updataRecord(row)
+  const handleStatusChange = async (row) => {
+    console.log('row',row.order_no)
+    updataRecord(row);
+    if (row.status == 'completed_not_collected') {
+      try {
+        const response = await axios.post(`http://localhost:8000/api/logistics/order_create/${row.order_no}`);
+        console.log('物流下单成功，响应数据：', response.data);
+        console.log('运单号：', response.data.logistics_data.waybill_number);
+        console.log('客户订单号：', response.data.logistics_data.customer_order_number);
+        ElMessage.warning('该订单已改为加工完成-未揽货状态');
+      } catch (error) {
+        console.error('物流下单失败：', error);
+        ElMessage.error('物流下单失败，请重试');
+      }
+    }
 };
 const updataRecord = async (record) => {
   try {
@@ -249,6 +286,7 @@ const updataRecord = async (record) => {
     console.error('请求失败:', error);
   }
 }
+
   </script>
   
   <style scoped>
