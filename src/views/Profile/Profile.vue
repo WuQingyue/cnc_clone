@@ -121,12 +121,12 @@ const navigateToOrder = (link) => {
 const navigateToFeature = (link) => {
     window.location.href = link
 }
-
+import service from '@/utils/request'
 const logout = async () => {
     try {
-        const response = await axios.post(
-            'http://localhost:8000/api/login/logout',
-            {},
+        const response = await service.post(
+            '/api/login/logout',
+            {}, 
             {
                 withCredentials: true,
                 headers: {

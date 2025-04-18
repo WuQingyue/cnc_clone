@@ -340,7 +340,7 @@ import {
 } from './AutomationTool'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
-
+import service from '@/utils/request'
 export default {
   name: 'ParameterInfo',
   props: {
@@ -874,7 +874,7 @@ export default {
             deliveryTypeCode: deliveryTypeCode.value
           }
         ];
-        const response = await axios.post('http://localhost:8000/api/price/price', requestData,{withCredentials: true})
+        const response = await service.post('/api/price/price', requestData,{withCredentials: true})
         console.log('参数对话框中的response', response)
         // 正确解析响应数据
         const priceData = response.data

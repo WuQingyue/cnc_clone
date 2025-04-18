@@ -127,7 +127,7 @@ import { ref, watch, onMounted, computed } from 'vue'
 import { ShoppingCart, Edit } from '@element-plus/icons-vue' // 引入 Edit 图标
 import { useSelectedDataStore } from '@/store/PriceInquiryDatas'
 import { useRouter } from 'vue-router'
-import axios from 'axios'
+import service from '@/utils/request'
 import { ElMessage } from 'element-plus'
 
 // 获取 store 实例
@@ -171,8 +171,8 @@ const fetchPrices = async () => {
       deliveryTypeCode: item.deliveryTypeCode
     }));
     console.log('requestData', requestData);
-
-    const response = await axios.post('http://localhost:8000/api/price/price', requestData, { withCredentials: true });
+    
+    const response = await service.post('/api/price/price', requestData, { withCredentials: true });
     console.log('response', response);
     const priceData = response.data;
     console.log('FileList中的priceData', priceData)

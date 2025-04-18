@@ -124,6 +124,7 @@ import { Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { countryList,productList } from './DeliveryInfo'
 import axios from 'axios'
+import service from '@/utils/request'
 
 export default {
   name: 'AddressEditDialog',
@@ -182,9 +183,10 @@ export default {
       })) 
     )
     const countryOptions = ref([])
+  
     const handlePostwayChange = async (value) => {
       console.log('value[0]',value[0])
-      const response = await axios.get('http://localhost:8000/api/logistics/get_country', {
+      const response = await service.get('/api/logistics/get_country', {
             params: { ProductCode: value[0] },
           },{ withCredentials: true })
       countryOptions.value = response.data.map(country =>({
@@ -204,7 +206,7 @@ export default {
     const provinceOptions = ref([])
     const handleCountryChange = async (value) => {
       console.log('value[0]',value[0])
-      const response = await axios.get('http://localhost:8000/api/logistics/get_region1', {
+      const response = await service.get('/api/logistics/get_region1', {
             params: { country_code: value[0] },
           },{ withCredentials: true })
       console.log('response',response)
@@ -223,7 +225,7 @@ export default {
     const handleProvinceChange = async (value) => {
       console.log('value[0]',value[0])
       regionDetail.value.provinceName = value[0]
-      const response = await axios.get('http://localhost:8000/api/logistics/get_region2', {
+      const response = await service.get('/api/logistics/get_region2', {
             params: { country: regionDetail.value.countryCode,region1:regionDetail.value.provinceName },
           },{ withCredentials: true })
       console.log('response',response)
@@ -240,7 +242,7 @@ export default {
     const postCodeOptions = ref([])
     const handleCityChange = async (value) => {
       regionDetail.value.cityName = value[0]
-      const response = await axios.get('http://localhost:8000/api/logistics/get_postcode', {
+      const response = await service.get('/api/logistics/get_postcode', {
             params: { country: regionDetail.value.countryCode,region1:regionDetail.value.provinceName,region2:regionDetail.value.cityName },
           },{ withCredentials: true })
       console.log('response',response)

@@ -77,6 +77,7 @@ const price_E1 = ref(0)
 const price_E2 = ref(0)
 const router = useRouter() // 获取 router 实例
 import { useSelectedDataStore } from '@/store/PriceInquiryDatas'
+import service from '@/utils/request'
 const props = defineProps({
   selectedDatas: {
     type: Array,
@@ -158,9 +159,9 @@ const submitOrder = async () => {
     }
   })
   console.log('formData',formData)
-
+ 
   try {
-    const response = await fetch('http://localhost:8000/api/orders/orders', {
+    const response = await service.post('/api/orders/orders', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json'
@@ -202,7 +203,7 @@ const goBack = () => {
 const priceResult = ref([])
 const fetchPrice = async () => {
   try {
-    const response = await axios.get('http://localhost:8000/api/logistics/price-trial', {
+    const response = await service.get('/api/logistics/price-trial', {
       params: {
         country_code: props.selectedAddress?.countryCode,
         weight: 1

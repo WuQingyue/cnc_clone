@@ -40,6 +40,7 @@ import { ref, computed } from 'vue'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
 import { useUserStore } from '@/store/user'
+import service from '@/utils/request'
 import axios from 'axios'
 // 检查用户是否登录
 const isUserLoggedIn = useUserStore().isLoggedIn
@@ -87,7 +88,7 @@ const handleBeforeUpload = (file) => {
   const data = new FormData();
   data.append('file', file); 
   // 使用 axios 发送获取fileInfoAccessId请求
-  axios.post('http://localhost:8000/api/upload/uploadDrawFile', data, { withCredentials: true })
+  service.post('/api/upload/uploadDrawFile', data, { withCredentials: true })
   .then(response => {
       handleUploadSuccess(response.data, file); // 调用 handleUploadSuccess 并传递响应数据
   })
@@ -104,7 +105,7 @@ const handleUploadSuccess = (response, file) => {
     console.log('fileInfoAccessId', response.data[0].fileInfoAccessId)
     formData.append('fileInfoAccessId', response.data[0].fileInfoAccessId);
      // 使用 axios 发送上传请求
-    axios.post('http://localhost:8000/api/upload/upload', formData, {
+    service.post('/api/upload/upload', formData, {
       headers: {
         'Content-Type': 'multipart/form-data'
       },

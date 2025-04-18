@@ -89,7 +89,7 @@ watch(() => props.shipData, (newValue) => {
     fetchTrackingInfo()
   }
 })
-
+import service from '@/utils/request'
 // 获取物流追踪信息
 const fetchTrackingInfo = async () => {
   // 修改这里，添加所有需要显示物流信息的状态
@@ -105,7 +105,7 @@ const fetchTrackingInfo = async () => {
   try {
     console.log('正在获取物流信息:', props.shipData.order_no)
     // 使用POST方法
-    const response = await axios.post(`http://localhost:8000/api/logistics/track_get/${props.shipData.order_no}`, { withCredentials: true })
+    const response = await service.post(`/api/logistics/track_get/${props.shipData.order_no}`, { withCredentials: true })
     console.log('物流追踪响应:', response.data)
     
     if (response.data && response.data.success === "true" && response.data.result && response.data.result.length > 0) {

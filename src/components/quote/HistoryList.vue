@@ -129,17 +129,17 @@ const formatFileSize = (bytes) => {
   const i = Math.floor(Math.log(bytes) / Math.log(k))
   return `${(bytes / Math.pow(k, i)).toFixed(2)} ${sizes[i]}`
 }
-import axios from 'axios'
+import service from '@/utils/request'
 const fileInfoAccessId = ref('')
 // 处理下单点击事件
 const handleOrder = async (row) => {
   console.log('row:', row)
   // 发送请求到后端查询数据
-  const response = await axios.get(`http://localhost:8000/api/upload/get_file_info/${row.id}`, { withCredentials: true })
+  const response = await service.get(`/api/upload/get_file_info/${row.id}`, { withCredentials: true })
   console.log('fileInfoAccessId:', response.data)
 
   fileInfoAccessId.value = response.data
-  axios.post(`http://localhost:8000/api/upload/get_analysis_result?data=${fileInfoAccessId.value}`, { withCredentials: true })
+  service.post(`/api/upload/get_analysis_result?data=${fileInfoAccessId.value}`, { withCredentials: true })
   .then(response => {
       // 发射事件，将数据传递给父组件
       emit('fileInfo', { fileInfoAccessId: fileInfoAccessId.value, 

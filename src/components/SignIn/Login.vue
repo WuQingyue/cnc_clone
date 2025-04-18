@@ -78,7 +78,7 @@ const router = useRouter()
 const userStore = useUserStore()
 const formRef = ref(null)
 const loading = ref(false)
-
+import service from '@/utils/request'
 // 表单数据
 const form = reactive({
   email: '',
@@ -114,8 +114,8 @@ const handleEmailLogin = async () => {
     // }
 
     // 普通用户登录逻辑
-    const response = await axios.post(
-      'http://localhost:8000/api/login/email/login',
+    const response = await service.post(
+      '/api/login/email/login',
       {
         email: form.email.trim(),
         password: form.password
@@ -142,8 +142,8 @@ const handleEmailLogin = async () => {
 // Google 登录
 const handleGoogleLogin = async () => {
   try {
-    const response = await axios.get(
-      'http://localhost:8000/api/login/login',
+    const response = await service.get(
+      '/api/login/login',
       { withCredentials: true }
     )
     
