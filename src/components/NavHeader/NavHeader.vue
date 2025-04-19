@@ -76,57 +76,8 @@
               <span>购物车</span>
             </router-link>
           </div>
-
-          <!-- 语言切换按钮 -->
-          <div class="action-button has-submenu" 
-               @click="toggleLanguage('language')"
-               @mouseenter="showLanguage('language')"
-               @mouseleave="hideLanguage('language')">
-            <span class="menu-title">
-              <el-icon><Language /></el-icon>
-              {{ getLanguageLabel(currentLang) }}
-              <el-icon class="submenu-icon" :class="{ 'is-active': activeLang === 'language' }">
-                <ArrowUpBold v-if="activeLang === 'language'" />
-                <ArrowDownBold v-else />
-              </el-icon>
-            </span>
-            <div class="submenu language-submenu" :class="{ 'is-visible': activeLang === 'language' }">
-              <!-- 亚洲语言 -->
-              <div class="submenu-group">
-                <div class="group-title">亚洲</div>
-                <div class="submenu-item" @click="handleLanguageChange('zh')" :class="{ 'active': currentLang === 'zh' }">
-                  中文（简体）
-                </div>
-                <div class="submenu-item" @click="handleLanguageChange('zh-TW')" :class="{ 'active': currentLang === 'zh-TW' }">
-                  中文（繁體）
-                </div>
-                <div class="submenu-item" @click="handleLanguageChange('ja')" :class="{ 'active': currentLang === 'ja' }">
-                  日本語
-                </div>
-                <div class="submenu-item" @click="handleLanguageChange('ko')" :class="{ 'active': currentLang === 'ko' }">
-                  한국어
-                </div>
-              </div>
-              <!-- 欧美语言 -->
-              <div class="submenu-group">
-                <div class="group-title">欧美</div>
-                <div class="submenu-item" @click="handleLanguageChange('en')" :class="{ 'active': currentLang === 'en' }">
-                  English
-                </div>
-                <div class="submenu-item" @click="handleLanguageChange('fr')" :class="{ 'active': currentLang === 'fr' }">
-                  Français
-                </div>
-                <div class="submenu-item" @click="handleLanguageChange('de')" :class="{ 'active': currentLang === 'de' }">
-                  Deutsch
-                </div>
-                <div class="submenu-item" @click="handleLanguageChange('es')" :class="{ 'active': currentLang === 'es' }">
-                  Español
-                </div>
-              </div>
-            </div>
-          </div>
-          
-           <!-- 用户区域 -->
+          <div id="translate" class="translate-select-language"></div>
+          <!-- 用户区域 -->
           <div class="user-area">
             <!-- 未登录状态 -->
             <template v-if="!userStore.isLoggedIn">
@@ -169,7 +120,7 @@
 <script setup>
 import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useRouter } from 'vue-router'
-import { ShoppingCart, Menu, Close, ArrowUpBold, ArrowDownBold, Language,Flag } from '@element-plus/icons-vue'
+import { ShoppingCart, Menu, Close, ArrowUpBold, ArrowDownBold, Flag } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/user'
 import { storeToRefs } from 'pinia'
 import { ElMessage } from 'element-plus'
@@ -177,7 +128,6 @@ import Profile from '@/views/Profile/Profile.vue' // 引入新组件
 
 const router = useRouter()
 const userStore = useUserStore()
-// 使用 storeToRefs 保持响应性
 
 const isScrolled = ref(false)
 const isMenuOpen = ref(false)
@@ -225,116 +175,6 @@ const hideAbout = (menu) => {
 }
 
 const activeSubmenu = ref(null)
-const activeLang = ref(null)
-const currentLang = ref(localStorage.getItem('preferred_language') || 'zh')
-let isTranslating = ref(false)
-// 语言菜单控制
-const toggleLanguage = (menu) => {
-  activeLang.value = activeLang.value === menu ? null : menu
-}
-const showLanguage = (menu) => {
-  activeLang.value = menu
-}
-const hideLanguage = (menu) => {
-  if (activeLang.value === menu) {
-    activeLang.value = null
-  }
-}
-// 语言配置
-const languages = {
-  // 亚洲语言
-  'zh': {
-    label: '中文（简体）',
-    translateCode: 'chinese_simplified'
-  },
-  'zh-TW': {
-    label: '中文（繁體）',
-    translateCode: 'chinese_traditional'
-  },
-  'ja': {
-    label: '日本語',
-    translateCode: 'japanese'
-  },
-  'ko': {
-    label: '한국어',
-    translateCode: 'korean'
-  },
-  // 欧美语言
-  'en': {
-    label: 'English',
-    translateCode: 'english'
-  },
-  'fr': {
-    label: 'Français',
-    translateCode: 'french'
-  },
-  'de': {
-    label: 'Deutsch',
-    translateCode: 'german'
-  },
-  'es': {
-    label: 'Español',
-    translateCode: 'spanish'
-  }
-}
-// 获取语言显示标签
-const getLanguageLabel = (lang) => {
-  return languages[lang]?.label || languages['zh'].label
-}
-// 初始化翻译
-const initTranslate = () => {
-  if (window.translate) {
-    // 设置翻译前回调
-    window.translate.beforeTranslate = () => {
-      isTranslating.value = true
-    }
-
-    // 设置翻译后回调
-    window.translate.afterTranslate = () => {
-      isTranslating.value = false
-    }
-
-    // 设置本地语言
-    window.translate.language.setLocal('chinese_simplified')
-    
-    // 使用客户端翻译服务
-    window.translate.service.use('client.edge')
-    
-    // 设置防抖
-    window.translate.debounce = 300
-    
-    // 设置缓存
-    window.translate.cache.enable = true
-  }
-}
-// 处理语言切换
-const handleLanguageChange = async (lang) => {
-  if (isTranslating.value) return // 如果正在翻译，则不执行
-  
-  currentLang.value = lang
-  activeLang.value = null  // 关闭下拉菜单
-  
-  try {
-    if (window.translate) {
-      // 添加加载状态
-      isTranslating.value = true
-      
-      const translateCode = languages[lang]?.translateCode || 'chinese_simplified'
-      await window.translate.changeLanguage(translateCode)
-      
-      // 保存语言选择
-      localStorage.setItem('preferred_language', lang)
-    }
-  } catch (error) {
-    console.error('翻译出错：', error)
-  } finally {
-    isTranslating.value = false
-  }
-  
-  // 更新 HTML 标签的语言属性
-  document.documentElement.lang = lang
-}
-
 
 import axios from 'axios'
 // 处理退出登录
@@ -389,21 +229,8 @@ const handleCommand = async (command) => {  // 添加 async
   }
 }
 
-
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
-  // 初始化翻译
-  initTranslate()
-  
-  // 恢复上次的语言选择
-  const savedLang = localStorage.getItem('preferred_language')
-  if (savedLang && savedLang !== 'zh') {
-    // 延迟执行翻译，等待页面完全加载
-    setTimeout(() => {
-      currentLang.value = savedLang
-      handleLanguageChange(savedLang)
-    }, 500)
-  }
 
   // 确保 google 脚本已加载
   if (window.google && window.google.accounts) {
@@ -448,6 +275,30 @@ const handleCredentialResponse = async (response) => {
     console.error('登录失败：', error)
   }
 }
+import { nextTick, onUpdated } from 'vue'
+
+// 组件挂载后初始化翻译
+nextTick(() => {
+  if (window.translate && typeof window.translate.execute === 'function') {
+    window.translate.execute();
+    setTimeout(() => {
+      window.translate.execute();
+    }, 500);
+    if (window.translate.listener && typeof window.translate.listener.start === 'function') {
+      window.translate.listener.start();
+    }
+  }else {
+    console.warn('translate.js 未加载完成，window.translate 不可用');
+  }
+});
+
+// 组件更新后再次执行翻译，确保新渲染内容也被翻译
+onUpdated(() => {
+  if (window.translate && typeof window.translate.execute === 'function') {
+    window.translate.execute();
+  }
+});
+
 </script>
 
 <style lang="scss" scoped>
@@ -466,7 +317,6 @@ const handleCredentialResponse = async (response) => {
   background: white;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
   padding: 0 20px; /* 增加左右内边距 */
-  
 
   .container {
     // max-width: 1200px;
@@ -726,162 +576,6 @@ const handleCredentialResponse = async (response) => {
 
 .user-info:hover {
   background-color: #f5f7fa;
-}
-
-/* 添加翻译过渡样式 */
-.translating {
-  opacity: 0.5;
-  pointer-events: none;
-}
-
-.translate-btn {
-  position: relative;
-  
-  &::after {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(255, 255, 255, 0.8);
-    opacity: 0;
-    visibility: hidden;
-    transition: all 0.3s ease;
-  }
-  
-  &.is-translating::after {
-    opacity: 1;
-    visibility: visible;
-  }
-}
-
-.header-right {
-  .action-button {
-    &.has-submenu {
-      position: relative;
-      
-      .menu-title {
-        display: flex;
-        align-items: center;
-        gap: 4px;
-        cursor: pointer;
-
-        .el-icon {
-          font-size: 16px;
-        }
-
-        .submenu-icon {
-          font-size: 12px;
-          transition: transform 0.3s ease;
-          margin-left: 4px;
-
-          &.is-active {
-            transform: rotate(180deg);
-          }
-        }
-      }
-
-      .language-submenu {
-        position: absolute;
-        top: 100%;
-        right: 0;  // 改为右对齐
-        background: #fff;
-        min-width: 120px;
-        padding: 8px 0;
-        margin-top: 4px;
-        border-radius: 4px;
-        box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-        opacity: 0;
-        visibility: hidden;
-        transform: translateY(10px);
-        transition: all 0.3s ease;
-        z-index: 1000;
-
-        &.is-visible {
-          opacity: 1;
-          visibility: visible;
-          transform: translateY(0);
-        }
-
-        .submenu-item {
-          padding: 8px 16px;
-          font-size: 14px;
-          color: #333;
-          cursor: pointer;
-          transition: all 0.3s ease;
-
-          &:hover {
-            color: var(--primary-color);
-            background: #f5f7fa;
-          }
-
-          &.active {
-            color: var(--primary-color);
-            background: #f5f7fa;
-          }
-        }
-      }
-
-      &:hover {
-        .menu-title {
-          color: var(--primary-color);
-        }
-      }
-    }
-  }
-}
-
-// 响应式样式
-@media (max-width: 768px) {
-  .header-right {
-    .action-button {
-      &.has-submenu {
-        .language-submenu {
-          position: fixed;
-          top: auto;
-          right: 20px;
-          bottom: 20px;
-        }
-      }
-    }
-  }
-}
-
-.language-submenu {
-  .submenu-group {
-    padding: 8px 0;
-    border-bottom: 1px solid #eee;
-    
-    &:last-child {
-      border-bottom: none;
-    }
-    
-    .group-title {
-      padding: 4px 16px;
-      font-size: 12px;
-      color: #999;
-      background: #f5f7fa;
-    }
-    
-    .submenu-item {
-      padding: 8px 16px;
-      font-size: 14px;
-      color: #333;
-      cursor: pointer;
-      transition: all 0.3s ease;
-
-      &:hover {
-        color: var(--primary-color);
-        background: #f5f7fa;
-      }
-
-      &.active {
-        color: var(--primary-color);
-        background: #f5f7fa;
-      }
-    }
-  }
 }
 
 .user-info {
