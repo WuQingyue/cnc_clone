@@ -105,7 +105,7 @@ const rules = {
     { min: 8, max: 32, message: 'Password must be 8-32 characters', trigger: 'blur' }
   ]
 }
-
+import service from '@/utils/request'
 // 表单提交
 const handleSubmit = async () => {
   if (!formRef.value) return
@@ -114,8 +114,8 @@ const handleSubmit = async () => {
     await formRef.value.validate()
 
      // 调用注册接口
-     const response = await axios.post(
-      'http://localhost:8000/api/login/register',
+     const response = await service.post(
+      '/api/login/register',
       {
         firstname: form.firstName.trim(),
         lastname: form.lastName.trim(),
@@ -141,7 +141,7 @@ const handleSubmit = async () => {
 
 // Google 注册
 const handleGoogleSignUp = () => {
-  window.location.href = 'http://localhost:8000/api/login/login'
+  window.location.href = '/api/login/login'
 }
 </script>
 

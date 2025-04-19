@@ -282,11 +282,11 @@ const groupedResults = computed(() => {
 const calculateTotal = (group) => {
   return group.reduce((sum, item) => sum + item.calculate_amount, 0)
 }
-
+import service from '@/utils/request'
 // 修改后的 fetchPrice 方法
 const fetchPrice = async () => {
   try {
-    const response = await axios.get('http://localhost:8000/api/logistics/price-trial', {
+    const response = await service.get('/api/logistics/price-trial', {
       params: {
         country_code: selectedCountryCode.value,
         weight: weight.value

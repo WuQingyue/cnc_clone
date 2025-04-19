@@ -243,10 +243,10 @@
     selectedAmount.value = row
     amountDialogVisible.value = true
   }
-  
+  import service from '@/utils/request'
   const fetchPartAuditData = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/orders/get_paid_orders', { withCredentials: true })
+      const response = await service.get('/api/orders/get_paid_orders', { withCredentials: true })
       console.log('response', response)
       if (!response.ok) {
         throw new Error('网络响应不是 OK')

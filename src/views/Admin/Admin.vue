@@ -72,22 +72,6 @@ const navigate = async (item) => {
   }
 }
 
-// // 获取零件审核信息
-// const fetchPartAuditData = async () => {
-//   try {
-//     const response = await fetch('http://localhost:8000/api/orders/get_orders_info') // 替换为实际的后端 API
-//     if (!response.ok) {
-//       throw new Error('网络响应不是 OK')
-//     }
-//     console.log("response:",response)
-//     componentData.value = await response.json() // 获取数据并存储
-//     console.log("componentData",componentData.value)
-//   } catch (error) {
-//     console.error('请求失败:', error)
-//     ElMessage.error('获取零件审核信息失败')
-//   }
-// }
-
 // 处理下拉菜单命令
 const handleCommand = (command) => {
   if (command === 'logout') {

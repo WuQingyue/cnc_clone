@@ -233,12 +233,12 @@ const initiatePayment = (record) => {
   router.push({ name: 'UnifiedPaymentCenter' 
   })
 }
-
+import service from '@/utils/request'
 // 打开模型信息对话框
 const openModelInfoDialog = async (row) => {
   console.log('打开模型信息对话框，数据:', row)
   try {
-    const response = await fetch(`http://localhost:8000/api/orders/get_order_info/${row.order_no}`, { withCredentials: true })
+    const response = await service.get(`/api/orders/get_order_info/${row.order_no}`, { withCredentials: true })
     if (!response.ok) {
       throw new Error('网络响应不是 OK')
     }
@@ -256,7 +256,7 @@ const openModelInfoDialog = async (row) => {
 const openAmountDialog = async (row) => {
   console.log('打开加工金额对话框，数据:', row)   
   try {
-    const response = await fetch(`http://localhost:8000/api/orders/get_order_info/${row.order_no}`, { withCredentials: true })
+    const response = await service.get(`/api/orders/get_order_info/${row.order_no}`, { withCredentials: true })
     if (!response.ok) {
       throw new Error('网络响应不是 OK')
     }
@@ -277,7 +277,7 @@ const openShippingDialog = (row) => {
 }
 const fetchPartAuditData = async () => {
   try {
-    const response = await fetch('http://localhost:8000/api/orders/get_paid_allOrders', { withCredentials: true })
+    const response = await service.get('/api/orders/get_paid_allOrders', { withCredentials: true })
     console.log('response', response)
     if (!response.ok) {
       throw new Error('网络响应不是 OK')

@@ -53,13 +53,13 @@ const historyData = ref([])
 const isOrdering = ref(false) // 控制是否显示 FileList 组件
 const selectedRecords = ref({}) // 存储选中的记录
 
-
+import service from '@/utils/request'
 const fetchHistory = async (processType) => {
   if (!processType) return
   
   try {
-    const response = await axios.get(
-      `http://localhost:8000/api/upload/history/${processType}`,
+    const response = await service.get(
+      `/api/upload/history/${processType}`,
       { withCredentials: true }
     )
     console.log('获取历史记录', response.data)

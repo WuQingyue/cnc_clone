@@ -4,7 +4,12 @@ module.exports = defineConfig({
   transpileDependencies: true,
   devServer: {
     port: 8080,
-    open: true
+    open: true,
+    proxy: {
+      '/api': {
+        target: "http://192.168.2.110:8000"
+      }
+    }
   },
   css: {
     loaderOptions: {

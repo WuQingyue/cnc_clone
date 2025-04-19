@@ -272,19 +272,19 @@ const initiatePayment = (record) => {
   }
   router.push({ name: 'UnifiedPaymentCenter' })
 }
-
+import service from '@/utils/request'
 // 获取零件审核信息
 const fetchPartAuditData = async () => {
   try {
     // 获取所有订单信息
-    const response = await fetch('http://localhost:8000/api/orders/get_orders_info', { withCredentials: true })
+    const response = await service.get('/api/orders/get_orders_info', { withCredentials: true })
     if (!response.ok) {
       throw new Error('网络响应不是 OK')
     }
     const data = await response.json()
     
     // 获取已支付订单信息
-    const response_paid = await fetch('http://localhost:8000/api/orders/get_paid_orders', { withCredentials: true })
+    const response_paid = await service.get('/api/orders/get_paid_orders', { withCredentials: true })
     if (!response_paid.ok) {
       throw new Error('网络响应不是 OK')
     }

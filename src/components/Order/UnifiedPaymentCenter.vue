@@ -158,11 +158,12 @@ const renderPayPalButton = (amount) => {
     }
   }).render(paypalButtonContainer.value)
 }
+import service from '@/utils/request'
 // 处理支付成功
 const handlePaymentSuccess = async (paypalOrder) => {
   try {
     // 调用后端 API 处理支付成功逻辑
-    const response = await axios.post('http://localhost:8000/api/payment/success', {
+    const response = await service.post('/api/payment/success', {
       paypalOrder,
       records: 100,
       order_no: record.order_no
@@ -188,9 +189,10 @@ import { onMounted } from 'vue'
 onMounted(() => {
   initPayment()
 })
+import service from '@/utils/request'
 const updataRecord = async () => {
   try {
-    const response = await fetch(`http://localhost:8000/api/orders/orders_info/${record.id}`, {
+    const response = await service.put(`/api/orders/orders_info/${record.id}`, {
       method: 'PUT', // 设置请求方法为 PUT
       headers: {
         'Content-Type': 'application/json' // 设置请求头

@@ -206,10 +206,10 @@ const reject = (record) => {
   updataRecord(record)
   ElMessage.error(`订单 ${record.order_no} 审核拒绝`)
 }
-
+import service from '@/utils/request'
 const updataRecord = async (record) => {
   try {
-    const response = await fetch(`http://localhost:8000/api/orders/orders_info/${record.id}`, {
+    const response = await service.put(`/api/orders/orders_info/${record.id}`, {
       method: 'PUT', // 设置请求方法为 PUT
       headers: {
         'Content-Type': 'application/json' // 设置请求头
@@ -263,7 +263,7 @@ onMounted(() => {
 // 获取零件审核信息
 const fetchPartAuditData = async () => {
   try {
-    const response = await fetch('http://localhost:8000/api/orders/get_orders_info', { withCredentials: true }) // 替换为实际的后端 API
+    const response = await service.get('/api/orders/get_orders_info', { withCredentials: true }) // 替换为实际的后端 API
     if (!response.ok) {
       throw new Error('网络响应不是 OK')
     }

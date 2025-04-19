@@ -30,6 +30,7 @@ import axios from 'axios'
 import NavHeader from '@/components/NavHeader/NavHeader.vue'
 import NavFooter from '@/components/Footer.vue'
 import Admin from '@/views/Admin/Admin.vue'
+import service from '@/utils/request'
 
 const route = useRoute()
 const router = useRouter()
@@ -68,7 +69,7 @@ watch(
         console.log('检测到 Google 授权码:', code)
         
         // 调用后端 callback 接口
-        const response = await axios.get('http://localhost:8000/api/login/callback', {
+        const response = await service.get('/api/login/callback', {
           params: { code },
           withCredentials: true
         } )

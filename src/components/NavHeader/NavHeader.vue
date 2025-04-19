@@ -176,7 +176,7 @@ const hideAbout = (menu) => {
 
 const activeSubmenu = ref(null)
 
-import axios from 'axios'
+import service from '@/utils/request'
 // 处理退出登录
 const handleCommand = async (command) => {  // 添加 async
   switch (command) {
@@ -189,8 +189,8 @@ const handleCommand = async (command) => {  // 添加 async
     case 'logout':
       try {
         // 添加 await 和 withCredentials 配置
-        const response = await axios.post(
-          'http://localhost:8000/api/login/logout',
+        const response = await service.post(
+          '/api/login/logout',     
           {},  // 空对象作为请求体
           {
             withCredentials: true,  // 允许发送 cookies
