@@ -44,7 +44,7 @@ import { ElMessage } from 'element-plus'
 import axios from 'axios'
 console.log('QrCode 组件被导入')  // 添加这行
 
-const API_BASE_URL = 'http://66.42.110.47:8000' // 或者使用环境变量
+const API_BASE_URL = 'http://66.42.110.47:5000' // 或者使用环境变量
 
 const props = defineProps({
   pollInterval: {

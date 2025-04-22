@@ -209,29 +209,32 @@ const reject = (record) => {
 import service from '@/utils/request'
 const updataRecord = async (record) => {
   try {
-    const response = await service.put(`/api/orders/orders_info/${record.id}`, {
-      method: 'PUT', // 设置请求方法为 PUT
-      headers: {
-        'Content-Type': 'application/json' // 设置请求头
+    const response = await service.put(
+      `/api/orders/orders_info/${record.id}`,
+      {
+        order_no: record.order_no,
+        user_email: record.user_email,
+        processing_fee_id: record.processing_fee_id,
+        status: record.status,
+        model_info_id: record.model_info_id,
+        operation: record.operation
       },
-      body: JSON.stringify({ // 将对象转换为 JSON 字符串
-        "order_no": record.order_no,
-        "user_email": record.user_email,
-        "processing_fee_id": record.processing_fee_id,
-        "status": record.status,
-        "model_info_id": record.model_info_id,
-        "operation": record.operation
-      })
-    }, { withCredentials: true });
+      {
+        headers: {
+          'Content-Type': 'application/json'
+        },
+        withCredentials: true
+      }
+    );
 
     // 检查响应状态
-    if (!response.ok) {
+    if (response.status != 200) {
       console.log('record', record);
       throw new Error('网络响应不是 OK');
     }
 
     // 可选：如果需要处理响应数据，可以在这里获取
-    const responseData = await response.json();
+    const responseData = response.data;
     console.log('更新成功:', responseData);
 
     // 更新数据
@@ -264,10 +267,10 @@ onMounted(() => {
 const fetchPartAuditData = async () => {
   try {
     const response = await service.get('/api/orders/get_orders_info', { withCredentials: true }) // 替换为实际的后端 API
-    if (!response.ok) {
+    if (response.status != 200) {
       throw new Error('网络响应不是 OK')
     }
-   filteredRecords.value = await response.json() // 获取数据并存储
+   filteredRecords.value = await response.data // 获取数据并存储
    console.log('filteredRecords.value',filteredRecords.value)
   } catch (error) {
     console.error('请求失败:', error)

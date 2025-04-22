@@ -99,13 +99,26 @@
       <el-table-column label="操作" fixed="right" width="280" align="center">
         <template #default="scope">
           <div class="button-group">
-            <template v-if="scope.row.status === 'pass'" >
+            <template v-if="scope.row.status === 'wait'">
+              <el-button disabled style="color: #909399; background: #f5f5f5;">
+                待审核
+              </el-button>
+            </template>
+            <template v-else-if="scope.row.status === 'pass' || scope.row.status === 'pending'">
               <el-button
                 type="primary"
                 style="color: white; background-color: blue;"
                 @click="initiatePayment(scope.row)"
               >
                 立即支付
+              </el-button>
+            </template>
+            <template v-else-if="scope.row.status === 'reject'">
+              <el-button
+                type="warning"
+                @click="openAmountDialog(scope.row)"
+              >
+                查看详情
               </el-button>
             </template>
             <template v-else>
@@ -277,34 +290,36 @@ import service from '@/utils/request'
 const fetchPartAuditData = async () => {
   try {
     // 获取所有订单信息
-    const response = await service.get('/api/orders/get_orders_info', { withCredentials: true })
-    if (!response.ok) {
+    const response_all = await service.get('/api/orders/get_orders_info', { withCredentials: true })
+    console.log('获取所有订单信息', response_all)
+    if (response_all.status != 200) {
       throw new Error('网络响应不是 OK')
     }
-    const data = await response.json()
+      const data = await response_all.data
     
-    // 获取已支付订单信息
-    const response_paid = await service.get('/api/orders/get_paid_orders', { withCredentials: true })
-    if (!response_paid.ok) {
-      throw new Error('网络响应不是 OK')
-    }
-    const data_paid = await response_paid.json()
+      // 获取已支付订单信息
+      const response_paid = await service.get('/api/orders/get_paid_orders', { withCredentials: true })
+      console.log('获取已支付订单信息', response_paid)
+      if (response_paid.status != 200) {
+        throw new Error('网络响应不是 OK')
+      }
+      const data_paid = await response_paid.data
 
-    // 创建已支付订单的映射，用于快速查找
-    const paidOrdersMap = new Map()
-    data_paid.forEach(order => {
-      paidOrdersMap.set(order.order_no, order)
-    })
+      // 创建已支付订单的映射，用于快速查找
+      const paidOrdersMap = new Map()
+      data_paid.forEach(order => {
+        paidOrdersMap.set(order.order_no, order)
+      })
 
-    // 合并数据，如果订单号相同，优先使用已支付的数据
-    const mergedData = data.map(order => {
-      const paidOrder = paidOrdersMap.get(order.order_no)
-      return paidOrder || order
-    })
+      // 合并数据，如果订单号相同，优先使用已支付的数据
+      const mergedData = data.map(order => {
+        const paidOrder = paidOrdersMap.get(order.order_no)
+        return paidOrder || order
+      })
 
-    // 更新 filteredRecords
-    filteredRecords.value = mergedData
-    console.log('合并后的订单数据:', filteredRecords.value)
+      // 更新 filteredRecords
+      filteredRecords.value = mergedData
+      console.log('合并后的订单数据:', filteredRecords.value)
 
   } catch (error) {
     console.error('请求失败:', error)

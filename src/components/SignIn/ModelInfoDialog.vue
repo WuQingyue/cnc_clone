@@ -58,10 +58,10 @@ import service from '@/utils/request'
 const fetchModelDetails = async (modelInfoId) => {
   try {
     const response = await service.get(`/api/orders/model_info/${modelInfoId}`, { withCredentials: true })
-    if (!response.ok) {
+    if (response.status != 200) {
       throw new Error('网络响应不是 OK')
     }
-    modelDetails.value = await response.json()
+    modelDetails.value = await response.data
   } catch (error) {
     console.error('请求失败:', error)
     modelDetails.value = null

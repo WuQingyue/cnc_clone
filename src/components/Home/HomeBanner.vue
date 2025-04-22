@@ -40,24 +40,12 @@ export default {
     return {
       modules: [Autoplay, Pagination, Navigation],
       bannerList: [
-        {
-          image: require('@/assets/images/banner1.png')
-        },
-        {
-          image: require('@/assets/images/banner2.jpg')
-        },
-        {
-          image: require('@/assets/images/banner3.jpg')
-        },
-        {
-          image: require('@/assets/images/banner4.jpg')
-        },
-        {
-          image: require('@/assets/images/banner5.jpg')
-        },
-        {
-          image: require('@/assets/images/banner6.jpg')
-        }
+        { image: require('@/assets/images/banner1.png') },
+        { image: require('@/assets/images/banner2.jpg') },
+        { image: require('@/assets/images/banner3.jpg') },
+        { image: require('@/assets/images/banner4.jpg') },
+        { image: require('@/assets/images/banner5.jpg') },
+        { image: require('@/assets/images/banner6.jpg') }
       ]
     }
   },
@@ -69,131 +57,112 @@ export default {
 }
 </script>
 
-<style lang="scss" scoped>
+<style scoped>
 .home-banner {
   height: 600px;
   position: relative;
   margin-top: 80px;
-
-  @include responsive(md) {
-    height: 500px;
-  }
-
-  @include responsive(sm) {
-    height: 400px;
-  }
-
-  .banner-swiper {
-    height: 100%;
-  }
-
-  .banner-slide {
-    position: relative;
-    height: 100%;
-
-    img {
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-    }
-
-    .banner-content {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      background: rgba(0, 0, 0, 0.4);
-      color: white;
-      @include flex-center;
-      text-align: center;
-
-      .slide-title {
-        font-size: 48px;
-        font-weight: bold;
-        margin-bottom: 20px;
-        line-height: 1.2;
-        opacity: 0;
-        transform: translateY(30px);
-        animation: fadeInUp 0.8s forwards;
-
-        span {
-          color: $primary-color;
-        }
-
-        @include responsive(md) {
-          font-size: 36px;
-        }
-
-        @include responsive(sm) {
-          font-size: 28px;
-        }
-      }
-
-      .slide-desc {
-        font-size: 20px;
-        margin-bottom: 30px;
-        opacity: 0;
-        transform: translateY(30px);
-        animation: fadeInUp 0.8s 0.3s forwards;
-
-        @include responsive(md) {
-          font-size: 18px;
-        }
-
-        @include responsive(sm) {
-          font-size: 16px;
-        }
-      }
-
-      .slide-btn {
-        opacity: 0;
-        transform: translateY(30px);
-        animation: fadeInUp 0.8s 0.6s forwards;
-      }
-    }
-  }
+  width: 100%;
+  max-width: 100vw;
+  overflow: hidden;
 }
 
-// 自定义 Swiper 样式
+.banner-swiper {
+  height: 100%;
+}
+
+.banner-slide {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.banner-slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* Swiper pagination bullets */
 :deep(.swiper-pagination-bullet) {
   width: 12px;
   height: 12px;
   background: rgba(255, 255, 255, 0.6);
   opacity: 1;
+  margin: 0 4px !important;
 }
 
 :deep(.swiper-pagination-bullet-active) {
-  background: $primary-color;
+  background: #007BFF;
 }
 
+/* Swiper navigation buttons */
 :deep(.swiper-button-prev),
 :deep(.swiper-button-next) {
   color: white;
-  width: 50px;
-  height: 50px;
+  width: 40px;
+  height: 40px;
   background: rgba(0, 0, 0, 0.3);
   border-radius: 50%;
   transition: all 0.3s ease;
-
-  &:hover {
-    background: rgba($primary-color, 0.8);
-  }
-
-  &::after {
-    font-size: 24px;
-  }
+  top: 50%;
+  transform: translateY(-50%);
 }
 
-// 动画
-@keyframes fadeInUp {
-  from {
-    opacity: 0;
-    transform: translateY(30px);
+:deep(.swiper-button-prev):hover,
+:deep(.swiper-button-next):hover {
+  background: rgba(0, 123, 255, 0.8);
+}
+
+:deep(.swiper-button-prev)::after,
+:deep(.swiper-button-next)::after {
+  font-size: 20px;
+}
+
+/* 响应式设计 */
+@media (max-width: 1200px) {
+  .home-banner {
+    height: 420px;
+    margin-top: 60px;
   }
-  to {
-    opacity: 1;
-    transform: translateY(0);
+}
+@media (max-width: 992px) {
+  .home-banner {
+    height: 320px;
+    margin-top: 50px;
+  }
+  :deep(.swiper-button-prev),
+  :deep(.swiper-button-next) {
+    width: 32px;
+    height: 32px;
+  }
+}
+@media (max-width: 768px) {
+  .home-banner {
+    height: 200px;
+    margin-top: 40px;
+  }
+  .banner-slide img {
+    min-height: 140px;
+  }
+}
+@media (max-width: 480px) {
+  .home-banner {
+    height: 120px;
+    margin-top: 32px;
+  }
+  .banner-slide img {
+    min-height: 80px;
+  }
+  :deep(.swiper-button-prev),
+  :deep(.swiper-button-next) {
+    width: 24px;
+    height: 24px;
+  }
+  :deep(.swiper-pagination-bullet) {
+    width: 8px;
+    height: 8px;
   }
 }
 </style>

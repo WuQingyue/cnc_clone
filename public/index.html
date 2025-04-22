@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
     <title>嘉立诚数控</title>
-  
+
     <script src="https://res.zvo.cn/translate/translate.js"></script>
     <script>
       // 翻译配置
@@ -54,6 +54,8 @@
         }
       }
     </script>
+    <!-- 添加 Google OAuth 脚本 -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
       .notranslate {
         opacity: 1 !important;
@@ -63,9 +65,95 @@
       [data-translate] {
         transition: opacity 0.3s ease;
       }
+
+      /* 例：修改按钮的背景色、字体、边框、圆角等 */
+      .translate-select-language {
+        position: relative !important;
+        display: flex !important;
+        align-items: center !important;
+        gap: 4px !important;
+        background: #fff !important;
+        border: 1px solid var(--border-color) !important;
+        border-radius: 4px !important;
+        box-shadow: none !important;
+        font-size: 14px !important;
+        color: #333 !important;
+        padding: 0 12px !important;
+        height: 32px !important;
+        cursor: pointer !important;
+        width: 120px !important;
+        min-width: 120px !important;
+        z-index: 1000 !important;
+        margin-right: 0 !important;
+        transition: border-color 0.3s !important;
+      }
+
+      /* 鼠标悬浮时边框变蓝 */
+      .translate-select-language:hover,
+      .translate-select-language:focus-within {
+        border-color: var(--primary-color) !important;
+      }
+
+      /* 下拉小三角图标（默认向下） */
+      .translate-select-language::after {
+        content: '';
+        display: block;
+        position: absolute;
+        right: 12px;
+        top: 50%;
+        width: 0;
+        height: 0;
+        pointer-events: none;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top: 6px solid #999;
+        transform: translateY(-50%) rotate(0deg);
+        transition: border-top-color 0.3s, transform 0.3s;
+      }
+
+      /* 展开（select 获得焦点）时小三角向上 */
+      .translate-select-language:focus-within::after {
+        border-top-color: var(--primary-color);
+        transform: translateY(-50%) rotate(180deg);
+      }
+
+      /* 让select和按钮风格一致 */
+      .translate-select-language select {
+        background: transparent !important;
+        color: #333 !important;
+        border: none !important;
+        font-size: 14px !important;
+        padding: 0 24px 0 0 !important; /* 右边留空间给图标 */
+        width: 100% !important;
+        height: 32px !important;
+        outline: none !important;
+        appearance: none !important; /* 隐藏原生下拉箭头 */
+        cursor: pointer !important;
+        box-shadow: none !important;
+      }
+
+      /* 选中/hover时 */
+      .translate-select-language select:focus,
+      .translate-select-language select:hover {
+        outline: none !important;
+        color: var(--primary-color) !important;
+      }
+
+      /* 选项样式 */
+      .translate-select-language option {
+        font-size: 14px !important;
+        color: #333 !important;
+        background: #fff !important;
+        padding: 8px 16px !important;
+      }
+
+      /* 去掉浮层相关样式 */
+      .translate-select-language .language-submenu,
+      .translate-select-language .submenu {
+        display: none !important;
+      }
+
     </style>
-    <!-- 添加 Google OAuth 脚本 -->
-    <!-- <script src="https://accounts.google.com/gsi/client" async defer></script> -->
   </head>
   <body>
     <noscript>

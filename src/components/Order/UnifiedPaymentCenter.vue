@@ -172,7 +172,13 @@ const handlePaymentSuccess = async (paypalOrder) => {
     })
     if(response.status === 200) {
       ElMessage.success('支付成功！')
-      updataRecord()
+      router.push({ 
+      path: '/cnc_order',
+      query: {
+        order_no: record.order_no,
+        message: '支付成功'
+      }
+    })
     } else {
       ElMessage.error('支付失败！')
     }
@@ -189,46 +195,6 @@ import { onMounted } from 'vue'
 onMounted(() => {
   initPayment()
 })
-import service from '@/utils/request'
-const updataRecord = async () => {
-  try {
-    const response = await service.put(`/api/orders/orders_info/${record.id}`, {
-      method: 'PUT', // 设置请求方法为 PUT
-      headers: {
-        'Content-Type': 'application/json' // 设置请求头
-      },
-      body: JSON.stringify({ // 将对象转换为 JSON 字符串
-        "id": record.id,
-        "order_no": record.order_no,
-        "user_email": record.user_email,
-        "processing_fee_id": record.processing_fee_id,
-        "status": record.status,
-        "model_info_id": record.model_info_id,
-        "operation": record.operation
-      }),
-      withCredentials: true
-    });
-
-    // 检查响应状态
-    if (!response.ok) {
-      console.log('record', record);
-      throw new Error('网络响应不是 OK');
-    }
-
-    // 可选：如果需要处理响应数据，可以在这里获取
-    const responseData = await response.json();
-    console.log('更新成功:', responseData);
-    router.push({ 
-      path: '/cnc_order',
-      query: {
-        order_no: record.order_no,
-        message: '支付成功'
-      }
-    })
-  } catch (error) {
-    console.error('请求失败:', error);
-  }
-}
 
   </script>
   <style scoped>

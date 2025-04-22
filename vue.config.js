@@ -7,7 +7,7 @@ module.exports = defineConfig({
     open: true,
     proxy: {
       '/api': {
-        target: "http://192.168.2.110:8000"
+        target: "http:66.42.110.47:5000"
       }
     }
   },

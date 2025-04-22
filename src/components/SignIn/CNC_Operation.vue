@@ -122,6 +122,7 @@
   import AmountDialog from '@/components/SignIn/AmountDialog.vue'
   import ShippingDialog from '@/components/SignIn/ShippingDialog.vue' // 引入运费对话框组件
   import { EventBus,EventBus_message } from '@/components/SignIn/eventBus.js';
+  import service from '@/utils/request'
   // 数据状态
   const searchQuery = ref('')
   const timeRange = ref('week')
@@ -196,10 +197,10 @@ const openModelInfoDialog = async (row) => {
   console.log('打开模型信息对话框，数据:', row)
   try {
     const response = await service.get(`/api/orders/get_order_info/${row.order_no}`, { withCredentials: true })
-    if (!response.ok) {
+    if (response.status != 200) {
       throw new Error('网络响应不是 OK')
     }
-    const data = await response.json()
+    const data = await response.data
     console.log('该订单模型信息response数据:', data)
     selectedModel.value = data
     modelInfoDialogVisible.value = true
@@ -214,10 +215,10 @@ const openAmountDialog = async (row) => {
   console.log('打开加工金额对话框，数据:', row)   
   try {
     const response = await service.get(`/api/orders/get_order_info/${row.order_no}`, { withCredentials: true })
-    if (!response.ok) {
+    if (response.status != 200) {
       throw new Error('网络响应不是 OK')
     }
-    const data = await response.json()
+    const data = await response.data
     console.log('该订单加工金额response数据:', data)
     selectedAmount.value = data
     amountDialogVisible.value = true
@@ -231,10 +232,10 @@ const openAmountDialog = async (row) => {
     try {
       const response = await service.get('/api/orders/get_paid_allOrders', { withCredentials: true })
       console.log('response', response)
-      if (!response.ok) {
+      if (response.status != 200) {
         throw new Error('网络响应不是 OK')
       }
-      filteredRecords.value = await response.json() // 获取数据并存储
+      filteredRecords.value = await response.data// 获取数据并存储
       console.log('filteredRecords.value', filteredRecords.value)
     } catch (error) {
       console.error('请求失败:', error)
@@ -266,18 +267,19 @@ import axios from 'axios'
 };
 const updataRecord = async (record) => {
   try {
-    const response = await service.put(`/api/orders/update_order_status/${record.order_no}`, {
-      method: 'PUT', // 设置请求方法为 PUT
+    const response = await service.put(
+      `/api/orders/update_order_status/${record.order_no}`,
+      {
+        "status": record.status
+      },
+      {
       headers: {
         'Content-Type': 'application/json' // 设置请求头
       },
-      body: JSON.stringify({ // 将对象转换为 JSON 字符串
-        "status": record.status
-      })
-    }, { withCredentials: true });
+      withCredentials: true });
     console.log('response', response)
     // 检查响应状态
-    if (response.ok) {
+    if (response.status == 200) {
       ElMessage.success('更新成功');
     }else{
       ElMessage.error('更新失败');

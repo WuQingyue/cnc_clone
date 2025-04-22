@@ -161,21 +161,18 @@ const submitOrder = async () => {
   console.log('formData',formData)
  
   try {
-    const response = await service.post('/api/orders/orders', {
-      method: 'POST',
+    const response = await service.post('/api/orders/orders', formData, {
       headers: {
         'Content-Type': 'application/json'
       },
-      credentials: 'include',
-      body: JSON.stringify(formData),
       withCredentials: true
     });
     
     console.log('response:', response)
+    console.log('response.status:', response.status)
     
-    if (response.ok) {
+    if (response.status === 200) {
       const orderNos = formData.map(item => item.order_no)
-      console.log('orderNos', orderNos)
       
       // 使用 path 而不是 name 进行路由跳转
       router.push({
@@ -186,7 +183,6 @@ const submitOrder = async () => {
         }
       })
     } else {
-      console.error('提交订单失败:', response.statusText)
       ElMessage.error('提交订单失败，请稍后重试')
     }
   } catch (error) {

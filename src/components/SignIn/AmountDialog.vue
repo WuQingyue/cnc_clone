@@ -48,10 +48,10 @@ import service from '@/utils/request'
 const fetchFeeDetails = async (processingFeeId) => {
   try {
     const response = await service.get(`/api/orders/processing_fees/${processingFeeId}`, { withCredentials: true })
-    if (!response.ok) {
+    if (response.status != 200) {
       throw new Error('网络响应不是 OK')
     }
-    feeDetails.value = await response.json()
+    feeDetails.value = await response.data
   } catch (error) {
     console.error('请求失败:', error)
     feeDetails.value = null

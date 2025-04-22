@@ -248,10 +248,10 @@
     try {
       const response = await service.get('/api/orders/get_paid_orders', { withCredentials: true })
       console.log('response', response)
-      if (!response.ok) {
+      if (response.status!= 200) {
         throw new Error('网络响应不是 OK')
       }
-      filteredRecords.value = await response.json() // 获取数据并存储
+      filteredRecords.value = await response.data // 获取数据并存储
       console.log('filteredRecords.value', filteredRecords.value)
     } catch (error) {
       console.error('请求失败:', error)
