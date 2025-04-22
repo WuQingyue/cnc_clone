@@ -218,11 +218,6 @@ const hideAbout = (menu) => {
   }
 }
 
-<<<<<<< HEAD
-=======
-const activeSubmenu = ref(null)
-
->>>>>>> f88c0d8f8ad1b6807c61b4fc5634426a40bb87d2
 import service from '@/utils/request'
 const handleCommand = async (command) => {
   switch (command) {
@@ -261,11 +256,6 @@ const handleCommand = async (command) => {
 
 onMounted(() => {
   window.addEventListener('scroll', handleScroll)
-<<<<<<< HEAD
-=======
-
-  // 确保 google 脚本已加载
->>>>>>> f88c0d8f8ad1b6807c61b4fc5634426a40bb87d2
   if (window.google && window.google.accounts) {
     initializeGoogleLogin()
   } else {
@@ -301,11 +291,7 @@ const handleCredentialResponse = async (response) => {
   }
 }
 import { nextTick, onUpdated } from 'vue'
-<<<<<<< HEAD
-=======
 
-// 组件挂载后初始化翻译
->>>>>>> f88c0d8f8ad1b6807c61b4fc5634426a40bb87d2
 nextTick(() => {
   if (window.translate && typeof window.translate.execute === 'function') {
     window.translate.execute();
@@ -319,20 +305,13 @@ nextTick(() => {
     console.warn('translate.js 未加载完成，window.translate 不可用');
   }
 });
-<<<<<<< HEAD
-=======
 
-// 组件更新后再次执行翻译，确保新渲染内容也被翻译
->>>>>>> f88c0d8f8ad1b6807c61b4fc5634426a40bb87d2
 onUpdated(() => {
   if (window.translate && typeof window.translate.execute === 'function') {
     window.translate.execute();
   }
 });
-<<<<<<< HEAD
-=======
 
->>>>>>> f88c0d8f8ad1b6807c61b4fc5634426a40bb87d2
 </script>
 
 <style lang="scss" scoped>
@@ -349,14 +328,10 @@ onUpdated(() => {
   z-index: 100;
   background: white;
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-<<<<<<< HEAD
   width: 100%;
   min-width: 0;
   padding: 0;
-=======
   padding: 0 20px; /* 增加左右内边距 */
-
->>>>>>> f88c0d8f8ad1b6807c61b4fc5634426a40bb87d2
   .container {
     width: 100%;
     max-width: 1200px; // 可根据需要调整最大宽度
@@ -540,10 +515,7 @@ onUpdated(() => {
 .user-info:hover {
   background-color: #f5f7fa;
 }
-<<<<<<< HEAD
-=======
 
->>>>>>> f88c0d8f8ad1b6807c61b4fc5634426a40bb87d2
 .user-info {
   display: flex;
   align-items: center;

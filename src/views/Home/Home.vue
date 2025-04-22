@@ -24,6 +24,7 @@
 
 <script>
 import HomeBanner from '@/components/Home/HomeBanner.vue'
+import LogoDisplay from '@/components/Home/LogoDisplay.vue'
 import OurProcessDisplay from '@/components/Home/OurProcessDisplay.vue'
 import MaterialSupport from '@/components/Home/MaterialSupport.vue'
 import OrderProcess from '@/components/Home/OrderProcess.vue'
@@ -34,6 +35,7 @@ export default {
   name: 'Home',
   components: {
     HomeBanner,
+    LogoDisplay,
     OurProcessDisplay,
     MaterialSupport,
     OrderProcess,
