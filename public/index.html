@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
     <title>嘉立诚数控</title>
-
+  
     <script src="https://res.zvo.cn/translate/translate.js"></script>
     <script>
       // 翻译配置
@@ -34,28 +34,18 @@
       // 等待 translate.js 加载完成
       window.onload = function() {
         if (window.translate) {
+          //启用翻译中的遮罩层，给用户一个友好提示，解决翻译延迟的问题
+          translate.progress.api.startUITip();
           // 设置本地语种（当前网页的语种）
-          translate.language.setLocal('chinese_simplified');
-          
+          // translate.language.setLocal('chinese_simplified');
+          translate.setAutoDiscriminateLocalLanguage();   
           // 开启页面变化监控，自动翻译变化部分
           translate.listener.start();
-          
           // 执行翻译初始化
           translate.execute();
-
-          // 检查是否有保存的语言设置
-          const savedLang = localStorage.getItem('preferred_language');
-          if (savedLang && savedLang !== 'zh') {
-            // 延迟执行翻译，确保页面完全加载
-            setTimeout(() => {
-              translate.execute(savedLang);
-            }, 300);
-          }
         }
       }
     </script>
-    <!-- 添加 Google OAuth 脚本 -->
-    <script src="https://accounts.google.com/gsi/client" async defer></script>
     <style>
       .notranslate {
         opacity: 1 !important;
@@ -154,11 +144,8 @@
       }
 
     </style>
-<<<<<<< HEAD
-=======
     <!-- 添加 Google OAuth 脚本 -->
     <script src="https://accounts.google.com/gsi/client" async defer></script>
->>>>>>> f88c0d8f8ad1b6807c61b4fc5634426a40bb87d2
   </head>
   <body>
     <noscript>
