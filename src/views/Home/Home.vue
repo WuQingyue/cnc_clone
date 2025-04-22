@@ -2,6 +2,10 @@
   <div class="home">
     <!-- 首页轮播图 -->
     <home-banner />
+
+    <!-- logo展示 -->
+    <logo-display />
+
      <!-- 我们的生产工艺 -->
     <our-process-display />
 
