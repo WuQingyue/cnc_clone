@@ -255,32 +255,42 @@ const handleCommand = async (command) => {
 }
 
 onMounted(() => {
-  window.addEventListener('scroll', handleScroll)
-  if (window.google && window.google.accounts) {
-    initializeGoogleLogin()
+  if (window.gapi) {
+    initializeGoogleLogin();
   } else {
+    // 如果 gapi 还未加载，添加一个全局回调
     window.onload = () => {
-      initializeGoogleLogin()
-    }
+      if (window.gapi) {
+        initializeGoogleLogin();
+      }
+    };
   }
-})
+});
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
 })
 const initializeGoogleLogin = () => {
-  window.google.accounts.id.initialize({
-    client_id: 'your-google-client-id',
-    callback: handleCredentialResponse
-  })
-  window.google.accounts.id.renderButton(
-    document.getElementById('googleButton'),
-    { 
-      theme: 'outline', 
-      size: 'large',
-      text: '使用Google账号登录',
-      width: 250
-    }
-  )
+   if (window.gapi) {
+    window.gapi.load('auth2', () => {
+      const auth2 = window.gapi.auth2.init({
+        client_id: 'your-google-client-id'
+      });
+      
+    window.google.accounts.id.initialize({
+      client_id: 'your-google-client-id',
+      callback: handleCredentialResponse
+    })
+    window.google.accounts.id.renderButton(
+      document.getElementById('googleButton'),
+      { 
+        theme: 'outline', 
+        size: 'large',
+        text: '使用Google账号登录',
+        width: 250
+      }
+    )
+    });
+  }
 }
 const handleCredentialResponse = async (response) => {
   try {

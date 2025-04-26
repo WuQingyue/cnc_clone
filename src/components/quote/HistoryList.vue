@@ -1,11 +1,7 @@
 <template>
-  <div class="history-section" v-if="historyData.length > 0">
+  <div class="history-section" v-if="isUserLoggedIn && historyData.length > 0">
     <div class="section-header">
       <h3>上传历史</h3>
-      <el-button type="primary" size="small" @click="$emit('refresh')">
-        <el-icon><Refresh /></el-icon>
-        刷新
-      </el-button>
     </div>
 
     <el-table 
@@ -104,10 +100,19 @@
       </el-table-column>
     </el-table>
   </div>
+  <div class="history-section" v-else>
+    <div class="section-header">
+      <h3>上传历史</h3>
+    </div>
+    <div class="no-data-message">
+      <el-icon><el-icon-info-filled /></el-icon>
+      <span>暂无数据</span>
+    </div>
+  </div>
 </template>
 
 <script setup>
-import { Refresh, PictureFilled, Document } from '@element-plus/icons-vue'
+import {  PictureFilled, Document, InfoFilled } from '@element-plus/icons-vue'
 import { ref } from 'vue'
 // 定义props
 const props = defineProps({
@@ -119,7 +124,7 @@ const props = defineProps({
 })
 
 // 定义事件
-const emit = defineEmits(['refresh', 'fileInfoAccessId', 'delete'])
+const emit = defineEmits([ 'fileInfoAccessId', 'delete'])
 
 // 格式化文件大小
 const formatFileSize = (bytes) => {
@@ -160,6 +165,10 @@ import { watch } from 'vue'
 watch(() => props.historyData, (newVal) => {
   console.log('历史记录已更新:', newVal)
 }, { deep: true })
+
+import { useUserStore } from '@/store/user'
+// 检查用户是否登录
+const isUserLoggedIn = useUserStore().isLoggedIn
 </script>
 
 <style scoped>
@@ -248,4 +257,20 @@ watch(() => props.historyData, (newVal) => {
   padding: 0 8px;
   font-size: 12px;
 }
+
+.no-data-message {
+  text-align: center;
+  color: #909399;
+  font-size: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  padding: 40px 0;
+}
+
+.no-data-message el-icon {
+  font-size: 24px;
+}
 </style>
+    

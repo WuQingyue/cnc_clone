@@ -1,6 +1,6 @@
 <template>
   <div class="file-uploader">
-    <div v-if="isUserLoggedIn">
+    <div>
       <el-upload
         v-if="processInfo"
         class="upload-area"
@@ -27,11 +27,6 @@
         </div>
       </el-upload>
     </div>
-    <div v-else>
-      <button class="login-button" @click="redirectToLogin">
-        请登录再上传文件
-      </button>
-    </div>
   </div>
 </template>
 
@@ -39,11 +34,8 @@
 import { ref, computed } from 'vue'
 import { UploadFilled } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
-import { useUserStore } from '@/store/user'
 import service from '@/utils/request'
 import axios from 'axios'
-// 检查用户是否登录
-const isUserLoggedIn = useUserStore().isLoggedIn
 
 const props = defineProps({
   processInfo: {
@@ -117,6 +109,19 @@ const handleUploadSuccess = (response, file) => {
         emit('update-history')
         ElMessage.success('上传成功')
     }})
+
+        service.post('/api/upload/analyze_model', {
+      clientId: "72e582a7d12024c2082dcf733d57dd61",
+      fileInfoAccessIds:  [response.data[0].fileInfoAccessId]
+    }, {
+      withCredentials: true
+    })
+    .then(response => {
+      if(response.status === 200){
+        console.log('分析成功！')
+      }
+    })
+    
   } else {
     ElMessage.error(response.detail || '上传失败')
   }

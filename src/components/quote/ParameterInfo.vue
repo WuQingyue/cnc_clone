@@ -384,6 +384,7 @@ export default {
     const currentCategory = ref(null)
     const selectedMaterial = ref(null)
     const categoryName = ref('')
+    const productModelAccessId = ref('')
 
     watch(() => props.visible, (val) => {
       dialogVisible.value = val
@@ -421,6 +422,7 @@ export default {
       craftAttributeFileAccessIds2.value = props.record.craftAttributeFileAccessIds2
       expeditedPrice.value = props.record.expeditedPrice
       deliveryTypeCode.value = props.record.deliveryTypeCode
+      productModelAccessId.value = props.record.productModelAccessId
       roughnessAccessId.value = props.record.roughnessAccessId
       toleranceAccessId.value = props.record.toleranceAccessId
       if (val) {
@@ -468,6 +470,7 @@ export default {
         surfaceCost: surfaceCost.value,
         expeditedPrice: expeditedPrice.value,
         deliveryTypeCode: deliveryTypeCode.value,
+        productModelAccessId: productModelAccessId.value,
         roughnessAccessId: roughnessAccessId.value,
         toleranceAccessId: toleranceAccessId.value,
         materialAccessId: selectedMaterial.value.materialAccessId,
@@ -553,6 +556,7 @@ export default {
         categoryName: categoryName.value,
         getSurfaceTreatmentLabel: getSurfaceTreatmentLabel,
         deliveryTypeCode: deliveryTypeCode.value,
+        productModelAccessId: productModelAccessId.value,
       }
       
       emit('confirm', parameters)
@@ -868,6 +872,7 @@ export default {
                 ].filter(Boolean)
               }
             ],
+            productModelAccessId: productModelAccessId.value,
             goodsQuantity: quantity.value,
             toleranceAccessId: toleranceAccessId.value,
             roughnessAccessId: roughnessAccessId.value,
@@ -986,6 +991,7 @@ export default {
       pricePerUnit,
       expeditedPrice,
       deliveryTypeCode,
+      productModelAccessId,
       roughnessAccessId,
       toleranceAccessId,
       handleConfirm,

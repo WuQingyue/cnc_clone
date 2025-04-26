@@ -49,8 +49,25 @@ export const parametersList = reactive([
           useful: true
         }
       ]
-  }
-  // 可以添加更多参数配置
+  }, 
+  {
+    id: 3,
+    name: '塑料',
+      children: [
+        {
+            "materialAccessId": "ba7d04eb738b4b0a98a63a99b877ea14",
+            "materialName": "工程塑料-ABS（白色）",
+            "materialCode": "P111",
+            "materialCategory": "塑料",
+            "materialSort": 2,
+            "defaultMaterialFlag": false,
+            "materialRemark": "<p>备注：ABS不喷油表面容易有磨损划痕，喷油后表面更光滑、美观。</p>",
+            "useful": true,
+            "limitThicknessStart": 1.00,
+            "limitThicknessEnd": 9999.00
+        }
+      ]
+    }
   ])
 // 当前选中的参数配置
 export const currentParameters = ref(parametersList[0])
@@ -1465,20 +1482,6 @@ export const surfaceTreatmentData = [
         }
     }
 ];
-// export const deliveryOptions = [
-//       {
-//         "type": "标准交期：5个工作日",
-//         "code": "BD"
-//       },
-//       {
-//         "type": "经济交期：10个工作日",
-//         "code": "ED"
-//       },
-//       {
-//         "type": "加急交期：3个工作日",
-//         "code": "UD"
-//       }
-//     ]
 
 export const roughness = {
     type: "Ra3.2",

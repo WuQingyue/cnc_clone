@@ -165,6 +165,7 @@ const fetchPrices = async () => {
           ].filter(Boolean)
         }
       ],
+      productModelAccessId: item.productModelAccessId,
       goodsQuantity: item.quantity,
       toleranceAccessId: item.toleranceAccessId,
       roughnessAccessId: item.roughnessAccessId,
