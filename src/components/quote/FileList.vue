@@ -174,10 +174,14 @@ const fetchPrices = async () => {
     console.log('requestData', requestData);
     
     const response = await service.post('/api/price/price', requestData, { withCredentials: true });
+    const response2 = await service.get('/api/price/place_calculate_coupon_fee', { withCredentials: true });
     console.log('response', response);
+    console.log('response2', response2);
     const priceData = response.data;
+    const jlc_carriageFee = response2.data;
     console.log('FileList中的priceData', priceData)
-    if (response.status === 200) {
+    console.log('jlc_carriageFee', jlc_carriageFee)
+    if (response.status === 200 && response2.status === 200) {
       // 假设我们只处理第一个报价信息（如果需要处理多个，可以遍历 quoteInfos）
       const quoteInfos = priceData;
       console.log('quoteInfos', quoteInfos)
@@ -190,7 +194,7 @@ const fetchPrices = async () => {
           record.surfaceCost = quoteInfos[index].craftPrice;
           record.expeditedPrice = quoteInfos[index].expeditedPrice;
           record.pricePerUnit = quoteInfos[index].price; // 更新单价
-          record.totalPrice = quoteInfos[index].price * record.quantity; // 更新总价
+          record.totalPrice = quoteInfos[index].price * record.quantity + jlc_carriageFee; // 更新总价
         }
       });
       // 更新 localRecords 中的数据
@@ -206,7 +210,7 @@ const fetchPrices = async () => {
             surfaceCost: updatedRecord.surfaceCost,
             expeditedPrice: updatedRecord.expeditedPrice,
             pricePerUnit: updatedRecord.pricePerUnit,
-            totalPrice: updatedRecord.totalPrice
+            totalPrice: updatedRecord.totalPrice,
           };
         }
         return record;

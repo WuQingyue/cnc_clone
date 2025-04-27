@@ -308,6 +308,10 @@
             <span>加急费</span>
             <span class="price">¥{{ expeditedPrice }}</span>
           </div>
+          <div class="price-item">
+            <span>运费</span>
+            <span class="price">¥{{ jlc_carriageFee }}</span>
+          </div>
         </div>
 
         <el-divider />
@@ -376,6 +380,7 @@ export default {
     const processingCost = ref(0)
     const surfaceCost = ref(0)
     const expeditedPrice = ref(0)
+    const jlc_carriageFee = ref(4.52)
     const deliveryTypeCode = ref('')
     const roughnessAccessId = ref('')
     const toleranceAccessId = ref('')
@@ -896,17 +901,25 @@ export default {
         ElMessage.error('获取价格信息失败，请检查网络连接')
       }
     }
+
+    const  get_jlc_carriageFee = async() => {
+      const response = await service.get('/api/price/place_calculate_coupon_fee', { withCredentials: true });
+      console.log('response', response);
+      jlc_carriageFee.value = response.data;
+    }
     // 添加计算属性
     const totalPrice = computed(() => {
-      return pricePerUnit.value * quantity.value
+      return pricePerUnit.value * quantity.value + jlc_carriageFee.value
     })
 
     // 监听参数变化触发价格计算
     watch([selectedMaterial, surfaceTreatment, selectedTreatment, selectedTreatment2, quantity, tolerance, roughness, selectedColor, selectedColor2, glossiness, glossiness2, uploadedFileName, uploadedFileName2], () => {
       if (selectedMaterial.value) {
         fetchPrices()
+        get_jlc_carriageFee()
       }
     })
+   
 
     // 组件挂载时初始化
     onMounted(() => {
@@ -983,6 +996,7 @@ export default {
       fileName,
       fileDimensions,
       materialCost,
+      jlc_carriageFee,
       engineeringCost,
       clampingCost,
       processingCost,
