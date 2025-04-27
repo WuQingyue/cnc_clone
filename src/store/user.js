@@ -12,11 +12,11 @@ export const useUserStore = defineStore('user', {
     setUser(userData) {
       this.user = userData
       this.isLoggedIn = true
-      if(this.user.user.email === 'admin@tongtron.com'){
+      if(this.user.user_email === 'admin@tongtron.com'){
         this.isAdmin = true
       }
-      console.log('用户信息已更新:', this.user.user)
-      console.log('用户eamil信息已更新:', this.user.user.email)
+      console.log('用户信息已更新:', this.user)
+      console.log('用户eamil信息已更新:', this.user.user_email)
       console.log('用户信息已更新:', this.isLoggedIn)
       console.log('用户信息已更新:', this.isAdmin)
     },

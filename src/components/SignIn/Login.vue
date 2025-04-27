@@ -123,13 +123,18 @@ const handleEmailLogin = async () => {
       { withCredentials: true }
     )
 
-    if (response.data) {
-      // 保存用户信息到 localStorage
-      localStorage.setItem('userInfo', JSON.stringify(response.data))
-      // 保存用户信息到 store
-      userStore.setUser(response.data)
+    if (response.status == 200) {
       ElMessage.success('登录成功！')
-      router.push('/')
+      const uesr_Info = await service.get(
+      '/api/login/check_login',
+      { withCredentials: true }
+    )
+      console.log('uesr_Info',uesr_Info)
+      if(uesr_Info.status == 200){
+        // 保存用户信息到 store
+        userStore.setUser(uesr_Info.data)
+        router.push('/')
+      }
     }
   } catch (error) {
     console.error('登录失败:', error)
@@ -142,8 +147,8 @@ const handleEmailLogin = async () => {
 // Google 登录
 const handleGoogleLogin = async () => {
   try {
-    const response = await service.get(
-      '/api/login/login',
+    const response = await axios.get(
+      'http://localhost:8000/api/login/login',
       { withCredentials: true }
     )
     

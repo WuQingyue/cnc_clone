@@ -91,9 +91,9 @@
                   <div class="user-info">
                     <el-avatar 
                       :size="32" 
-                      :src="userStore.user.user.picture" 
+                      :src="userStore.user.picture" 
                     />
-                    <span>{{ userStore.user.user.name }}</span>
+                    <span>{{ userStore.user.user_name }}</span>
                   </div>
                 </template>
               </Profile>
@@ -153,9 +153,9 @@
                   <div class="user-info">
                     <el-avatar 
                       :size="32" 
-                      :src="userStore.user.user.picture" 
+                      :src="userStore.user.picture" 
                     />
-                    <span>{{ userStore.user.user.name }}</span>
+                    <span>{{ userStore.user.user_name }}</span>
                   </div>
                 </template>
               </Profile>
@@ -255,6 +255,7 @@ const handleCommand = async (command) => {
 }
 
 onMounted(() => {
+  checkLoginStatus()
   if (window.gapi) {
     initializeGoogleLogin();
   } else {
@@ -266,6 +267,21 @@ onMounted(() => {
     };
   }
 });
+const checkLoginStatus = async () => {
+  const uesr_Info = await service.get(
+      '/api/login/check_login',
+      { withCredentials: true }
+  )
+  if(uesr_Info.status == 200){
+    // 保存用户信息到 store
+    userStore.setUser(uesr_Info.data)
+  }else{
+    ElMessage.error('用户登录已失效，请重新登录')
+    router.push('/login')
+  }
+
+}
+
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
 })
