@@ -132,10 +132,34 @@ export default {
     Plus
   },
   props: {
-    visible: Boolean
-  },
+  visible: Boolean,
+  selectedAddress: {
+    type: Object,
+    default: null
+  }
+},
+
   emits: ['update:visible', 'save-address', 'use-address'],
   setup(props, { emit }) {
+    watch(() => props.selectedAddress, (newVal) => {
+        console.log('收到selectedAddress变化:', props.selectedAddress)
+        if (newVal) {
+          // 更宽松的比较方式
+          const foundAddress = savedAddresses.value.find(addr => {
+            return addr.name === newVal.name && 
+                  addr.phone === newVal.phone &&
+                  addr.fullAddress.includes(newVal.detail) // 部分匹配
+          })
+          
+          if (foundAddress) {
+            console.log('找到匹配地址:', foundAddress)
+            useAddress(foundAddress)
+          } else {
+            console.log('未找到匹配地址')
+          }
+        }
+      }, { immediate: true, deep: true })  // 添加deep:true深度监听
+
     const dialogVisible = ref(false)
     const showForm = ref(false)
     const savedAddresses = ref([])
@@ -292,34 +316,67 @@ export default {
       emit('use-address', address)
     }
 
-    const setDefaultAddress = (address) => {
+    const setDefaultAddress = async (address) => {
       savedAddresses.value.forEach(item => {
         item.isDefault = item === address
       })
+      const response = await service.post(
+      '/api/address/set_default_address',
+      {
+        address_id: address.address_id
+      },
+      { withCredentials: true }
+    )
+    console.log('更新默认地址response',response)
     }
 
     const saveAddress = async () => {
       if (!addressFormRef.value) return
-      
-      await addressFormRef.value.validate((valid) => {
-        if (valid) {
-          // const { postway, country, province, city } = addressForm.value.region;
-          // const fullRegion = [postway, country, province, city].filter(Boolean).join(' ');
 
+      await addressFormRef.value.validate(async (valid) => {
+        if (valid) {
+          // 1. 本地 address（用于本地表格展示）
           const address = { 
             ...addressForm.value,
-            // fullAddress: fullRegion + ' ' + addressForm.value.detail,
-            fullAddress: regionDetail.value.detail + ' ' + regionDetail.value.cityName+ ','+regionDetail.value.provinceName + ' '+ regionDetail.value.postCode + ' '+regionDetail.value.countryCode,
+            fullAddress: regionDetail.value.detail + ' ' + regionDetail.value.cityName + ',' + regionDetail.value.provinceName + ' ' + regionDetail.value.postCode + ' ' + regionDetail.value.countryCode,
             isDefault: savedAddresses.value.length === 0,
             isUsing: savedAddresses.value.length === 0,
             postName: regionDetail.value.postName,
-            countryCode:regionDetail.value.countryCode
+            countryCode: regionDetail.value.countryCode
           }
-          savedAddresses.value.push(address)
-          showForm.value = false
-          emit('save-address', address)
-          if (address.isUsing) {
-            emit('use-address', address)
+
+          // 2. 后端需要的数据结构
+          const addressPayload = {
+            contact_name: addressForm.value.name,
+            contact_phone: addressForm.value.phone,
+            detail_address: addressForm.value.detail,
+            is_active: false,
+            is_default: false,
+            shipping_method: regionDetail.value.postway || '',
+            countryCode: regionDetail.value.countryCode || '',
+            province: regionDetail.value.provinceName || '',
+            city: regionDetail.value.cityName || '',
+            postal_code: regionDetail.value.postCode || ''
+          }
+
+          try {
+            // 3. 发送给后端
+            const response = await service.post('/api/address/add_address', addressPayload, { withCredentials: true })
+            if (response.status === 200) {
+              ElMessage.success('地址保存成功')
+              // 4. 本地保存（不影响后端）
+              savedAddresses.value.push(address)
+              showForm.value = false
+              emit('save-address', address)
+              if (address.isUsing) {
+                emit('use-address', address)
+              }
+            } else {
+              ElMessage.error('地址保存失败')
+            }
+          } catch (error) {
+            ElMessage.error('地址保存失败')
+            console.error('地址保存出错:', error)
           }
         }
       })
@@ -328,7 +385,40 @@ export default {
     const cancelEdit = () => {
       showForm.value = false
     }
+  
+    const fetchAddresses = async () => {
+      try {
+        const response = await service.get('/api/address/get_user_addresses', { withCredentials: true })
+        if (response.status === 200 && Array.isArray(response.data)) {
+          savedAddresses.value = response.data.map(addr => ({
+            address_id: addr.id,
+            name: addr.contact_name,
+            phone: addr.contact_phone,
+            detail: addr.detail_address, 
+            shippingMethod: addr.shipping_method,
+            countryCode: addr.country,
+            provinceName: addr.province,
+            cityName: addr.city,
+            postCode: addr.postal_code,
+            isDefault: addr.is_default,
+            isUsing: addr.is_active,
+            fullAddress: addr.detail_address + ' ' + addr.city + ',' + addr.province + ' ' + addr.postal_code + ' ' + addr.country,
+            
+          }))
+          console.log('savedAddresses',savedAddresses.value)
+        } else if (response.status === 200 && Array.isArray(response.data.data)) {
+          // 如果后端返回 { data: [...] }
+          savedAddresses.value = response.data.data
+        }
+      } catch (error) {
+        ElMessage.error('获取地址列表失败')
+        console.error('获取地址失败:', error)
+      }
+    }
 
+    onMounted(() => {
+      fetchAddresses()
+    })
 
     return {
       dialogVisible,
@@ -356,6 +446,8 @@ export default {
     }
   }
 }
+import { onMounted } from 'vue'
+
 </script>
 
 <style scoped>
