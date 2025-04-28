@@ -142,14 +142,11 @@ export default {
   emits: ['update:visible', 'save-address', 'use-address'],
   setup(props, { emit }) {
     watch(() => props.selectedAddress, (newVal) => {
-        console.log('收到selectedAddress变化:', props.selectedAddress)
+        console.log('收到selectedAddress变化:', newVal)
         if (newVal) {
           // 更宽松的比较方式
-          const foundAddress = savedAddresses.value.find(addr => {
-            return addr.name === newVal.name && 
-                  addr.phone === newVal.phone &&
-                  addr.fullAddress.includes(newVal.detail) // 部分匹配
-          })
+          const foundAddress = savedAddresses.value.find(addr => addr.address_id === newVal.address_id )
+          
           
           if (foundAddress) {
             console.log('找到匹配地址:', foundAddress)

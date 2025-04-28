@@ -111,6 +111,7 @@
     <!-- 联系方式编辑弹窗 -->
     <ContactEditDialog
       v-model:visible="contactDialogVisible"
+      :selected-contact="selectedContact" 
       @use-contact="handleContactSelected"
     />
   </div>
@@ -137,7 +138,7 @@ export default {
     AddressEditDialog,
     ContactEditDialog
   },
-  emits: ['address-selected'], // 添加emit
+  emits: ['address-selected','contact-selected'], // 添加emit
   setup(props, { emit }) {  // 添加emit参数
     const deliveryForm = ref({
       address: {
@@ -219,9 +220,10 @@ export default {
     
     const getDefaultAddress = async () => {
       try {
-        const response = await service.get('/api/address/get_default_addresses');
+        const response = await service.get('/api/address/get_default_addresses',{withCredentials:true});
         if (response.status === 200)  {  
           selectedAddress.value = {
+            address_id:response.data.id,
             fullAddress:response.data.detail_address + ' ' + response.data.city + ',' + response.data.province + ' ' + response.data.postal_code + ' ' + response.data.countryCode,
             postCode:response.data.postal_code,
             cityName: response.data.city,
@@ -238,9 +240,29 @@ export default {
         console.error('获取默认地址失败:', error);
       }
     }
+    const getDefaultContact = async () => {
+      try {
+        const response = await service.get('/api/contact/get_default_contact',{withCredentials:true});
+        console.log('默认联系人：',response.data);
+        if (response.status === 200)  {  
+          selectedContact.value = {
+            contact_id: response.data.id,
+            orderName:response.data.order_contact,
+            orderPhone: response.data.order_contact_phone,
+            techName:response.data.tech_contact,
+            techPhone: response.data.tech_contact_phone,
+          }
+          console.log('默认联系人：',response.data);
+          emit('contact-selected', selectedContact.value)
+        }
+      } catch (error) {
+        console.error('获取默认地址失败:', error);
+      }
+    }
 
     onMounted(() => {
       getDefaultAddress();
+      getDefaultContact(); 
     })
     return {
       deliveryForm,

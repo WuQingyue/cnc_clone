@@ -85,19 +85,40 @@
 </template>
 
 <script>
-import { ref, watch } from 'vue'
+import { ref, watch,onMounted } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
 import { ElMessage } from 'element-plus'
+import service from '@/utils/request'
 export default {
   name: 'ContactEditDialog',
   components: {
     Plus
   },
   props: {
-    visible: Boolean
+    visible: Boolean,
+    selectedContact: {
+      type: Object,
+      default: null
+    }
   },
   emits: ['update:visible', 'save-contact', 'use-contact'],
   setup(props, { emit }) {
+
+    watch(() => props.selectedContact, (newVal) => {
+        console.log('收到selectedContact变化:', newVal)
+        if (newVal) {
+          // 更宽松的比较方式
+          const foundContacts = savedContacts.value.find(cont => cont.contact_id === newVal.contact_id )
+          
+          if (foundContacts) {
+            console.log('找到匹配联系人:', foundContacts)
+            useContact(foundContacts)
+          } else {
+            console.log('未找到匹配联系人')
+          }
+        }
+      }, { immediate: true, deep: true })  // 添加deep:true深度监听
+
     const dialogVisible = ref(false)
     const showForm = ref(false)
     const savedContacts = ref([])
@@ -146,27 +167,55 @@ export default {
       emit('use-contact', contact)
     }
 
-    const setDefaultContact = (contact) => {
+    const setDefaultContact = async (contact) => {
+      console.log('setDefaultContact',contact)
       savedContacts.value.forEach(item => {
         item.isDefault = item === contact
       })
+      const response = await service.post(
+      '/api/contact/set_default_contact',
+      {
+        contact_id: contact.contact_id
+      },
+      { withCredentials: true }
+    )
+    console.log('更新默认联系人response',response)
     }
 
     const saveContact = async () => {
       if (!contactFormRef.value) return
-      
-      await contactFormRef.value.validate((valid) => {
+
+      await contactFormRef.value.validate(async (valid) => {
         if (valid) {
-          const contact = { 
-            ...contactForm.value,
-            isDefault: savedContacts.value.length === 0,
-            isUsing: savedContacts.value.length === 0
+          // 保存到本地列表
+            const contact = { 
+              ...contactForm.value,
+              isDefault: savedContacts.value.length === 0,
+              isUsing: savedContacts.value.length === 0
+            }
+          // 构造后端需要的参数
+          const payload = {
+            order_contact: contactForm.value.orderName,
+            order_contact_phone: contactForm.value.orderPhone,
+            tech_contact: contactForm.value.techName,
+            tech_contact_phone: contactForm.value.techPhone
           }
-          savedContacts.value.push(contact)
-          showForm.value = false
-          emit('save-contact', contact)
-          if (contact.isUsing) {
-            emit('use-contact', contact)
+          try {
+            const response = await service.post('/api/contact/add_contact', payload, { withCredentials: true })
+            if (response.status === 200) {
+              ElMessage.success('联系人保存成功')
+              // 4. 本地保存（不影响后端）
+              savedContacts.value.push(contact)
+              showForm.value = false
+              emit('save-contact', contact)
+              if (contact.isUsing) {
+              emit('use-contact', contact)
+            }
+            } else {
+              ElMessage.error('联系人保存失败')
+            }
+          } catch (e) {
+            ElMessage.error('联系人保存失败')
           }
         }
       })
@@ -187,6 +236,33 @@ export default {
         savedContacts.value.splice(index, 1)
       }
     }
+    const fetchContacts = async () => {
+      try {
+        const response = await service.get('/api/contact/get_user_contacts', { withCredentials: true })
+        if (response.status === 200 && Array.isArray(response.data)) {
+          savedContacts.value = response.data.map(addr => ({
+            contact_id: addr.id,
+            orderName: addr.order_contact,
+            orderPhone: addr.order_contact_phone,
+            techName: addr.tech_contact,
+            techPhone: addr.tech_contact_phone,
+            isDefault: addr.is_default,
+            isUsing: addr.is_active,
+          }))
+          console.log('savedContacts',savedContacts.value)
+        } else if (response.status === 200 && Array.isArray(response.data.data)) {
+          // 如果后端返回 { data: [...] }
+          savedContacts.value = response.data.data
+        }
+      } catch (error) {
+        ElMessage.error('获取联系人列表失败')
+        console.error('获取联系人失败:', error)
+      }
+    }
+
+    onMounted(() => {
+      fetchContacts()
+    })
 
     return {
       dialogVisible,
