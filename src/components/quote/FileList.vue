@@ -344,11 +344,17 @@ const selectedTotalPrice = computed(() => {
 const handleConfirm = async () => {
   // 筛选出被选中的记录
   const selectedDatas = localRecords.value.filter(record => record.selected)
-  console.log('准备提交的数据:',selectedDatas)
+  console.log('准备提交的数据:', selectedDatas)
   if (selectedDatas.length > 0) {
     try {
-      // 跳转到询价页面
+      // 1. 发送数据到后端，存储到 session
+      const response =  await service.post('/api/orders/save_selected_datas', selectedDatas, { withCredentials: true })
+      console.log('后端返回的数据:', response)
+      if (response.status === 200){
+      // 2. 跳转到询价页面
       router.push('/price-inquiry')
+      }
+
     } catch (error) {
       console.error("存储数据时出错:", error)
       alert('准备询价数据时出错，请稍后重试。')

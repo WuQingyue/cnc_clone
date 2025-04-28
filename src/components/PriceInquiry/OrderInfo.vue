@@ -85,27 +85,31 @@
 </template>
   
 <script setup>
-import { ref, watch } from 'vue'
+import { ref, watch, computed, onMounted } from 'vue'
 import { ArrowDown } from '@element-plus/icons-vue'
-
-const props = defineProps({
-  selectedDatas: {
-    type: Array,
-    required: true
-  }
-})
+import { useSelectedDataStore } from '@/store/PriceInquiryDatas'
 
 const isCollapsed = ref(false)
-const orderItems = ref([])
 
-// 监听 selectedDatas 的变化
-watch(() => props.selectedDatas, (newVal) => {
-  orderItems.value=newVal
-  console.log('orderItems', orderItems.value)
-}, { immediate: true })
+// 获取 store 实例
+const selectedDataStore = useSelectedDataStore()
+
+// 使用计算属性获取数据
+const orderItems = ref([])
 
 const toggleCollapse = () => {
   isCollapsed.value = !isCollapsed.value
+}
+
+onMounted(() => {
+  console.log('OrderInfo 组件已加载',orderItems)
+  get_selected_datas()
+})
+import service from '@/utils/request'
+const get_selected_datas = async () => {
+  const response =  await service.get('/api/orders/get_selected_datas', { withCredentials: true })
+  orderItems.value = response.data
+  console.log('后端返回的数据:', orderItems.value)
 }
 </script>
   

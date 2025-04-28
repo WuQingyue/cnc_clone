@@ -80,7 +80,7 @@ const handleBeforeUpload = (file) => {
   const data = new FormData();
   data.append('file', file); 
   // 使用 axios 发送获取fileInfoAccessId请求
-  service.post('/api/upload/uploadDrawFile', data, { withCredentials: true })
+  service.post('/api/upload/uploadDrawFile', data)
   .then(response => {
       handleUploadSuccess(response.data, file); // 调用 handleUploadSuccess 并传递响应数据
   })

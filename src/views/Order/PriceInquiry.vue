@@ -9,7 +9,7 @@
         <div class="form-section">
           <DeliveryInfo  @address-selected="handleAddressSelected"/>
           <!-- <ExpressInfo /> -->
-          <OrderInfo :selectedDatas="selectedDatas"/>
+          <OrderInfo/>
           <InvoiceInfo />
           <OtherInfo />
         </div>
