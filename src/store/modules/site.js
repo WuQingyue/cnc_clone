@@ -4,7 +4,7 @@ import { ref, computed } from 'vue'
 export const useSiteStore = defineStore('site', () => {
   // state
   const siteInfo = ref({
-    name: '嘉立诚数控科技有限公司',
+    name: '厦门修蓁慧进技术有限公司',
     phone: '400-0755-519',
     email: 'info@jlc-cnc.com',
     address: '深圳市宝安区福永街道凤凰工业园',

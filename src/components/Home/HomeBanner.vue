@@ -17,6 +17,10 @@
       <swiper-slide v-for="(slide, index) in bannerList" :key="index">
         <div class="banner-slide">
           <img :src="slide.image" :alt="slide.title" @click="handleLearnMore">
+          <div class="banner-text-block">
+            <div class="banner-title">{{ slide.title }}</div>
+            <div class="banner-subtitle">{{ slide.subtitle }}</div>
+          </div>
         </div>
       </swiper-slide>
     </swiper>
@@ -40,12 +44,31 @@ export default {
     return {
       modules: [Autoplay, Pagination, Navigation],
       bannerList: [
-        { image: require('@/assets/images/banner1.png') },
-        { image: require('@/assets/images/banner2.jpg') },
-        { image: require('@/assets/images/banner3.jpg') },
-        { image: require('@/assets/images/banner4.jpg') },
-        { image: require('@/assets/images/banner5.jpg') },
-        { image: require('@/assets/images/banner6.jpg') }
+        {
+          image: require('@/assets/images/banner2.png'),
+          title: 'SmartCNC机械智造',
+          subtitle: '交期迅速 | 无忧品质 | 高性价比 |  贴心服务'
+        },
+        {
+          image: require('@/assets/images/banner3.png'),
+          title: '专业团队，品质保障',
+          subtitle: '经验丰富的工程师团队为您服务'
+        },
+        {
+          image: require('@/assets/images/banner4.png'),
+          title: '支持定制化服务',
+          subtitle: '满足不同行业的个性化需求'
+        },
+        {
+          image: require('@/assets/images/banner5.png'),
+          title: '智能制造，未来已来',
+          subtitle: '引领智能制造新潮流'
+        },
+        {
+          image: require('@/assets/images/banner6.png'),
+          title: 'SmartCNC欢迎您',
+          subtitle: '携手共创美好未来'
+        }
       ]
     }
   },
@@ -82,6 +105,40 @@ export default {
   height: 100%;
   object-fit: cover;
   display: block;
+}
+
+/* 文字块，垂直居中，靠左 */
+.banner-text-block {
+  position: absolute;
+  left: 40px;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  z-index: 2;
+}
+
+/* 标题样式 */
+.banner-title {
+  color: #fff;
+  font-size: clamp(0.45rem, 1.8vw, 1.6rem);
+  font-weight: bold;
+  line-height: 1.15;
+  letter-spacing: 2px;
+  text-shadow: 0 2px 16px rgba(0,0,0,0.4);
+  margin-bottom: 12px;
+}
+
+/* 副标题样式 */
+
+.banner-subtitle {
+  color: #fff;
+  font-size: clamp(0.32rem, 1vw, 0.8rem);
+  font-weight: normal;
+  line-height: 1.4;
+  letter-spacing: 1px;
+  text-shadow: 0 2px 8px rgba(0,0,0,0.3);
 }
 
 /* Swiper pagination bullets */
@@ -126,7 +183,11 @@ export default {
     height: 420px;
     margin-top: 60px;
   }
+  .banner-text-block {
+    left: 20px;
+  }
 }
+
 @media (max-width: 992px) {
   .home-banner {
     height: 320px;
@@ -137,7 +198,11 @@ export default {
     width: 32px;
     height: 32px;
   }
+  .banner-text-block {
+    left: 20px;
+  }
 }
+
 @media (max-width: 768px) {
   .home-banner {
     height: 200px;
@@ -146,7 +211,11 @@ export default {
   .banner-slide img {
     min-height: 140px;
   }
+  .banner-text-block {
+    left: 10px;
+  }
 }
+
 @media (max-width: 480px) {
   .home-banner {
     height: 120px;
@@ -163,6 +232,9 @@ export default {
   :deep(.swiper-pagination-bullet) {
     width: 8px;
     height: 8px;
+  }
+  .banner-text-block {
+    left: 6px;
   }
 }
 </style>

@@ -5,7 +5,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width,initial-scale=1.0">
     <link rel="icon" href="<%= BASE_URL %>favicon.ico">
-    <title>嘉立诚数控</title>
+    <title>SmartCNC</title>
     <!-- 添加 Google OAuth 脚本 -->
     <script src="https://accounts.google.com/gsi/client"></script>
     <script src="https://res.zvo.cn/translate/translate.js"></script>
@@ -23,9 +23,9 @@
           'style'
         ],
         // 默认语言
-        defaultLang: 'zh',
+        defaultLang: 'en',
         // 关闭自动检测
-        detectLanguage: false,
+        detectLanguage: true,
         // 设置翻译延迟
         translateDelay: 100,
         // 缓存翻译结果
@@ -35,11 +35,12 @@
       // 等待 translate.js 加载完成
       window.onload = function() {
         if (window.translate) {
+          translate.language.setDefaultTo('english');
           //启用翻译中的遮罩层，给用户一个友好提示，解决翻译延迟的问题
           translate.progress.api.startUITip();
           // 设置本地语种（当前网页的语种）
           // translate.language.setLocal('chinese_simplified');
-          translate.setAutoDiscriminateLocalLanguage();   
+          // translate.setAutoDiscriminateLocalLanguage();   
           // 开启页面变化监控，自动翻译变化部分
           translate.listener.start();
           // 执行翻译初始化
@@ -142,6 +143,72 @@
       .translate-select-language .language-submenu,
       .translate-select-language .submenu {
         display: none !important;
+      }
+      @media (max-width: 1200px) {
+        .translate-select-language,
+        .translate-select-language select,
+        .translate-select-language option {
+          font-size: 7px !important;
+          height: 20px !important;
+          min-width: 60px !important;
+          width: 60px !important;
+        }
+        .translate-select-language::after {
+          border-left: 3px solid transparent;
+          border-right: 3px solid transparent;
+          border-top: 3px solid #999;
+          right: 6px;
+          width: 0;
+          height: 0;
+        }
+      }
+      @media (max-width: 992px) {
+        .translate-select-language,
+        .translate-select-language select,
+        .translate-select-language option {
+          font-size: 6px !important;
+          height: 18px !important;
+          min-width: 50px !important;
+          width: 50px !important;
+        }
+        .translate-select-language::after {
+          border-left: 2.5px solid transparent;
+          border-right: 2.5px solid transparent;
+          border-top: 2.5px solid #999;
+          right: 5px;
+        }
+      }
+      @media (max-width: 768px) {
+        .translate-select-language,
+        .translate-select-language select,
+        .translate-select-language option {
+          font-size: 5px !important;
+          height: 16px !important;
+          min-width: 40px !important;
+          width: 40px !important;
+        }
+        .translate-select-language::after {
+          border-left: 2px solid transparent;
+          border-right: 2px solid transparent;
+          border-top: 2px solid #999;
+          right: 4px;
+        }
+      }
+      @media (max-width: 480px) {
+        .translate-select-language,
+        .translate-select-language select,
+        .translate-select-language option {
+          font-size: 4px !important;
+          height: 14px !important;
+          min-width: 30px !important;
+          width: 30px !important;
+        }
+        .translate-select-language::after {
+          border-left: 1.5px solid transparent;
+          border-right: 1.5px solid transparent;
+          border-top: 1.5px solid #999;
+          right: 3px;
+        }
       }
 
     </style>

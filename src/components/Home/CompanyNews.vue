@@ -2,7 +2,6 @@
   <section class="company-news">
     <div class="container">
       <h2 class="section-title">企业动态及技术专栏</h2>
-      
       <div class="news-container">
         <!-- 公司动态 -->
         <div class="news-section">
@@ -10,7 +9,6 @@
             <h3>公司动态</h3>
             <router-link to="/news" class="more-link">更多 ></router-link>
           </div>
-          
           <div class="news-list">
             <div class="news-item" @click="handleNewsClick(companyNews[0])">
               <div class="news-image">
@@ -24,34 +22,30 @@
             </div>
           </div>
         </div>
-
         <!-- 技术文章 -->
         <div class="news-section">
           <div class="section-header">
             <h3>技术文章</h3>
             <router-link to="/articles" class="more-link">更多 ></router-link>
           </div>
-          
           <ul class="article-list">
-            <li v-for="article in techArticles" 
-                :key="article.id" 
+            <li v-for="article in techArticles"
+                :key="article.id"
                 @click="handleArticleClick(article)">
               <span class="article-title">{{ article.title }}</span>
               <span class="article-date">{{ article.date }}</span>
             </li>
           </ul>
         </div>
-
         <!-- 技术讨论 -->
         <div class="news-section">
           <div class="section-header">
             <h3>技术讨论</h3>
             <router-link to="/discussions" class="more-link">更多 ></router-link>
           </div>
-          
           <ul class="discussion-list">
-            <li v-for="discussion in techDiscussions" 
-                :key="discussion.id" 
+            <li v-for="discussion in techDiscussions"
+                :key="discussion.id"
                 @click="handleDiscussionClick(discussion)">
               <span class="discussion-title">{{ discussion.title }}</span>
               <span class="discussion-date">{{ discussion.date }}</span>
@@ -156,13 +150,41 @@ const handleDiscussionClick = (discussion) => {
 
 <style lang="scss" scoped>
 .company-news {
-  padding: 60px 0;
+  width: 100%;
+  max-width: 100vw;
+  margin-top: 80px;
   background: #fff;
+  overflow: hidden;
+  /* 保持和 HomeBanner.vue 一致 */
+  @media (max-width: 1200px) {
+    margin-top: 60px;
+  }
+  @media (max-width: 992px) {
+    margin-top: 50px;
+  }
+  @media (max-width: 768px) {
+    margin-top: 40px;
+  }
+  @media (max-width: 480px) {
+    margin-top: 32px;
+  }
 
   .container {
     max-width: 1200px;
     margin: 0 auto;
     padding: 0 15px;
+    width: 100%;
+    /* 保持和 HomeBanner.vue 一致 */
+    @media (max-width: 1200px) {
+      max-width: 100vw;
+      padding: 0 8px;
+    }
+    @media (max-width: 768px) {
+      padding: 0 4px;
+    }
+    @media (max-width: 480px) {
+      padding: 0 2px;
+    }
   }
 
   .section-title {
@@ -171,12 +193,27 @@ const handleDiscussionClick = (discussion) => {
     text-align: center;
     margin-bottom: 40px;
     font-weight: 500;
+    @media (max-width: 768px) {
+      font-size: 24px;
+      margin-bottom: 30px;
+    }
+    @media (max-width: 480px) {
+      font-size: 18px;
+      margin-bottom: 18px;
+    }
   }
 
   .news-container {
     display: grid;
     grid-template-columns: repeat(3, 1fr);
     gap: 20px;
+    @media (max-width: 1200px) {
+      grid-template-columns: 1fr;
+      gap: 20px;
+    }
+    @media (max-width: 768px) {
+      gap: 10px;
+    }
   }
 
   .news-section {
@@ -184,6 +221,12 @@ const handleDiscussionClick = (discussion) => {
     border-radius: 4px;
     box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
     padding: 20px;
+    @media (max-width: 768px) {
+      padding: 12px;
+    }
+    @media (max-width: 480px) {
+      padding: 6px;
+    }
 
     .section-header {
       display: flex;
@@ -280,6 +323,20 @@ const handleDiscussionClick = (discussion) => {
         }
       }
     }
+    @media (max-width: 768px) {
+      .news-item {
+        .news-image {
+          height: 140px;
+        }
+      }
+    }
+    @media (max-width: 480px) {
+      .news-item {
+        .news-image {
+          height: 80px;
+        }
+      }
+    }
   }
 
   .article-list,
@@ -320,30 +377,6 @@ const handleDiscussionClick = (discussion) => {
         font-size: 12px;
         color: #999;
         white-space: nowrap;
-      }
-    }
-  }
-
-  @media (max-width: 1200px) {
-    .news-container {
-      grid-template-columns: 1fr;
-      gap: 20px;
-    }
-  }
-
-  @media (max-width: 768px) {
-    padding: 40px 0;
-
-    .section-title {
-      font-size: 24px;
-      margin-bottom: 30px;
-    }
-
-    .news-list {
-      .news-item {
-        .news-image {
-          height: 140px;
-        }
       }
     }
   }

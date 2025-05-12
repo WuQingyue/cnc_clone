@@ -18,8 +18,8 @@
         <div class="container">
           <div class="intro-content">
             <div class="intro-text">
-              <h2>公司简介</h2>
-              <p>嘉立诚数控科技有限公司成立于2010年，是一家专业从事精密零件加工的高新技术企业。公司拥有先进的数控加工设备和专业的技术团队，致力于为客户提供高质量的加工服务。</p>
+              <h2>SmartCNC简介</h2>
+              <p>SmartCNC 致力于为客户提供高质量的加工服务。</p>
               <p>经过多年发展，公司已形成完整的加工产业链，可提供CNC加工、3D打印、钣金加工等全方位服务。我们的产品广泛应用于航空航天、医疗器械、汽车配件等多个领域。</p>
               <div class="company-data">
                 <div class="data-item">
@@ -106,7 +106,7 @@
           {
             year: '2010',
             title: '公司成立',
-            content: '嘉立诚数控科技有限公司正式成立',
+            content: 'SmartCNC 正式成立',
             color: '#0bbd87'
           },
           {

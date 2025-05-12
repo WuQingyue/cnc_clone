@@ -103,7 +103,6 @@ watch(
 </script>
 
 <style lang="scss">
-// 全局样式
 :root {
   --primary-color: #1890ff;
   --success-color: #52c41a;
@@ -148,7 +147,6 @@ html, body {
   padding: 0 20px;
 }
 
-// 页面过渡动画
 .fade-enter-active,
 .fade-leave-active {
   transition: opacity 0.3s ease;
@@ -159,7 +157,7 @@ html, body {
   opacity: 0;
 }
 
-// 通用样式类
+
 .section-title {
   font-size: 32px;
   text-align: center;
@@ -174,7 +172,7 @@ html, body {
   color: var(--text-color-secondary);
 }
 
-// 响应式布局
+
 @media (max-width: 1200px) {
   .container {
     max-width: 960px;

@@ -143,7 +143,7 @@
         newsList: [
           {
             id: 1,
-            title: '嘉立诚数控成功入选国家级专精特新"小巨人"企业',
+            title: 'SmartCNC成功入选国家级专精特新"小巨人"企业',
             description: '近日，工信部公布了第四批专精特新"小巨人"企业名单，我司凭借在精密加工领域的技术创新和市场表现成功入选...',
             image: require('@/assets/images/news1.png'),
             tagName: '公司新闻',

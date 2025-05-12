@@ -228,7 +228,7 @@ onUnmounted(() => {
     .el-button {
       width: 180px;
       height: 48px;
-      font-size: 16px;
+      font-size: 1s6px;
     }
   }
 

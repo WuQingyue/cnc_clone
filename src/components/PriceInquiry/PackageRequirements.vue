@@ -17,7 +17,7 @@
                 :class="{ active: modelValue === 'jlc' }"
                 @click="$emit('update:modelValue', 'jlc')"
             >
-                嘉立创标识盒子
+            SmartCNC 标识盒子
                 <el-icon v-if="modelValue === 'jlc'" class="check-icon"><Check /></el-icon>
             </div>
             <div

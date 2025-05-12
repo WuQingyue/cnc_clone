@@ -255,28 +255,28 @@ const categories = ref([
     activeSubNames: [],
     subItems: [
       {
-        text: '嘉立创EDA',
+        text: 'SmartCNC EDA',
         icon: 'el-icon-document',
         subSubItems: [
           { text: '进入首页', icon: 'el-icon-document' }
         ]
       },
       {
-        text: '嘉立创CAM',
+        text: 'SmartCNC CAM',
         icon: 'el-icon-document',
         subSubItems: [
           { text: '了解CAM工具', icon: 'el-icon-document' }
         ]
       },
       {
-        text: '嘉立创DFM',
+        text: 'SmartCNC DFM',
         icon: 'el-icon-document',
         subSubItems: [
           { text: '了解DFM工具', icon: 'el-icon-document' }
         ]
       },
       {
-        text: '嘉立创ECAD',
+        text: 'SmartCNC ECAD',
         icon: 'el-icon-document',
         subSubItems: [
           { text: '进入首页', icon: 'el-icon-document' }
@@ -304,7 +304,7 @@ const categories = ref([
         ]
       },
       {
-        text: '嘉立创开放平台',
+        text: 'SmartCNC开放平台',
         icon: 'el-icon-document',
         subSubItems: [
           { text: '进入首页', icon: 'el-icon-document' }
@@ -401,7 +401,7 @@ const categories = ref([
         text: '更多服务',
         icon: 'el-icon-document',
         subSubItems: [
-          { text: '嘉立创题库', icon: 'el-icon-document' },
+          { text: 'SmartCNC题库', icon: 'el-icon-document' },
           { text: '资料下载', icon: 'el-icon-document' },
           { text: '文件下载记录', icon: 'el-icon-document' },
           { text: '回到桌面', icon: 'el-icon-document' },

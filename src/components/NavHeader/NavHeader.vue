@@ -1,3 +1,4 @@
+
 <template>
   <header class="nav-header" :class="{ 'is-fixed': isScrolled }">
     <div class="container">
@@ -5,12 +6,12 @@
         <!-- Logo -->
         <div class="logo">
           <router-link to="/">
-            <img src="@/assets/images/logo.jpg" alt="嘉立诚数控">
+            <img src="@/assets/images/logo.jpg" alt="SmartCNC">
           </router-link>
         </div>
 
         <!-- 主导航菜单 (Desktop) -->
-        <nav class="nav-menu" :class="{ open: isMenuOpen }">
+        <nav class="nav-menu">
           <ul class="menu-list">
             <li class="menu-item">
               <router-link to="/quote">在线报价</router-link>
@@ -64,119 +65,54 @@
             <li class="menu-item">
               <router-link to="/contact">联系我们</router-link>
             </li>
+            <!-- 购物车按钮 -->
+            <li class="menu-item">
+              <el-button class="action-button no-border" @click="$router.push('/cart')" type="default">
+                <el-icon><ShoppingCart /></el-icon>
+                <span>购物车</span>
+              </el-button>
+            </li>
+            <!-- 语言切换按钮 -->
+            <li class="menu-item">
+              <div id="translate" class="translate-select-language"></div>
+            </li>
+            <!-- 用户区域 -->
+            <li class="menu-item user-area">
+              <!-- 未登录状态 -->
+              <template v-if="!userStore.isLoggedIn">
+                <el-button class="action-button no-border" @click="$router.push('/register')">注册</el-button>
+                <el-button class="action-button no-border" @click="$router.push('/login')">登录</el-button>
+              </template>
+              <!-- 已登录状态 -->
+              <template v-else>
+                <Profile>
+                  <template #trigger>
+                    <div class="user-info">
+                      <el-avatar 
+                        :size="32" 
+                        :src="userStore.user.picture" 
+                      />
+                      <span>{{ userStore.user.user_name }}</span>
+                    </div>
+                  </template>
+                </Profile>
+              </template>
+            </li>
           </ul>
         </nav>
-
-        <!-- 右侧功能区 (Desktop) -->
-        <div class="header-right">
-          <!-- 购物车按钮 -->
-          <div class="action-button">
-            <router-link to="/cart">
-              <el-icon><ShoppingCart /></el-icon>
-              <span>购物车</span>
-            </router-link>
-          </div>
-          <div id="translate" class="translate-select-language"></div>
-          <!-- 用户区域 -->
-          <div class="user-area">
-            <!-- 未登录状态 -->
-            <template v-if="!userStore.isLoggedIn">
-              <el-button class="action-button" @click="$router.push('/register')">注册</el-button>
-              <el-button class="action-button" @click="$router.push('/login')">登录</el-button>
-            </template>
-            <!-- 已登录状态 -->
-            <template v-else>
-              <Profile>
-                <template #trigger>
-                  <div class="user-info">
-                    <el-avatar 
-                      :size="32" 
-                      :src="userStore.user.picture" 
-                    />
-                    <span>{{ userStore.user.user_name }}</span>
-                  </div>
-                </template>
-              </Profile>
-            </template>
-          </div>
-        </div>
-        <!-- 移动端菜单按钮 -->
-        <div class="menu-toggle" @click="toggleMenu">
-          <el-icon v-if="!isMenuOpen"><Menu /></el-icon>
-          <el-icon v-else><Close /></el-icon>
-        </div>
       </div>
     </div>
-    <!-- 移动端菜单 -->
-    <transition name="fade">
-      <div class="mobile-menu" v-if="isMenuOpen">
-        <ul class="mobile-menu-list">
-          <li><router-link to="/quote" @click="toggleMenu">在线报价</router-link></li>
-          <li><router-link to="/sales-promotion" @click="toggleMenu">CNC1元打样</router-link></li>
-          <li>
-            <el-icon style="color: red"><Flag /></el-icon>
-            <router-link to="/coupons" @click="toggleMenu">领券中心</router-link>
-          </li>
-          <li><router-link to="/materials" @click="toggleMenu">材料介绍</router-link></li>
-          <li>
-            <details>
-              <summary>服务指引</summary>
-              <router-link to="/service-guidance" @click="toggleMenu">服务指引</router-link>
-              <router-link to="/user-evaluation" @click="toggleMenu">客户评价</router-link>
-              <router-link to="/technical-column" @click="toggleMenu">技术专栏</router-link>
-              <router-link to="/forum" @click="toggleMenu">技术论坛</router-link>
-            </details>
-          </li>
-          <li>
-            <details>
-              <summary>关于我们</summary>
-              <router-link to="/news" @click="toggleMenu">公司动态</router-link>
-              <router-link to="/about" @click="toggleMenu">公司简介</router-link>
-            </details>
-          </li>
-          <li><router-link to="/contact" @click="toggleMenu">联系我们</router-link></li>
-        </ul>
-        <div class="mobile-actions">
-          <router-link to="/cart" class="action-button" @click="toggleMenu">
-            <el-icon><ShoppingCart /></el-icon>
-            <span>购物车</span>
-          </router-link>
-          <div id="translate-mobile" class="translate-select-language"></div>
-          <div class="user-area">
-            <template v-if="!userStore.isLoggedIn">
-              <el-button class="action-button" @click="$router.push('/register');toggleMenu()">注册</el-button>
-              <el-button class="action-button" @click="$router.push('/login');toggleMenu()">登录</el-button>
-            </template>
-            <template v-else>
-              <Profile>
-                <template #trigger>
-                  <div class="user-info">
-                    <el-avatar 
-                      :size="32" 
-                      :src="userStore.user.picture" 
-                    />
-                    <span>{{ userStore.user.user_name }}</span>
-                  </div>
-                </template>
-              </Profile>
-            </template>
-          </div>
-        </div>
-      </div>
-    </transition>
   </header>
   <div class="login-options">
     <div id="googleButton"></div>
   </div>
 </template>
 
-
 <script setup>
-import { ref, onMounted, onUnmounted, watch } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
-import { ShoppingCart, Menu, Close, ArrowUpBold, ArrowDownBold, Flag } from '@element-plus/icons-vue'
+import { ShoppingCart, ArrowUpBold, ArrowDownBold, Flag } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/user'
-import { storeToRefs } from 'pinia'
 import { ElMessage } from 'element-plus'
 import Profile from '@/views/Profile/Profile.vue'
 import axios from 'axios'
@@ -184,14 +120,10 @@ const router = useRouter()
 const userStore = useUserStore()
 
 const isScrolled = ref(false)
-const isMenuOpen = ref(false)
 const activeSubmenu2 = ref(null)
 const isUserMenuVisible = ref(false)
 const activeSubmenu = ref(null)
 
-const toggleMenu = () => {
-  isMenuOpen.value = !isMenuOpen.value
-}
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 0
 }
@@ -256,16 +188,6 @@ const handleCommand = async (command) => {
 
 onMounted(() => {
   checkLoginStatus()
-  if (window.gapi) {
-    initializeGoogleLogin();
-  } else {
-    // 如果 gapi 还未加载，添加一个全局回调
-    window.onload = () => {
-      if (window.gapi) {
-        initializeGoogleLogin();
-      }
-    };
-  }
 });
 const checkLoginStatus = async () => {
   const uesr_Info = await service.get(
@@ -273,13 +195,11 @@ const checkLoginStatus = async () => {
       { withCredentials: true }
   )
   if(uesr_Info.status == 200){
-    // 保存用户信息到 store
     userStore.setUser(uesr_Info.data)
   }else{
     ElMessage.error('用户登录已失效，请重新登录')
     router.push('/login')
   }
-
 }
 
 onUnmounted(() => {
@@ -337,392 +257,315 @@ onUpdated(() => {
     window.translate.execute();
   }
 });
-
 </script>
-
 <style lang="scss" scoped>
-:root {
-  --primary-color: #007BFF;
-  --border-color: #dcdfe6;
-}
-
-.nav-header {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 100;
-  background: white;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
-  width: 100%;
-  min-width: 0;
-  padding: 0;
-  padding: 0 20px; /* 增加左右内边距 */
-  .container {
-    width: 100%;
-    max-width: 1200px; // 可根据需要调整最大宽度
-    margin: 0 auto;
-    padding: 0 20px;
-    box-sizing: border-box;
+  :root {
+    --primary-color: #007BFF;
+    --border-color: #dcdfe6;
   }
-  .header-content {
-    display: flex;
-    align-items: center;
-    height: 100px;
+  
+  .nav-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 100;
+    background: white;
+    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
     width: 100%;
     min-width: 0;
-  }
-  .logo {
-    height: 40px;
-    margin-right: 40px;
-    img {
-      height: 100%;
-      width: auto;
-      display: block;
+    padding: 0;
+  
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      width: 100%;
+      padding: 0 15px;
+      box-sizing: border-box;
+      // 不设置高度
+      @media (max-width: 1200px) {
+        max-width: 100vw;
+        padding: 0 8px;
+      }
+      @media (max-width: 768px) {
+        padding: 0 4px;
+      }
+      @media (max-width: 480px) {
+        padding: 0 2vw;
+      }
     }
-  }
-  .nav-menu {
-    flex: 1;
-    min-width: 0;
-    .menu-list {
+    .header-content {
       display: flex;
-      gap: 20px;
-      list-style-type: none;
-      margin: 0;
-      padding: 0;
-    }
-    .menu-item {
-      color: #333;
-      font-size: 16px;
-      text-decoration: none;
-      padding: 8px 0;
-      cursor: pointer;
-      width: 100px;
+      flex-wrap: wrap; // 允许内容换行
+      align-items: center;
+      width: 100%;
       min-width: 0;
-      transition: color 0.3s ease;
-      text-align: center;
-      a,
-      .menu-title {
-        color: #333;
-        text-decoration: none;
-        width: 100px;
-        text-align: center;
-        &:hover {
-          color: var(--primary-color);
+      height: auto; // 高度自适应
+      padding: 8px 0;
+      gap: 0.5vw;
+      // 不设置min/max-height
+    }
+    .logo {
+      flex: 0 0 auto;
+      height: 40px;
+      margin-right: 2vw;
+      display: flex;
+      align-items: center;
+      img {
+        height: 100%;
+        width: auto;
+        display: block;
+        max-width: 120px;
+        @media (max-width: 768px) {
+          max-width: 80px;
+        }
+        @media (max-width: 480px) {
+          max-width: 60px;
         }
       }
-      &.has-submenu {
-        position: relative;
-        cursor: pointer;
+    }
+    .nav-menu {
+      flex: 1 1 200px;
+      min-width: 0;
+      .menu-list {
+        display: flex;
+        flex-wrap: wrap; // 允许菜单项换行
+        gap: 1vw;
+        list-style-type: none;
+        margin: 0;
+        padding: 0;
+        align-items: center;
+        width: 100%;
+        @media (max-width: 768px) {
+          gap: 0.5vw;
+        }
+        @media (max-width: 480px) {
+          gap: 0.2vw;
+        }
+      }
+      .menu-item {
+        color: #333;
+        font-size: clamp(12px, 1.1vw, 16px);
+        text-decoration: none;
+        padding: 0 0.6vw;
+        min-width: 0;
+        white-space: nowrap;
+        text-align: center;
+        transition: color 0.3s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex: 0 1 auto;
+        margin-bottom: 4px; // 换行时有间距
+        a,
         .menu-title {
+          color: #333;
+          text-decoration: none;
+          white-space: nowrap;
           display: flex;
           align-items: center;
-          gap: 4px;
-          .submenu-icon {
-            font-size: 12px;
-            transition: transform 0.3s ease;
-            margin-left: 4px;
-            &.is-active {
-              transform: rotate(360deg);
-            }
-          }
-        }
-        .submenu {
-          position: absolute;
-          top: 100%;
-          left: 0;
-          background: #fff;
-          min-width: 160px;
-          padding: 8px 0;
-          border-radius: 4px;
-          box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-          opacity: 0;
-          visibility: hidden;
-          transform: translateY(10px);
-          transition: all 0.3s ease;
-          z-index: 1000;
-          &.is-visible {
-            opacity: 1;
-            visibility: visible;
-            transform: translateY(0);
-          }
-          a {
-            display: block;
-            padding: 8px 16px;
-            color: #333;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            font-size: 14px;
-            &:hover {
-              color: var(--primary-color);
-              background: #f5f7fa;
-            }
-            &.active {
-              color: var(--primary-color);
-            }
-          }
-        }
-        &:hover {
-          .menu-title {
+          justify-content: center;
+          font-size: inherit;
+          &:hover {
             color: var(--primary-color);
           }
         }
-      }
-    }
-  }
-  .header-right {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-left: 50px;
-    .action-button {
-      height: 32px;
-      padding: 0 12px;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      transition: all 0.3s ease;
-      background-color: #fff;
-      cursor: pointer;
-      text-decoration: none;
-      color: #333;
-      width: 100px;
-      &:hover {
-        border-color: var(--primary-color);
-        color: var(--primary-color);
-      }
-      a {
-        text-decoration: none;
-        color: inherit;
-        display: flex;
-        align-items: center;
-        gap: 4px;
-      }
-      .el-icon {
-        font-size: 16px;
-      }
-    }
-    .user-actions {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      .register-btn, .login-btn {
-        font-size: 14px;
-        color: #333;
-        text-decoration: none;
-        background-color: #fff;
-        border: 1px solid var(--border-color);
-        &:hover {
-          color: var(--primary-color);
-          border-color: var(--primary-color);
+        &.has-submenu {
+          position: relative;
+          cursor: pointer;
+          .menu-title {
+            display: flex;
+            align-items: center;
+            gap: 0.3vw;
+            .submenu-icon {
+              font-size: 0.9em;
+              transition: transform 0.3s ease;
+              margin-left: 0.3vw;
+              &.is-active {
+                transform: rotate(360deg);
+              }
+            }
+          }
+          .submenu {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            background: #fff;
+            min-width: 120px;
+            padding: 0.4em 0;
+            border-radius: 4px;
+            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            font-size: clamp(12px, 1vw, 14px);
+            &.is-visible {
+              opacity: 1;
+              visibility: visible;
+              transform: translateY(0);
+            }
+            a {
+              display: block;
+              padding: 0.4em 1em;
+              color: #333;
+              text-decoration: none;
+              transition: all 0.3s ease;
+              font-size: inherit;
+              &:hover {
+                color: var(--primary-color);
+                background: #f5f7fa;
+              }
+              &.active {
+                color: var(--primary-color);
+              }
+            }
+          }
+          &:hover {
+            .menu-title {
+              color: var(--primary-color);
+            }
+          }
+        }
+        &.user-area {
+          gap: 0.5vw;
+          .action-button {
+            margin-left: 0;
+          }
         }
       }
     }
   }
-  .menu-toggle {
-    display: none;
+  
+  /* 新增：无边框按钮样式 */
+  .action-button.no-border {
+    border: none !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    outline: none !important;
+    color: #333;
+    padding: 0 0.7vw;
+    transition: background 0.2s;
+    font-size: inherit;
   }
-}
-.user-area {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  cursor: pointer;
-  padding: 4px 8px;
-  border-radius: 4px;
-}
-.user-info:hover {
-  background-color: #f5f7fa;
-}
-
-.user-info {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  .username {
+  .action-button.no-border:hover,
+  .action-button.no-border:focus {
+    background: #f5f7fa !important;
+    color: var(--primary-color) !important;
+  }
+  
+  .user-area {
+    display: flex;
+    align-items: center;
+    gap: 0.5vw;
+    font-size: inherit;
+  }
+  .user-info {
+    display: flex;
+    align-items: center;
+    gap: 0.5vw;
+    cursor: pointer;
+    padding: 0.2em 0.5em;
+    border-radius: 4px;
+    font-size: inherit;
+  }
+  .user-info:hover {
+    background-color: #f5f7fa;
+  }
+  .user-info .username {
     max-width: 80px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-}
-.user-submenu {
-  width: 200px;
-  padding: 0;
-  .user-header {
-    padding: 16px;
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    border-bottom: 1px solid #eee;
-    .user-info {
-      flex: 1;
-      overflow: hidden;
-      .name {
-        font-weight: 500;
-        margin-bottom: 4px;
-      }
-      .email {
-        font-size: 12px;
-        color: #999;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-    }
-  }
-  .menu-items {
-    padding: 8px 0;
-    a {
-      display: block;
-      padding: 8px 16px;
-      color: #333;
-      text-decoration: none;
-      transition: all 0.3s;
-      &:hover {
-        color: var(--primary-color);
-        background: #f5f7fa;
-      }
-    }
-  }
-}
-.login-options {
-  margin-top: 20px;
-  display: flex;
-  justify-content: center;
-  #googleButton {
-    width: 100%;
-    display: flex;
-    justify-content: center;
-  }
-}
-
-.menu-toggle {
-  display: none;
-  cursor: pointer;
-  margin-left: 16px;
-  .el-icon {
-    font-size: 28px;
-  }
-}
-
-@media (max-width: 900px) {
-  .header-content {
-    height: 60px;
-  }
-  .logo {
-    margin-right: 12px;
-    img {
-      height: 32px;
-    }
-  }
-  .nav-menu {
-    display: none;
-  }
-  .header-right {
-    display: none;
-  }
-  .menu-toggle {
-    display: block;
-  }
-}
-
-/* Mobile menu styles */
-.mobile-menu {
-  position: fixed;
-  top: 60px;
-  left: 0;
-  width: 100vw;
-  background: #fff;
-  z-index: 9999;
-  box-shadow: 0 2px 12px rgba(0,0,0,0.1);
-  padding: 16px 0 0 0;
-  .mobile-menu-list {
-    list-style: none;
-    margin: 0;
-    padding: 0 24px;
-    li {
-      margin-bottom: 16px;
-      a {
-        color: #333;
-        text-decoration: none;
-        font-size: 18px;
-        display: block;
-        padding: 8px 0;
-        &:hover {
-          color: var(--primary-color);
-        }
-      }
-      details {
-        summary {
-          font-size: 18px;
-          cursor: pointer;
-          outline: none;
-          margin-bottom: 8px;
-        }
-        router-link {
-          padding-left: 16px;
-        }
-      }
-    }
-  }
-  .mobile-actions {
-    padding: 16px 24px 24px 24px;
-    display: flex;
-    flex-direction: column;
-    gap: 12px;
-    .action-button {
+  .user-submenu {
+    width: 200px;
+    padding: 0;
+    font-size: clamp(12px, 1vw, 16px);
+    .user-header {
+      padding: 1em;
       display: flex;
       align-items: center;
-      justify-content: flex-start;
-      width: 100%;
-      border: 1px solid var(--border-color);
-      border-radius: 4px;
-      padding: 8px 12px;
-      background: #fff;
-      color: #333;
-      text-decoration: none;
-      font-size: 16px;
-      gap: 8px;
-      &:hover {
-        color: var(--primary-color);
-        border-color: var(--primary-color);
-      }
-      .el-icon {
-        font-size: 20px;
-      }
-    }
-    .translate-select-language {
-      margin: 8px 0;
-      text-align: left;
-    }
-    .user-area {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      .action-button {
-        width: 100%;
-        justify-content: flex-start;
-      }
+      gap: 0.7vw;
+      border-bottom: 1px solid #eee;
       .user-info {
-        gap: 8px;
-        font-size: 16px;
+        flex: 1;
+        overflow: hidden;
+        .name {
+          font-weight: 500;
+          margin-bottom: 4px;
+        }
+        .email {
+          font-size: 0.8em;
+          color: #999;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
+    }
+    .menu-items {
+      padding: 0.5em 0;
+      a {
+        display: block;
+        padding: 0.5em 1em;
+        color: #333;
+        text-decoration: none;
+        transition: all 0.3s;
+        font-size: inherit;
+        &:hover {
+          color: var(--primary-color);
+          background: #f5f7fa;
+        }
       }
     }
   }
-}
-
-/* Fade transition for mobile menu */
-.fade-enter-active, .fade-leave-active {
-  transition: opacity 0.2s;
-}
-.fade-enter-from, .fade-leave-to {
-  opacity: 0;
-}
+  .login-options {
+    margin-top: 1.5vw;
+    display: flex;
+    justify-content: center;
+    font-size: inherit;
+    #googleButton {
+      width: 100%;
+      display: flex;
+      justify-content: center;
+    }
+  }
+  
+  /* 小屏幕适配，减小字体和间距 */
+  @media (max-width: 768px) {
+    .nav-header .logo {
+      margin-right: 1vw;
+      height: 32px;
+      img {
+        max-width: 60px;
+      }
+    }
+    .nav-header .nav-menu .menu-list {
+      gap: 0.3vw;
+    }
+    .nav-header .menu-item {
+      font-size: clamp(11px, 2.5vw, 14px);
+      padding: 0 0.4vw;
+    }
+    .user-info .username {
+      max-width: 60px;
+    }
+  }
+  @media (max-width: 480px) {
+    .nav-header .logo {
+      margin-right: 0.5vw;
+      height: 24px;
+      img {
+        max-width: 40px;
+      }
+    }
+    .nav-header .menu-item {
+      font-size: clamp(10px, 3vw, 13px);
+      padding: 0 0.2vw;
+    }
+    .user-info .username {
+      max-width: 40px;
+    }
+  }
 </style>

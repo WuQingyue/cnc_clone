@@ -1,7 +1,6 @@
 # 要完成的视图
 
-- CNC1元打样
-- 领劵中心
+
 - 材料介绍
 - 服务指引
 - 客户评价
@@ -33,24 +32,9 @@
 ```
 @/components/quote/FileList.vue
 ```
-
-## 领劵中心视图
-```
-@/views/coupon/CouponCenter.vue
-```
-### 背景图组件
-```
-@/components/CouponCenter/BannerSection.vue
-```
-### 新用户优惠券组件
-```
-@/components/CouponCenter/NewUserCoupons.vue
-```
-
 ## 说明
 
 - 所有组件的命名规则为：`组件名.vue`,组件放在components文件夹下
 - 所有视图的命名规则为：`视图名.vue`，视图放在views文件夹下
 - 领劵中心视图的组件尚未完成，可更改
-
 

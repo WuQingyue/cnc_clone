@@ -6,9 +6,9 @@
           <div class="footer-content">
             <!-- 公司信息 -->
             <div class="footer-section company-info">
-              <!-- <img src="@/assets/images/logo_bottom.png" alt="嘉立诚数控" class="footer-logo"> -->
+              <!-- <img src="@/assets/images/logo_bottom.png" alt="SmartCNC" class="footer-logo"> -->
               <p class="company-desc">
-                嘉立诚数控科技有限公司专注于精密零件加工制造，提供CNC加工、3D打印、钣金加工等一站式服务。
+                SmartCNC专注于精密零件加工制造，提供CNC加工、3D打印、钣金加工等一站式服务。
               </p>
               <div class="contact-info">
                 <p><i class="el-icon-phone"></i> 服务热线：400-0755-519</p>
@@ -59,7 +59,7 @@
       <div class="footer-bottom">
         <div class="container">
           <div class="copyright">
-            <p>© {{ currentYear }} 嘉立诚数控科技有限公司 版权所有</p>
+            <p>© {{ currentYear }} 厦门修蓁慧进技术有限公司 版权所有</p>
             <p>
               <a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备XXXXXXXX号-1</a>
             </p>

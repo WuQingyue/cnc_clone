@@ -5,7 +5,7 @@
         <!-- Logo -->
         <div class="logo" @mouseenter="isHovered = true" @mouseleave="isHovered = false">
           <router-link to="/">
-            <img :src="logoSrc" alt="嘉立创CNC" />
+            <img :src="logoSrc" alt="SmartCNC" />
           </router-link>
         </div>
 
@@ -14,12 +14,6 @@
           <div class="nav-list">
             <div class="nav-item">
               <router-link to="/quote">在线报价</router-link>
-            </div>
-            <div class="nav-item">
-              <router-link to="/sample">CNC1元打样</router-link>
-            </div>
-            <div class="nav-item">
-              <router-link to="/coupons">领券中心</router-link>
             </div>
             <div class="nav-item">
               <router-link to="/materials">材料介绍</router-link>

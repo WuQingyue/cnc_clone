@@ -1,3 +1,4 @@
+
 <template>
     <div class="luxury-showcase">
         <div class="showcase-header">
@@ -382,4 +383,4 @@ body {
         font-size: 16px;
     }
 }
-</style>    
+</style>

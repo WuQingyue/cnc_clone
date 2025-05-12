@@ -139,14 +139,14 @@
           <div class="company-headquarters">
             <h2 class="section-title">公司总部</h2>
             <el-tabs v-model="activeLocation" class="location-tabs">
-              <el-tab-pane label="嘉立创总部" name="shenzhen">
+              <el-tab-pane label="SmartCNC 总部" name="shenzhen">
                 <div class="location-info">
                   <div class="map-container">
                     <img src="@/assets/images/map1.png" alt="地图背景" class="map-bg">
                     <div class="location-marker">
                       <img src="@/assets/images/map2.png" alt="位置标记" class="marker-icon">
                       <div class="company-info">
-                        <h3>嘉立创总部</h3>
+                        <h3>SmartCNC 总部</h3>
                         <p>深圳市福田区莲花街道景华社区商报路2号奥林匹克大厦27层</p>
                       </div>
                     </div>
@@ -176,8 +176,8 @@
                     <div class="location-marker">
                       <img src="@/assets/images/map2.png" alt="位置标记" class="marker-icon">
                       <div class="company-info">
-                        <h3>广东韶关基地</h3>
-                        <p>广东省韶关市翁源县翁城镇韶关嘉立创</p>
+                        <h3>福建厦门基地</h3>
+                        <p>福建省厦门市集美区软件园三期f20三楼SmartCNC</p>
                       </div>
                     </div>
                   </div>

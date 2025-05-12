@@ -29,7 +29,7 @@ export const processList = [
       '支持3D<strong style="color: black;">(必须)</strong>格式:<strong style="color: black;">step,stp</strong>;支持2D格式:<strong style="color: black;">dwg,dxf,pdf</strong>，可压缩包(<strong style="color: black;">zip、rar</strong>)直接上传',
       '建议您同时上传3D(必须)和2D图纸，同一款零件3D和2D图纸名称需要一致',
       '单次上传文件 <strong style="color: blue;">≤20</strong> 个，单个文件大小<strong style="color: blue;"><100M</strong>',
-      '<img src="IMAGE_PLACEHOLDER" style="width: 15px;"><strong style="color:rgb(59, 228, 186);">嘉立创CNC将对您的文件绝对保密，保护您的知识产权</strong>'  
+      '<img src="IMAGE_PLACEHOLDER" style="width: 15px;"><strong style="color:rgb(59, 228, 186);">SmartCNC将对您的文件绝对保密，保护您的知识产权</strong>'  
     ]
   },
   {

@@ -8,7 +8,7 @@ const routes = [
     name: 'Home',
     component: () => import('@/views/Home/Home.vue'),
     meta: {
-      title: '首页 - 嘉立诚数控'
+      title: '首页 - SmartCNC'
     }
   },
   {
@@ -16,7 +16,7 @@ const routes = [
     name: 'News',
     component: () => import('@/views/NavHeader/About/News.vue'),
     meta: {
-      title: '新闻资讯 - 嘉立诚数控'
+      title: '新闻资讯 - SmartCNC'
     }
   },
   {
@@ -24,7 +24,7 @@ const routes = [
     name: 'About',
     component: () => import('@/views/NavHeader/About/About.vue'),
     meta: {
-      title: '关于我们 - 嘉立诚数控'
+      title: '关于我们 - SmartCNC'
     }
   },
   {
@@ -32,7 +32,7 @@ const routes = [
     name: 'Contact',
     component: () => import('@/views/NavHeader/Contact/Contact.vue'),
     meta: {
-      title: '联系我们 - 嘉立诚数控'
+      title: '联系我们 - SmartCNC'
     }
   },
   {
@@ -41,7 +41,7 @@ const routes = [
     name: 'NotFound',
     component: () => import('@/views/NotFound.vue'),
     meta: {
-      title: '页面未找到 - 嘉立诚数控'
+      title: '页面未找到 - SmartCNC'
     }
   },
   {
@@ -69,12 +69,6 @@ const routes = [
     path: '/sales-promotion',
     name: 'SalesPromotion',
     component: () => import('@/components/NavHeader/SalesPromotion.vue')
-  },
-  
-  {
-    path: '/coupons',
-    name: 'CouponCenter',
-    component: () => import('@/components/CouponCenter/CouponsCenter.vue'),
   },
   {
     path: '/materials',
@@ -115,7 +109,7 @@ const routes = [
     name: 'Login',
     component: () => import('@/components/SignIn/Login.vue'),
     meta: {
-      title: '登录 - 嘉立创',
+      title: '登录 - SmartCNC',
       guest: true
     }
   },
@@ -182,7 +176,7 @@ router.beforeEach((to, from, next) => {
   const auth = useAuthStore()
   
   // 设置页面标题
-  document.title = to.meta.title ? `${to.meta.title} - 嘉立创` : '嘉立创'
+  document.title = to.meta.title ? `${to.meta.title} - SmartCNC` : 'SmartCNC'
   
   // // 处理需要登录的页面
   // if (to.meta.requiresAuth && !auth.isAuthenticated) {

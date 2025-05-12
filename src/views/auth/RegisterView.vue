@@ -4,7 +4,7 @@
     <header class="register-header">
       <div class="header-content">
         <router-link to="/" class="logo">
-          <img src="@/assets/images/logo.png" alt="嘉立创">
+          <img src="@/assets/images/logo.png" alt="SmartCNC">
         </router-link>
         <h1 class="header-title">用户注册</h1>
       </div>
@@ -25,7 +25,7 @@
     <!-- 页脚 -->
     <footer class="register-footer">
       <div class="footer-content">
-        <p>Copyright © {{ currentYear }} 嘉立创数控科技有限公司 版权所有</p>
+        <p>Copyright © {{ currentYear }} 厦门修蓁慧进技术有限公司 版权所有</p>
       </div>
     </footer>
   </div>

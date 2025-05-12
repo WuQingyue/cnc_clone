@@ -35,9 +35,9 @@
                 <template #title>
                   <span>电子产业</span>
                 </template>
-                <el-menu-item index="pcb">嘉立创PCB</el-menu-item>
-                <el-menu-item index="fpc">嘉立创FPC</el-menu-item>
-                <el-menu-item index="smt">嘉立创SMT</el-menu-item>
+                <el-menu-item index="pcb">SmartCNC PCB</el-menu-item>
+                <el-menu-item index="fpc">SmartCNC FPC</el-menu-item>
+                <el-menu-item index="smt">SmartCNC SMT</el-menu-item>
                 <el-menu-item index="laser">激光钢网</el-menu-item>
               </el-sub-menu>
   
@@ -55,9 +55,9 @@
                 <template #title>
                   <span>工业软件</span>
                 </template>
-                <el-menu-item index="eda">嘉立创EDA</el-menu-item>
-                <el-menu-item index="ecad">嘉立创ECAD</el-menu-item>
-                <el-menu-item index="cam">嘉立创CAM</el-menu-item>
+                <el-menu-item index="eda">SmartCNC EDA</el-menu-item>
+                <el-menu-item index="ecad">SmartCNC ECAD</el-menu-item>
+                <el-menu-item index="cam">SmartCNC CAM</el-menu-item>
               </el-sub-menu>
             </el-menu>
           </div>
