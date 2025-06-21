@@ -2,7 +2,7 @@
     <div class="payment-center">
       <!-- 顶部导航栏 -->
       <div class="navbar">
-        <img src="@/assets/images/logo.jpg" alt="Logo" class="logo" />
+        <img src="@/assets/images/logo.png" alt="Logo" class="logo" />
         <span class="title">统一支付中心</span>
       </div>
   
@@ -159,6 +159,16 @@ const renderPayPalButton = (amount) => {
   }).render(paypalButtonContainer.value)
 }
 import service from '@/utils/request'
+// 获取payUuid
+const get_payUuid  = async (order_no) => {
+  const res = await service.get('/api/orders/get_payUuid', {
+      params: { orderAccessId: order_no }
+    })
+    console.log('获取payUuid', res)
+    console.log('res.data', res.data)
+    console.log('res.data.data.payUrl', res.data.data.payUrl)
+    return res.data.data.payUrl
+  }
 // 处理支付成功
 const handlePaymentSuccess = async (paypalOrder) => {
   try {
@@ -172,11 +182,22 @@ const handlePaymentSuccess = async (paypalOrder) => {
     })
     if(response.status === 200) {
       ElMessage.success('支付成功！')
+      const payUrl = await get_payUuid(record.order_no)
+      console.log('payUrl', payUrl)
+        // 判断 payUrl 存在且为非空字符串
+    if (typeof payUrl === 'string' && payUrl.trim() !== '') {
+      // jlc下单
+        const res = await service.post('/api/orders/jlc_order', { payUrl: payUrl }, { withCredentials: true })
+        console.log('jlc下单', res)
+        if(res.status === 200) { 
+          const logistics_res = await service.post('/api/logistics/order_create', { order_no: record.order_no }, { withCredentials: true })
+          console.log('物流下单', logistics_res)
+          } 
+    }
       router.push({ 
       path: '/cnc_order',
       query: {
-        order_no: record.order_no,
-        message: '支付成功'
+        payUrl:payUrl
       }
     })
     } else {

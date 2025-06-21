@@ -75,6 +75,7 @@ const routes = [
     name: 'Materials',
     component: () => import('@/components/NavHeader/MaterialsIntroduction.vue')
   },
+  
   {
     path: '/material/:materialId',
     name: 'MaterialDetail',

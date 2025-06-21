@@ -67,8 +67,8 @@ const router = useRouter()
 const companyNews = ref([
   {
     id: 1,
-    title: '嘉立创CNC祝您蛇年大吉，新春佳节期间正常生产！',
-    description: '春节期间，嘉立创CNC生产基地正常生产，欢迎下单！',
+    title: 'SmartCNC祝您蛇年大吉，新春佳节期间正常生产！',
+    description: '春节期间，SmartCNC生产基地正常生产，欢迎下单！',
     image: require('@/assets/images/news1.png'),
     date: '2024-02-10'
   }

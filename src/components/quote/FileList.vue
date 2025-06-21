@@ -138,13 +138,12 @@ const selectedDelivery = ref('BD')
 const localRecords = ref([])
 const showParameterDialog = ref(false) // 控制 ParameterInfo 对话框的显示与隐藏
 const selectedRecord = ref(null) // 用于存储当前选中的需要修改参数的记录
-
-
 const fetchPrices = async () => {
   const selectedDatas = selectedDataStore.getSelectedData();
   console.log('获取勾选的数据', selectedDatas);
 
   try {
+    
     const requestData = selectedDatas.map(item => ({
       materialAccessId: item.materialAccessId,
       crafts: [
@@ -174,14 +173,11 @@ const fetchPrices = async () => {
     console.log('requestData', requestData);
     
     const response = await service.post('/api/price/price', requestData, { withCredentials: true });
-    const response2 = await service.get('/api/price/place_calculate_coupon_fee', { withCredentials: true });
     console.log('response', response);
-    console.log('response2', response2);
     const priceData = response.data;
-    const jlc_carriageFee = response2.data;
     console.log('FileList中的priceData', priceData)
-    console.log('jlc_carriageFee', jlc_carriageFee)
-    if (response.status === 200 && response2.status === 200) {
+    
+    if (response.status === 200) {
       // 假设我们只处理第一个报价信息（如果需要处理多个，可以遍历 quoteInfos）
       const quoteInfos = priceData;
       console.log('quoteInfos', quoteInfos)
@@ -194,7 +190,7 @@ const fetchPrices = async () => {
           record.surfaceCost = quoteInfos[index].craftPrice;
           record.expeditedPrice = quoteInfos[index].expeditedPrice;
           record.pricePerUnit = quoteInfos[index].price; // 更新单价
-          record.totalPrice = quoteInfos[index].price * record.quantity + jlc_carriageFee; // 更新总价
+          record.totalPrice = record.pricePerUnit * record.quantity; // 更新总价
         }
       });
       // 更新 localRecords 中的数据
@@ -223,6 +219,7 @@ const fetchPrices = async () => {
       console.error('Unexpected response format:', priceData);
       ElMessage.error('获取价格信息失败，返回数据格式不正确');
     }
+    
   } catch (error) {
     console.error('请求失败:', error.response?.data || error.message);
     ElMessage.error('获取价格信息失败，请检查网络连接');
@@ -253,8 +250,8 @@ watch(selectedDelivery, (newDeliveryOption) => {
 import ParameterInfo from './ParameterInfo.vue' // 引入 ParameterInfo 组件
 const props = defineProps({
   selectedRecords: {
-    type: Array,
-    default: () => []
+    type: Object,
+    default: () => ({})
   }
 })
 
@@ -339,6 +336,7 @@ const selectedTotalPrice = computed(() => {
     .reduce((total, record) => total + record.totalPrice, 0)
     .toFixed(2); // 保留两位小数
 });
+
 
 
 const handleConfirm = async () => {

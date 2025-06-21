@@ -28,7 +28,7 @@
                     <h3>CNC业务咨询</h3>
                     <p class="contact-person">
                       <el-icon><User /></el-icon>
-                      彭小姐
+                      大俊
                     </p>
                     <p class="contact-phone">
                       <el-icon><Phone /></el-icon>

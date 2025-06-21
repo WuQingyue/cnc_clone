@@ -8,6 +8,7 @@ import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import { createPinia } from 'pinia'
 import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
+// import VueGtag from 'vue-gtag'
 
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)
@@ -44,6 +45,19 @@ app.config.errorHandler = (err, vm, info) => {
   // 可以添加错误上报逻辑
 }
 
+// app.use(store)
+//    .use(router)
+//    .use(ElementPlus, {
+//      locale: zhCn,
+//      size: 'default',
+//      zIndex: 3000
+//    })
+//    .use(VueGtag, {
+//     config: {
+//       id: 'G-GBV72MKCHP'  // 替换为你的衡量ID
+//     }
+//   })
+//    .mount('#app')
 app.use(store)
    .use(router)
    .use(ElementPlus, {

@@ -21,6 +21,7 @@
                     <span class="value">增值税普通发票</span>
                     <span class="invoice-subject">{{ invoiceForm.selectedInvoice.type }}</span>
                     <span class="value">{{ invoiceForm.selectedInvoice.name }}</span>
+                    <span class="value">{{ invoiceForm.selectedInvoice.taxNo }}</span>
                   </div>
                 </div>
                 <span v-else class="content-text placeholder">请选择开票资料</span>
@@ -44,10 +45,10 @@
 </template>
 
 <script>
-import { ref } from 'vue'
+import { ref,onMounted } from 'vue'
 import { ArrowDown, Edit } from '@element-plus/icons-vue'
 import InvoiceEditDialog from './InvoiceEditDialog.vue'
-
+import service from '@/utils/request'
 export default {
   name: 'InvoiceInfo',
   components: {
@@ -55,7 +56,8 @@ export default {
     Edit,
     InvoiceEditDialog
   },
-  setup() {
+  emits: ['invoiceInfo-selected'], // 添加emit
+  setup(props, { emit }) {
     const isCollapsed = ref(false)
     const invoiceDialogVisible = ref(false)
     const invoiceForm = ref({
@@ -74,6 +76,29 @@ export default {
       invoiceForm.value.selectedInvoice = data
       invoiceDialogVisible.value = false
     }
+     const getDefaultInvoiceInfo = async () => {
+      try {
+        const response = await service.get('/api/invoiceInfo/get_default_invoice_info',{withCredentials:true});
+        if (response.status === 200)  {  
+          invoiceForm.value.selectedInvoice.type = response.data.type;
+          if(invoiceForm.value.selectedInvoice.type === 'company'){
+            invoiceForm.value.selectedInvoice.name = response.data.company_name;
+            invoiceForm.value.selectedInvoice.taxNo = response.data.company_tax_no;
+          }
+          else
+          {
+            invoiceForm.value.selectedInvoice.name = response.data.personal_name;
+          }
+          console.log('默认开票信息：',response.data);
+          emit('invoiceInfo-selected', invoiceForm.value.selectedInvoice)
+        }
+      } catch (error) {
+        console.error('获取默认开票信息失败:', error);
+      }
+    }
+    onMounted(() => {
+      getDefaultInvoiceInfo();
+    })
 
     return {
       isCollapsed,

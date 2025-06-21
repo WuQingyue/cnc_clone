@@ -11,9 +11,9 @@
                 SmartCNC专注于精密零件加工制造，提供CNC加工、3D打印、钣金加工等一站式服务。
               </p>
               <div class="contact-info">
-                <p><i class="el-icon-phone"></i> 服务热线：400-0755-519</p>
-                <p><i class="el-icon-message"></i> 邮箱：info@jlc-cnc.com</p>
-                <p><i class="el-icon-location"></i> 地址：深圳市宝安区福永街道凤凰工业园</p>
+                <p><i class="el-icon-phone"></i> 联系方式:13421889916</p>
+                <p><i class="el-icon-message"></i> 微信号码：TONGTRON</p>
+                <p><i class="el-icon-location"></i> 地址：福建省厦门市集美区软件园三期F20栋三楼</p>
               </div>
             </div>
   
@@ -47,7 +47,7 @@
                 </div>
                 <div class="qr-item">
                   <img src="@/assets/images/contact1.png" alt="联系我们">
-                  <span>联系我们</span>
+                  <span>联系人：大俊</span>
                 </div>
               </div>
             </div>
@@ -60,9 +60,9 @@
         <div class="container">
           <div class="copyright">
             <p>© {{ currentYear }} 厦门修蓁慧进技术有限公司 版权所有</p>
-            <p>
+            <!-- <p>
               <a href="https://beian.miit.gov.cn/" target="_blank">粤ICP备XXXXXXXX号-1</a>
-            </p>
+            </p> -->
           </div>
         </div>
       </div>

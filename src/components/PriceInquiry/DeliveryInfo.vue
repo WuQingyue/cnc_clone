@@ -203,6 +203,7 @@ export default {
     const handleAddressSelected = (address) => {
       selectedAddress.value = address
       console.log('收货地址：',selectedAddress.value)
+      emit('address-selected', selectedAddress.value)
       addressDialogVisible.value = false
       // 重置隐藏状态
       addressHidden.value = false

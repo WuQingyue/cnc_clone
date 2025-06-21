@@ -45,7 +45,7 @@
       v-loading="loading"
     >
       <el-table-column type="index" label="序号" width="100" align="center" />
-      <el-table-column prop="order_no" label="订单号" width="200" align="center"/>
+      <el-table-column prop="orderCode" label="订单号" width="200" align="center"/>
       <el-table-column prop="create_time" label="创建时间" width="200" align="center">
         <template #default="scope">
           {{ formatDate(scope.row.create_time) }}
@@ -90,7 +90,18 @@
           <el-button
             link
             type="primary"
-            @click="openShippingDialog(scope.row)"
+            @click="openShippingProgressDialog(scope.row)"
+          >
+            查看详情
+          </el-button>
+        </template>
+      </el-table-column>
+      <el-table-column label="加工进度" width="200" align="center">
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="openProgressDialog(scope.row)"
           >
             查看详情
           </el-button>
@@ -99,12 +110,15 @@
       <el-table-column label="操作" fixed="right" width="280" align="center">
         <template #default="scope">
           <div class="button-group">
-            <template v-if="scope.row.status === 'wait'">
-              <el-button disabled style="color: #909399; background: #f5f5f5;">
+            <template v-if="scope.row.status === '待审核'">
+              <el-button
+                disabled
+                style="color: white; background-color: orange;"
+              >
                 待审核
               </el-button>
             </template>
-            <template v-else-if="scope.row.status === 'pass' || scope.row.status === 'pending'">
+            <template v-else-if ="scope.row.status === '待付款'">
               <el-button
                 type="primary"
                 style="color: white; background-color: blue;"
@@ -113,20 +127,20 @@
                 立即支付
               </el-button>
             </template>
-            <template v-else-if="scope.row.status === 'reject'">
-              <el-button
-                type="warning"
-                @click="openAmountDialog(scope.row)"
-              >
-                查看详情
-              </el-button>
-            </template>
-            <template v-else>
+            <template v-else-if="scope.row.status === '生产中' || scope.row.status === '已发货'">
               <el-button
                 disabled
-                style="color: white; background-color: #909399;"
+                style="color: white; background-color: green;"
               >
-                已支付
+                支付成功
+              </el-button>
+            </template>
+            <template v-else-if="scope.row.status === '支付中'">
+              <el-button
+                disabled
+                style="color: white; background-color: red;"
+              >
+                正在支付
               </el-button>
             </template>
           </div>
@@ -146,11 +160,61 @@
       :amount-data="selectedAmount"
     />
 
-    <!-- 运费对话框 -->
-    <shipping-dialog
-      v-model:visible="shippingDialogVisible"
-      :ship-data="selectedShipping"
-    />
+    <!-- 加工进度对话框 -->
+    <el-dialog
+      v-model="progressDialogVisible"
+      title="加工进度"
+      width="50%"
+    >
+      <div class="progress-content">
+        <div class="custom-timeline">
+          <div
+            v-for="(step, idx) in progressData"
+            :key="idx"
+            class="custom-timeline-item"
+          >
+            <el-icon
+              :style="{
+                color: step.processStatus === 1 ? '#409EFF' : '#C0C4CC',
+                fontSize: '20px',
+                verticalAlign: 'middle'
+              }"
+            >
+              <circle-filled />
+            </el-icon>
+            <span class="timeline-label">{{ step.processName }}</span>
+          </div>
+        </div>
+      </div>
+    </el-dialog>
+    <!-- 物流进度对话框 -->
+    <el-dialog
+      v-model="shippingProgressDialogVisible"
+      title="物流进度"
+      width="50%"
+    >
+      <div class="progress-content">
+        <div class="custom-timeline">
+          <div
+            v-for="(step, idx) in shippingProgressData"
+            :key="idx"
+            class="custom-timeline-item"
+          >
+            <el-icon
+              :style="{
+                color: step.status === 1 ? '#409EFF' : '#C0C4CC',
+                fontSize: '20px',
+                verticalAlign: 'middle'
+              }"
+            >
+              <circle-filled />
+            </el-icon>
+            <span class="timeline-label">{{ step.content }}</span>
+            <span class="timeline-label" style="margin-left:20px;color:#888;">{{ step.time }}</span>
+          </div>
+        </div>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -160,7 +224,6 @@ import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import ModelInfoDialog from '@/components/SignIn/ModelInfoDialog.vue'
 import AmountDialog from '@/components/SignIn/AmountDialog.vue'
-import ShippingDialog from '@/components/SignIn/ShippingDialog.vue'
 import { EventBus } from '@/components/SignIn/eventBus.js'
 
 // 数据状态
@@ -171,24 +234,30 @@ const loading = ref(false)
 const filteredRecords = ref([])
 const modelInfoDialogVisible = ref(false)
 const amountDialogVisible = ref(false)
-const shippingDialogVisible = ref(false)
+const progressDialogVisible = ref(false)
 const selectedModel = ref(null)
 const selectedAmount = ref(null)
-const selectedShipping = ref('')
+const progressData = ref([])
+const shippingProgressDialogVisible = ref(false)
+const shippingProgressData = ref([])
+
+import { CircleFilled } from '@element-plus/icons-vue'
 
 // 使用 Vue Router
 const router = useRouter()
 const route = useRoute()
-
 // 监听路由变化
-watch(() => route.query, (newQuery) => {
-  console.log('newQuery', newQuery)
-  if (newQuery.message === '支付成功') {
-    // 更新订单状态
-   fetchPartAuditData()
-  }
-}, { immediate: true })
-
+watch(
+  () => route.query,
+  (newQuery) => {
+    console.log('newQuery', newQuery)
+    // 判断 payUrl 存在且为非空字符串
+    if (typeof newQuery.payUrl === 'string' && newQuery.payUrl.trim() !== '') {
+      fetchPartAuditData()
+    }
+  },
+  { immediate: true }
+)
 // 格式化日期
 const formatDate = (date) => {
   return new Date(date).toLocaleString()
@@ -266,10 +335,64 @@ const openAmountDialog = (row) => {
 }
 
 // 打开物流信息对话框
-const openShippingDialog = (row) => {
-  console.log('打开物流信息对话框',row)
-  selectedShipping.value = row
-  shippingDialogVisible.value = true
+const openShippingProgressDialog = async (row) => {
+  shippingProgressDialogVisible.value = true
+  shippingProgressData.value = []
+  try {
+    // 假设用 order_no 作为参数，如需调整请改为对应字段
+    const res = await service.post('/api/logistics/track_get', { order_no: row.order_no }, { withCredentials: true })
+    // 假设返回格式为 { data: { result: [{track_Info: {track_events: [...]}}] } }
+    let events = []
+    if (res.data && res.data.result && res.data.result[0] && res.data.result[0].track_Info && Array.isArray(res.data.result[0].track_Info.track_events)) {
+      events = res.data.result[0].track_Info.track_events
+    }
+    // 格式化为进度条需要的数据
+    shippingProgressData.value = events.map(item => ({
+      content: item.process_content,
+      time: item.process_time ? formatTrackTime(item.process_time) : '',
+      status: item.track_node_code === 'DELIVERED' || item.track_node_code === 'ARRIVED' ? 1 : 0 // 你可以根据实际业务判断已完成节点
+    }))
+  } catch (err) {
+    ElMessage.error('获取物流进度失败')
+    shippingProgressData.value = []
+  }
+}
+
+// 格式化物流事件时间
+const formatTrackTime = (timeString) => {
+  if (!timeString || timeString.includes('0001-01-01')) return '时间未知'
+  return new Date(timeString).toLocaleString('zh-CN', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit'
+  })
+}
+
+// 打开加工进度对话框
+const openProgressDialog = async (row) => {
+  console.log('打开加工进度对话框时的row', row)
+  progressDialogVisible.value = true
+  progressData.value = []
+  try {
+    const res = await service.get('/api/orders/query_order_progress', {
+      params: { orderInfoAccessId: row.order_no }
+    })
+    // 假设res.data是数组
+    if (Array.isArray(res.data)) {
+      // 格式化为进度条需要的数据
+      progressData.value = res.data.map(item => ({
+        processName: item.processName,
+        processStatus: item.processStatus
+      }))
+    } else {
+      progressData.value = []
+    }
+  } catch (err) {
+    console.log('暂无加工结果')
+    progressData.value = []
+  }
 }
 
 // 初始化支付
@@ -277,6 +400,7 @@ const initiatePayment = (record) => {
   EventBus.data = { 
     id: record.id,
     order_no: record.order_no,
+    orderCode: record.orderCode,
     user_email: record.user_email,
     processing_fee_id: record.processing_fee_id,
     status: record.status,
@@ -286,7 +410,8 @@ const initiatePayment = (record) => {
   router.push({ name: 'UnifiedPaymentCenter' })
 }
 import service from '@/utils/request'
-// 获取零件审核信息
+
+// 获取零件信息
 const fetchPartAuditData = async () => {
   try {
     // 获取所有订单信息
@@ -295,35 +420,13 @@ const fetchPartAuditData = async () => {
     if (response_all.status != 200) {
       throw new Error('网络响应不是 OK')
     }
-      const data = await response_all.data
-    
-      // 获取已支付订单信息
-      const response_paid = await service.get('/api/orders/get_paid_orders', { withCredentials: true })
-      console.log('获取已支付订单信息', response_paid)
-      if (response_paid.status != 200) {
-        throw new Error('网络响应不是 OK')
-      }
-      const data_paid = await response_paid.data
-
-      // 创建已支付订单的映射，用于快速查找
-      const paidOrdersMap = new Map()
-      data_paid.forEach(order => {
-        paidOrdersMap.set(order.order_no, order)
-      })
-
-      // 合并数据，如果订单号相同，优先使用已支付的数据
-      const mergedData = data.map(order => {
-        const paidOrder = paidOrdersMap.get(order.order_no)
-        return paidOrder || order
-      })
-
       // 更新 filteredRecords
-      filteredRecords.value = mergedData
-      console.log('合并后的订单数据:', filteredRecords.value)
+      filteredRecords.value = response_all.data
+      console.log('cnc订单数据:', filteredRecords.value)
 
   } catch (error) {
     console.error('请求失败:', error)
-    ElMessage.error('获取零件审核信息失败')
+    ElMessage.error('获取信息失败')
   }
 }
 
@@ -334,6 +437,21 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.custom-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  margin-top: 20px;
+}
+.custom-timeline-item {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.timeline-label {
+  font-size: 16px;
+}
+
 .part-audit {
   padding: 20px;
   background-color: #f9f9f9;
@@ -375,5 +493,13 @@ onMounted(() => {
 .el-tag {
   font-size: 14px;
   padding: 5px 10px;
+}
+
+.progress-content {
+  padding: 20px;
+}
+
+.el-timeline {
+  margin-top: 20px;
 }
 </style>

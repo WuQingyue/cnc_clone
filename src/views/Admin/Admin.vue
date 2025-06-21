@@ -3,7 +3,7 @@
     <!-- 左侧导航栏 -->
     <div class="sidebar">
       <div class="logo">
-        <img src="@/assets/images/logo.jpg" alt="Logo" class="logo-image" />
+        <img src="@/assets/images/logo.png" alt="Logo" class="logo-image" />
       </div>
       <div class="nav-item" v-for="item in navItems" :key="item.name" @click="navigate(item)">
         <el-icon :component="item.icon" />
@@ -43,6 +43,7 @@
 import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Search, CaretBottom, Document, List, User, Truck } from '@element-plus/icons-vue'
+import DataDashboard from '@/components/SignIn/DataDashboard.vue'
 import PartAuditInfo from '@/components/SignIn/PartAuditInfo.vue'
 import OrderInfo from '@/components/SignIn/OrderInfo.vue'
 import UserInfo from '@/components/SignIn/UserInfo.vue'
@@ -51,6 +52,7 @@ import CNC_Operation from '@/components/SignIn/CNC_Operation.vue'
 import CNC_Logistics from '@/components/SignIn/CNC_Logistics.vue'
 // 导航项
 const navItems = [
+  { name: '数据看板', component: DataDashboard, icon: Truck },
   { name: '零件审核信息', component: PartAuditInfo, icon: Document },
   { name: '订单信息', component: OrderInfo, icon: List },
   { name: '用户信息', component: UserInfo, icon: User },
@@ -65,7 +67,7 @@ const componentData = ref(null) // 用于存储从后端获取的数据
 // 导航到指定组件
 const navigate = async (item) => {
   currentComponent.value = item.component 
-  if (item.name === '零件审核信息') {
+  if (item.name === '数据看板') {
     // await fetchPartAuditData() // 获取零件审核信息
   } else {
     componentData.value = null // 清空数据

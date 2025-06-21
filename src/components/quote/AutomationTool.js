@@ -1488,6 +1488,6 @@ export const roughness = {
     roughnessAccessId: "4e6158ff486640ab9c82196c64196fe9",
 }
 export const tolerance = {
-    type: "GB/T 18.4-2000 m级",
+    type: "GB/T 1804-2000 m级",
     toleranceAccessId: "4c5b4f8543b34dd2b4c861a270f36ea7",
 }

@@ -6,7 +6,7 @@
         <!-- Logo -->
         <div class="logo">
           <router-link to="/">
-            <img src="@/assets/images/logo.jpg" alt="SmartCNC">
+            <img src="@/assets/images/logo.png" alt="SmartCNC">
           </router-link>
         </div>
 
@@ -16,18 +16,21 @@
             <li class="menu-item">
               <router-link to="/quote">在线报价</router-link>
             </li>
-            <li class="menu-item">
+            <!-- <li class="menu-item">
               <router-link to="/sales-promotion">CNC1元打样</router-link>
             </li>
             <li class="menu-item">
               <el-icon style="color: red"><Flag /></el-icon>
               <router-link to="/coupons">领券中心</router-link>
-            </li>
+            </li> -->
             <li class="menu-item">
               <router-link to="/materials">材料介绍</router-link>
             </li>
+            <li class="menu-item">
+              <router-link to="/cnc_order">我的订单</router-link>
+            </li>
             <!-- 服务指引下拉菜单 -->
-            <li class="menu-item has-submenu" 
+            <!-- <li class="menu-item has-submenu" 
                 @click="toggleService('service')" 
                 @mouseenter="showService('service')"
                 @mouseleave="hideService('service')">
@@ -44,9 +47,9 @@
                 <router-link to="/technical-column">技术专栏</router-link>
                 <router-link to="/forum">技术论坛</router-link>
               </div>
-            </li>
+            </li> -->
             <!-- 关于我们下拉菜单 -->
-            <li class="menu-item has-submenu" 
+            <!-- <li class="menu-item has-submenu" 
               @click="toggleAbout('about')" 
               @mouseenter="showAbout('about')"
               @mouseleave="hideAbout('about')">
@@ -64,7 +67,7 @@
             </li>
             <li class="menu-item">
               <router-link to="/contact">联系我们</router-link>
-            </li>
+            </li> -->
             <!-- 购物车按钮 -->
             <li class="menu-item">
               <el-button class="action-button no-border" @click="$router.push('/cart')" type="default">

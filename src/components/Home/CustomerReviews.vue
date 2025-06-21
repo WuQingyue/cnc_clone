@@ -227,7 +227,7 @@
       <!-- 修改公司简介部分的样式 -->
       <div class="company-intro">
         <div class="intro-content">
-          <p>嘉立创CNC致力于打造高性价比的CNC机加、钣金加工和复模加工服务商！欢迎广大个人及公司洽谈合作！</p>
+          <p>SmartCNC致力于打造高性价比的CNC机加、钣金加工和复模加工服务商！欢迎广大个人及公司洽谈合作！</p>
           <el-button type="primary" class="consult-btn" @click="handleConsult">
             <el-icon class="icon"><Message /></el-icon>
             在线咨询

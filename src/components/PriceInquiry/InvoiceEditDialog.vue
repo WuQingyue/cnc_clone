@@ -1,4 +1,3 @@
-
 <template>
   <el-dialog
     v-model="dialogVisible"
@@ -17,7 +16,16 @@
           <div class="selected-invoice" v-if="selectedInvoice">
             <div class="invoice-info">
               <el-tag type="primary" effect="plain">{{ selectedInvoice.type }}</el-tag>
-              <span class="company-name">{{ selectedInvoice.name }}</span>
+              <!-- 新增：公司显示公司名称和税号，个人只显示名称 -->
+              <template v-if="selectedInvoice.type === 'company'">
+                <span class="company-row">
+                  <span class="company-name">{{ selectedInvoice.name }}</span>
+                  <span class="company-taxno"> {{ selectedInvoice.taxNo }}</span>
+                </span>
+              </template>
+              <template v-else>
+                <span class="company-name">{{ selectedInvoice.name }}</span>
+              </template>
             </div>
             <div class="edit-button" @click="showInvoiceList">
               <el-icon><Edit /></el-icon>
@@ -104,7 +112,7 @@
         </el-table-column>
         <el-table-column prop="type" label="开票主体" width="120">
           <template #default="scope">
-            <el-tag type="primary">{{ scope.row.type }}</el-tag>
+            <el-tag type="primary">{{ scope.row.type === 'company' ? '公司' : '个人' }}</el-tag>
           </template>
         </el-table-column>
         <el-table-column prop="name" label="开票公司名称/个人名称" min-width="200" />
@@ -123,7 +131,7 @@
                 v-if="scope.row.isDefault" 
                 type="primary" 
                 effect="plain"
-              >
+              > 
                 默认地址
               </el-tag>
               <el-button 
@@ -238,8 +246,10 @@
 </template>
 
 <script>
-import { ref, watch, computed } from 'vue';
+import { ref, watch, computed,ElMessage,onMounted } from 'vue';
 import { Edit, Check } from '@element-plus/icons-vue';
+import axios from 'axios';
+import service from '@/utils/request'
 
 export default {
   name: 'InvoiceEditDialog',
@@ -264,12 +274,6 @@ export default {
 
     const invoiceForm = ref({
       type: 'normal',
-      company: '',
-      taxNo: '',
-      address: '',
-      phone: '',
-      bank: '',
-      bankAccount: ''
     });
 
     const newInvoiceForm = ref({
@@ -284,16 +288,20 @@ export default {
     });
 
     const rules = {
-      type: [{ required: true, message: '请选择发票类型' }],
-      company: [{ required: true, message: '请输入单位名称' }],
-      taxNo: [{ required: true, message: '请输入税号' }]
+      type: [{ required: true, message: '请选择发票类型' }]
     };
 
     const newInvoiceRules = {
       type: [{ required: true, message: '请选择开票主体', trigger: 'change' }],
-      companyName: [{ required: true, message: '请输入开票公司名称', trigger: 'blur' }],
-      taxNo: [{ required: true, message: '请输入税号', trigger: 'blur' }],
-      personalName: [{ required: true, message: '请输入个人名称', trigger: 'blur' }]
+      companyName: [
+        { required: true, message: '请输入开票公司名称', trigger: 'blur' }
+      ],
+      taxNo: [
+        { required: true, message: '请输入税号', trigger: 'blur' }
+      ],
+      personalName: [
+        { required: true, message: '请输入个人名称', trigger: 'blur' }
+      ]
     };
 
     const selectedInvoiceId = ref(null);
@@ -320,28 +328,54 @@ export default {
 
     const addNewInvoice = () => {
       showAddForm.value = true;
-      newInvoiceForm.value = { type: 'company' }; // 默认为公司
+      newInvoiceForm.value = {
+        type: 'company',
+        companyName: '',
+        taxNo: '',
+        address: '',
+        phone: '',
+        bankAccount: '',
+        bankName: '',
+        personalName: ''
+      };
     };
 
+    // 新增发票信息时，按后端要求提交
     const saveNewInvoice = async () => {
       if (!newInvoiceFormRef.value) return;
 
-      await newInvoiceFormRef.value.validate((valid) => {
+      await newInvoiceFormRef.value.validate(async (valid) => {
         if (valid) {
-          const newInvoice = {
-            id: Date.now(),
-            type: newInvoiceForm.value.type === 'company' ? '公司' : '个人',
-            name: newInvoiceForm.value.type === 'company' ? newInvoiceForm.value.companyName : newInvoiceForm.value.personalName,
-            taxNo: newInvoiceForm.value.taxNo,
-            isComplete: true,
-            isDefault: invoiceList.value.length === 0
+          let postData = {
+            invoice_subject: newInvoiceForm.value.type, // 'company' or 'personal'
+            company_name: newInvoiceForm.value.type === 'company' ? newInvoiceForm.value.companyName : '',
+            company_tax_no: newInvoiceForm.value.type === 'company' ? newInvoiceForm.value.taxNo : '',
+            personal_name: newInvoiceForm.value.type === 'personal' ? newInvoiceForm.value.personalName : '',
+            is_default: invoiceList.value.length === 0
           };
-          invoiceList.value.push(newInvoice);
-          if (newInvoice.isDefault) {
-            selectedInvoiceId.value = newInvoice.id;
+
+          // 调用后端接口
+          try {
+            const resp = await axios.post('/api/invoiceInfo/add_invoice_info', postData);
+            const newInvoice = resp.data;
+            // 兼容本地展示
+            invoiceList.value.push({
+              id: newInvoice.id || Date.now(),
+              type: newInvoice.invoice_subject,
+              name: newInvoice.invoice_subject === 'company' ? newInvoice.company_name : newInvoice.personal_name,
+              taxNo: newInvoice.company_tax_no || '',
+              isComplete: true,
+              isDefault: postData.is_default
+            });
+            if (postData.is_default) {
+              selectedInvoiceId.value = newInvoice.id || Date.now();
+            }
+            showAddForm.value = false;
+            showEditList.value = true;
+          } catch (e) {
+            // 你可以根据实际情况处理错误弹窗
+            console.error('保存失败', e);
           }
-          showAddForm.value = false;
-          showEditList.value = true;
         }
       });
     };
@@ -369,23 +403,52 @@ export default {
     };
 
     const handleConfirm = () => {
-        if (selectedInvoice.value) {
-            emit('save', {
-            type: selectedInvoice.value.type,
-            name: selectedInvoice.value.name,
-            taxNo: selectedInvoice.value.taxNo,
-            invoiceType: 'normal' // 增值税普通发票
-            })
-        }
-        dialogVisible.value = false
-        }
-
-    const setDefaultInvoice = (invoice) => {
-      invoiceList.value.forEach(item => {
-        item.isDefault = item === invoice;
-      });
+      if (selectedInvoice.value) {
+        emit('save', {
+          type: selectedInvoice.value.type,
+          name: selectedInvoice.value.name,
+          taxNo: selectedInvoice.value.taxNo,
+          invoiceType: 'normal' // 增值税普通发票
+        });
+      }
+      dialogVisible.value = false;
     };
-
+    const setDefaultInvoice = async (invoice) => {
+          invoiceList.value.forEach(item => {
+            item.isDefault = item === invoice
+          })
+          const response = await service.post(
+          '/api/invoiceInfo/set_default_invoice_info',
+          {
+            invoice_info_id: invoice.id
+          },
+          { withCredentials: true }
+        )
+        console.log('更新默认发票信息response',response)
+        }
+    const fetchInvoiceInfos = async () => {
+      try {
+        const response = await service.get('/api/invoiceInfo/get_user_invoice_infos', { withCredentials: true })
+        if (response.status === 200 && Array.isArray(response.data)) {
+          invoiceList.value = response.data.map(invoice => ({
+            id: invoice.id,
+            type: invoice.invoice_subject,
+            name: invoice.invoice_subject === 'company' ? invoice.company_name : invoice.personal_name,
+            taxNo: invoice.company_tax_no || '',
+          }))
+          console.log('invoiceList',invoiceList.value)
+        } else if (response.status === 200 && Array.isArray(response.data.data)) {
+          // 如果后端返回 { data: [...] }
+          invoiceList.value = response.data.data
+        }
+      } catch (error) {
+        ElMessage.error('获取发票信息失败')
+        console.error('获取发票信息失败:', error)
+      }
+    }   
+    onMounted(() => {
+      fetchInvoiceInfos()
+    })
     return {
       dialogVisible,
       showEditList,

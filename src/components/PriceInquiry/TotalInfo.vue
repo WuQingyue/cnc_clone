@@ -27,7 +27,7 @@
         </div>
         <div class="info-row">
           <span class="label">运费</span>
-          <span class="value">¥{{ shippingFee }}</span>
+          <span class="value">¥{{ TotalShippingFee }}</span>
           <el-tooltip content="`运费: ${price_E1.value}元 挂号费: ${price_E2.value}元`" placement="top" effect="dark">
             <el-icon class="question-icon"><QuestionFilled /></el-icon>
           </el-tooltip>
@@ -72,10 +72,13 @@ import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import { QuestionFilled } from '@element-plus/icons-vue'
 const shippingFee = ref(0)
+const TotalShippingFee = ref(0)
 const ShippingTime = ref(0)
 const price_E1 = ref(0)
 const price_E2 = ref(0)
 const router = useRouter() // 获取 router 实例
+const TotalWeight = ref(0)
+const orderAccessId = ref('')
 import { useSelectedDataStore } from '@/store/PriceInquiryDatas'
 import service from '@/utils/request'
 const props = defineProps({
@@ -103,77 +106,57 @@ watch(() => props.selectedDatas, (newValue) => {
   orderItems.value=newValue
 }, { immediate: true })
 
-//生成订单编号
-// 生成8位随机数
-const generateRandomNumber = () => {
-  return Math.floor(10000000 + Math.random() * 90000000)
-}
-
-// 获取当前日期
-const getCurrentDate = () => {
-  const now = new Date()
-  const day = now.getDate().toString().padStart(2, '0')
-  const month = (now.getMonth() + 1).toString().padStart(2, '0')
-  const year = now.getFullYear().toString().slice(-2)
-  return `${day}${month}${year}`
-}
-
-// 生成订单编号
-const generateOrderNumber = () => {
-  const date = getCurrentDate()
-  const randomNumber = generateRandomNumber()
-  return `SC-${date}-${randomNumber}`
-}
 // 提交订单方法
 const submitOrder = async () => {
   console.log('props.selectedDatas:',props.selectedDatas)
-  const formData = props.selectedDatas.map(selectedData =>{
-    const orderNo = generateOrderNumber()
-    console.log('订单编号:',orderNo)
-    return {
-      "order_no": orderNo,
-      "user_email": "3@q.com",
-      "material_cost": selectedData.materialCost,
-      "engineering_cost": selectedData.engineeringCost,
-      "clamping_cost": selectedData.clampingCost,
-      "processing_cost": selectedData.processingCost,
-      "expedited_price": selectedData.expeditedPrice,
-      "surface_cost": selectedData.surfaceCost,
-      "unit_price": selectedData.pricePerUnit,
-      "total_price": selectedData.totalPrice,
-      "material": selectedData.material,
-      "surface_treatment": selectedData.surfaceTreatment === 0 ? "none" : true,
-      "treatment1_option": selectedData.selectedTreatment,
-      "treatment1_color": selectedData.selectedColor,
-      "treatment1_gloss": selectedData.glossiness,
-      "treatment1_drawing": selectedData.uploadedFileName,
-      "treatment2_option": selectedData.selectedTreatment2,
-      "treatment2_color": selectedData.selectedColor2,
-      "treatment2_gloss": selectedData.glossiness2,
-      "treatment2_drawing": selectedData.uploadedFileName2,
-      "quantity": selectedData.quantity,
-      "tolerance": selectedData.tolerance,
-      "roughness": selectedData.roughness,
-      "has_thread": selectedData.hasThread === "false" ? 0 : 1,
-      "has_assembly": selectedData.hasAssembly === "false" ? 0 : 1
-    }
-  })
-  console.log('formData',formData)
- 
-  try {
-    const response = await service.post('/api/orders/orders', formData, {
+  if(orderAccessId.value){
+    const formData = props.selectedDatas.map(selectedData =>{
+      const orderNo = orderAccessId.value
+      console.log('订单编号:',orderNo)
+      return {
+        "order_no": orderNo,
+        "user_email": "1@q.com",
+        "material_cost": selectedData.materialCost,
+        "engineering_cost": selectedData.engineeringCost,
+        "clamping_cost": selectedData.clampingCost,
+        "processing_cost": selectedData.processingCost,
+        "expedited_price": selectedData.expeditedPrice,
+        "surface_cost": selectedData.surfaceCost,
+        "unit_price": selectedData.pricePerUnit,
+        "total_price": selectedData.totalPrice,
+        "material": selectedData.material,
+        "surface_treatment": selectedData.surfaceTreatment === 0 ? "none" : true,
+        "treatment1_option": selectedData.selectedTreatment,
+        "treatment1_color": selectedData.selectedColor,
+        "treatment1_gloss": selectedData.glossiness,
+        "treatment1_drawing": selectedData.uploadedFileName,
+        "treatment2_option": selectedData.selectedTreatment2,
+        "treatment2_color": selectedData.selectedColor2,
+        "treatment2_gloss": selectedData.glossiness2,
+        "treatment2_drawing": selectedData.uploadedFileName2,
+        "quantity": selectedData.quantity,
+        "tolerance": selectedData.tolerance,
+        "roughness": selectedData.roughness,
+        "has_thread": selectedData.hasThread === "false" ? 0 : 1,
+        "has_assembly": selectedData.hasAssembly === "false" ? 0 : 1
+      }
+    })
+    console.log('formData',formData)
+    const submitOrderresponse = await service.get('/api/orders/submit_cnc_order',{
+    params: {bizOrderAccessId:orderAccessId.value},},
+     {withCredentials: true})
+    console.log('submitOrderresponse:', submitOrderresponse)
+    if (submitOrderresponse.status === 200) {
+      const response = await service.post('/api/orders/orders', JSON.stringify(formData), {
       headers: {
         'Content-Type': 'application/json'
       },
       withCredentials: true
     });
-    
     console.log('response:', response)
     console.log('response.status:', response.status)
-    
     if (response.status === 200) {
       const orderNos = formData.map(item => item.order_no)
-      
       // 使用 path 而不是 name 进行路由跳转
       router.push({
         path: '/SubmitOrderSuccess',
@@ -185,9 +168,12 @@ const submitOrder = async () => {
     } else {
       ElMessage.error('提交订单失败，请稍后重试')
     }
-  } catch (error) {
-    console.error('提交订单出错:', error)
-    ElMessage.error('提交订单出错，请稍后重试')
+    } else {
+      ElMessage.error('提交订单失败，请稍后重试')
+    }
+  }
+  else{
+    console.log('订单编号为空，无法提交订单')
   }
 }
 
@@ -202,7 +188,7 @@ const fetchPrice = async () => {
     const response = await service.get('/api/logistics/price-trial', {
       params: {
         country_code: props.selectedAddress?.countryCode,
-        weight: 1
+        weight: TotalWeight.value
       }
     }, { withCredentials: true })
     priceResult.value = response.data.result
@@ -214,13 +200,114 @@ const fetchPrice = async () => {
     shippingFee.value = priceE1.convert_amount + priceE2.convert_amount
     ShippingTime.value = priceE2.interval_day
     price_E1.value = priceE1.convert_amount 
-    price_E2.value = priceE2.convert_amount 
+    price_E2.value = priceE2.convert_amount
+    TotalShippingFee.value = shippingFee.value + carriageFee.value
     ElMessage.success('获取价格信息成功')
   } catch (error) {
     console.error('请求失败:', error)
     ElMessage.error('获取价格信息失败')
   }
 }
+const getDatas = ref([])
+const carriageFee = ref(0)
+
+const get_selected_datas = async () => {
+  const get_selected_datas_response =  await service.get('/api/orders/get_selected_datas', { withCredentials: true })
+  getDatas.value = get_selected_datas_response.data[0]
+  console.log('get_selected_datas:', getDatas.value)
+  console.log('getDatas.value:', getDatas.value)
+  console.log('getDatas.value.fileInfoAccessId:', getDatas.value.fileInfoAccessId)
+  const orderData = {
+    activityGiveawayCode: null,
+    urlType: "CNC_ORDER_SUCCESSFUL",
+    goods: [{
+      assembleFileUuid: null,
+      assembleModelAccessIds: [],
+      crafts: [
+          {
+            "craftAccessId": getDatas.value.craftAccessId1,
+            "attributes": [
+              {
+                "craftAttributeAccessId": getDatas.value.craftAttributeGlossinessAccessIds1,
+                "customerCraft": "",
+                "resourceUrl": ""
+              },
+              {
+                "craftAttributeAccessId": getDatas.value.craftAttributeColorAccessIds1,
+                "customerCraft": "",
+                "resourceUrl": ""
+              }
+            ].filter(attr => attr.craftAttributeAccessId) // 过滤掉craftAttributeAccessId为空的元素
+          },
+          {
+            "craftAccessId": getDatas.value.craftAccessId2,
+            "attributes": [
+              {
+                "craftAttributeAccessId": getDatas.value.craftAttributeGlossinessAccessIds2,
+                "customerCraft": "",
+                "resourceUrl": ""
+              },
+              {
+                "craftAttributeAccessId": getDatas.value.craftAttributeColorAccessIds2,
+                "customerCraft": "",
+                "resourceUrl": ""
+              }
+            ].filter(attr => attr.craftAttributeAccessId) // 过滤掉craftAttributeAccessId为空的元素
+          }
+        ]
+        .filter(craft => craft.craftAccessId) // 过滤掉craftAccessId为空的元素
+        .map(craft => ({
+          ...craft,
+          attributes: craft.attributes && craft.attributes.length > 0 ? craft.attributes : [] // 如果attributes为空则设为空数组
+        }))
+        .filter(craft => Object.keys(craft).some(key => key !== 'craftAccessId' && craft[key] && craft[key].length > 0)), // 过滤掉所有字段都为空的craft
+      
+      deliveryTypeCode: getDatas.value.deliveryTypeCode,
+      fileInfoAccessIds: [getDatas.value.fileInfoAccessId], 
+      materialAccessId: getDatas.value.materialAccessId,
+      productModelAccessId: getDatas.value.productModelAccessId,
+      quantity: getDatas.value.quantity,
+      roughnessAccessId: getDatas.value.roughnessAccessId,
+      roughnessFileUuid: '',
+      toleranceAccessId: getDatas.value.toleranceAccessId,
+      toleranceFileUuid: '',
+      whorlFlag: 0,
+      whorls: []
+    }]
+  };
+  console.log('get_orderAccessIds前端传送的数据',orderData)
+  const orderResponse = await service.post('/api/price/get_orderAccessIds',  JSON.stringify(orderData), {
+  withCredentials: true
+  });
+  orderAccessId.value = orderResponse.data.data.orderAccessIds[0];
+  if(orderAccessId.value){
+    console.log('获取到的orderAccessId:', orderAccessId.value);
+    const get_orderAccessIds = {
+    bizOrderAccessId:orderAccessId.value
+  }
+    const carriageFeeResponse = await service.post('/api/price/place_calculate_coupon_fee',  JSON.stringify(get_orderAccessIds), {
+        withCredentials: true
+      });
+    console.log('获取到的carriageFeeResponse:', carriageFeeResponse);
+    carriageFee.value = carriageFeeResponse.data.carriageFee;
+    console.log('carriageFee', carriageFee.value)
+    
+    const get_weight_OrderAccessIds = {
+      bizOrderAccessId:orderAccessId.value,
+      businessLine: "cnc",
+    }
+    const response = await service.post('/api/price/get_weight', JSON.stringify(get_weight_OrderAccessIds), { withCredentials: true })
+    TotalWeight.value = response.data.data.bizTotalWeight
+    console.log('估重', TotalWeight.value)
+  }
+  else{
+    console.log('获取失败，请检查问题!');
+  }
+}
+
+onMounted(() => {
+  get_selected_datas()
+})
 
 </script>
 

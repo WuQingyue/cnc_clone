@@ -23,7 +23,7 @@
           'style'
         ],
         // 默认语言
-        defaultLang: 'en',
+        defaultLang: 'zh',
         // 关闭自动检测
         detectLanguage: true,
         // 设置翻译延迟
@@ -35,7 +35,7 @@
       // 等待 translate.js 加载完成
       window.onload = function() {
         if (window.translate) {
-          translate.language.setDefaultTo('english');
+          translate.language.setDefaultTo('chinese_simplified');
           //启用翻译中的遮罩层，给用户一个友好提示，解决翻译延迟的问题
           translate.progress.api.startUITip();
           // 设置本地语种（当前网页的语种）
@@ -212,6 +212,24 @@
       }
 
     </style>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-GBV72MKCHP"></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', 'G-GBV72MKCHP');
+
+      function getSourcePlatform() {
+      const params = new URLSearchParams(window.location.search);
+      return params.get('source_platform') || 'unknown';
+    }
+
+      // 设置到 GA4（gtag方式）
+      gtag('set', 'user_properties', {
+        source_platform: getSourcePlatform()
+      });
+    </script>
   </head>
   <body>
     <noscript>

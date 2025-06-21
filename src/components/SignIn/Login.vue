@@ -2,7 +2,7 @@
   <div class="login-container">
     <div class="login-box">
       <!-- Logo -->
-      <img src="@/assets/images/logo.jpg" alt="JLC Logo" class="logo">
+      <img src="@/assets/images/logo.png" alt="JLC Logo" class="logo">
       
       <!-- Title -->
       <h1 class="title">Sign In</h1>
