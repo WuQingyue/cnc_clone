@@ -103,9 +103,9 @@ const fetchTrackingInfo = async () => {
   
   loading.value = true
   try {
-    console.log('正在获取物流信息:', props.shipData.order_no)
+    console.log('正在获取物流信息:', props.shipData)
     // 使用POST方法
-    const response = await service.post(`/api/logistics/track_get/${props.shipData.order_no}`, { withCredentials: true })
+    const response = await service.get(`/api/logistics/track_shipment?logistics_id=${props.shipData.logistics_info_id}`, { withCredentials: true })
     console.log('物流追踪响应:', response.data)
     
     if (response.data && response.data.success === "true" && response.data.result && response.data.result.length > 0) {

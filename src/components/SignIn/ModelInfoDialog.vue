@@ -70,6 +70,7 @@ const fetchModelDetails = async (modelInfoId) => {
 
 // 在弹出框打开时获取模型详情
 watch(() => props.modelData, () => {
+  console.log('模型信息props.modelData',props.modelData)
   if (props.modelData && props.modelData.model_info_id) {
     console.log('props.modelData',props.modelData)
     fetchModelDetails(props.modelData.model_info_id)

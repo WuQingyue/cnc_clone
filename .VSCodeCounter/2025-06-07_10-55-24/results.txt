@@ -129,8 +129,6 @@ Files
 | e:\cnc_clone\src\components\PriceInquiry\ReceiptDelivery.vue              | Vue        |        111 |          0 |         11 |        122 |
 | e:\cnc_clone\src\components\PriceInquiry\TotalInfo.vue                    | Vue        |        373 |         10 |         33 |        416 |
 | e:\cnc_clone\src\components\SignIn\AmountDialog.vue                       | Vue        |         70 |          3 |          8 |         81 |
-| e:\cnc_clone\src\components\SignIn\CNC_Logistics.vue                      | Vue        |        285 |         17 |         28 |        330 |
-| e:\cnc_clone\src\components\SignIn\CNC_Operation.vue                      | Vue        |        292 |         17 |         28 |        337 |
 | e:\cnc_clone\src\components\SignIn\DataDashboard.vue                      | Vue        |        526 |         19 |         68 |        613 |
 | e:\cnc_clone\src\components\SignIn\Login.vue                              | Vue        |        212 |         24 |         35 |        271 |
 | e:\cnc_clone\src\components\SignIn\LogisticsInfo.vue                      | Vue        |         15 |          0 |          3 |         18 |

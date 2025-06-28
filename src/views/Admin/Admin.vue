@@ -1,4 +1,27 @@
 <template>
+  <!-- 新增：无权限遮罩弹窗 -->
+  <el-dialog
+    v-model="showNoPermission"
+    title="权限不足"
+    width="350px"
+    :close-on-click-modal="false"
+    :close-on-press-escape="false"
+    :show-close="false"
+    align-center
+    style="z-index: 9999"
+    lock-scroll
+    append-to-body
+    >
+    <div style="text-align:center;font-size:18px;color:#d32f2f;font-weight:bold;margin-bottom:24px;">
+      您的权限不足
+    </div>
+    <el-button
+      type="danger"
+      style="width:100%;color:white;font-weight:bold"
+      @click="returnHome"
+    >返回首页</el-button>
+  </el-dialog>
+
   <div class="admin-container">
     <!-- 左侧导航栏 -->
     <div class="sidebar">
@@ -34,34 +57,34 @@
       </div>
 
       <!-- 组件显示区域 -->
-      <component :is="currentComponent" :data="componentData" />
+      <component
+        v-if="permissionChecked && !showNoPermission"
+        :is="currentComponent"
+        :data="componentData"
+      />
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import { ElMessage } from 'element-plus'
 import { Search, CaretBottom, Document, List, User, Truck } from '@element-plus/icons-vue'
+import { ElMessage, ElDialog, ElButton } from 'element-plus'
+import axios from 'axios'
+
 import DataDashboard from '@/components/SignIn/DataDashboard.vue'
-import PartAuditInfo from '@/components/SignIn/PartAuditInfo.vue'
 import OrderInfo from '@/components/SignIn/OrderInfo.vue'
 import UserInfo from '@/components/SignIn/UserInfo.vue'
 import LogisticsInfo from '@/components/SignIn/LogisticsInfo.vue'
-import CNC_Operation from '@/components/SignIn/CNC_Operation.vue'
-import CNC_Logistics from '@/components/SignIn/CNC_Logistics.vue'
 // 导航项
 const navItems = [
   { name: '数据看板', component: DataDashboard, icon: Truck },
-  { name: '零件审核信息', component: PartAuditInfo, icon: Document },
   { name: '订单信息', component: OrderInfo, icon: List },
   { name: '用户信息', component: UserInfo, icon: User },
-  { name: '物流信息', component: LogisticsInfo, icon: Truck },
-  { name: '模拟工厂加工操作', component: CNC_Operation, icon: Truck },
-  { name: '模拟物流轨迹操作', component: CNC_Logistics, icon: Truck }
+  { name: '物流信息', component: LogisticsInfo, icon: Truck }
 ]
 
-const currentComponent = ref(PartAuditInfo)
+const currentComponent = ref(DataDashboard)
 const componentData = ref(null) // 用于存储从后端获取的数据
 
 // 导航到指定组件
@@ -83,7 +106,30 @@ const handleCommand = (command) => {
     window.close()
   }
 }
+// 新增：权限弹窗相关
+const showNoPermission = ref(false)
+const permissionChecked = ref(false)
+const checkPermission = async () => {
+  try {
+    const res = await axios.get('/api/login/check-permission', {
+      withCredentials: true
+    })
+    if (!res.data.success) {
+      showNoPermission.value = true
+    }
+  } catch (e) {
+    showNoPermission.value = true
+  } finally {
+    // 权限检查结束
+    permissionChecked.value = true
+  }
+}
+
+const returnHome = () => {
+  window.location.href = '/'
+}
 onMounted(() => {
+  checkPermission()
   // fetchPartAuditData(); // 直接调用获取数据的方法
 });
 </script>

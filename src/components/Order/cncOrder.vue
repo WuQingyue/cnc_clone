@@ -68,7 +68,7 @@
               {{ getStatusText(scope.row.status) }}
             </el-tag>
         </template>
-    </el-table-column>
+      </el-table-column>
       <el-table-column prop="update_time" label="更新时间" width="200" align="center">
         <template #default="scope">
           {{ formatDate(scope.row.update_time) }}
@@ -85,23 +85,23 @@
           </el-button>
         </template>
       </el-table-column>
-      <el-table-column prop="shipping_cost" label="物流信息" width="200" align="center">
-        <template #default="scope">
-          <el-button
-            link
-            type="primary"
-            @click="openShippingProgressDialog(scope.row)"
-          >
-            查看详情
-          </el-button>
-        </template>
-      </el-table-column>
       <el-table-column label="加工进度" width="200" align="center">
         <template #default="scope">
           <el-button
             link
             type="primary"
             @click="openProgressDialog(scope.row)"
+          >
+            查看详情
+          </el-button>
+        </template>
+      </el-table-column>
+      <el-table-column label="物流信息" width="200" align="center">
+        <template #default="scope">
+          <el-button
+            link
+            type="primary"
+            @click="openShippingProgressDialog(scope.row)"
           >
             查看详情
           </el-button>
@@ -161,60 +161,16 @@
     />
 
     <!-- 加工进度对话框 -->
-    <el-dialog
+    <progress-dialog
       v-model="progressDialogVisible"
-      title="加工进度"
-      width="50%"
-    >
-      <div class="progress-content">
-        <div class="custom-timeline">
-          <div
-            v-for="(step, idx) in progressData"
-            :key="idx"
-            class="custom-timeline-item"
-          >
-            <el-icon
-              :style="{
-                color: step.processStatus === 1 ? '#409EFF' : '#C0C4CC',
-                fontSize: '20px',
-                verticalAlign: 'middle'
-              }"
-            >
-              <circle-filled />
-            </el-icon>
-            <span class="timeline-label">{{ step.processName }}</span>
-          </div>
-        </div>
-      </div>
-    </el-dialog>
+      :model-data="progressData"
+    />
+
     <!-- 物流进度对话框 -->
-    <el-dialog
+    <shipping-progress-dialog
       v-model="shippingProgressDialogVisible"
-      title="物流进度"
-      width="50%"
-    >
-      <div class="progress-content">
-        <div class="custom-timeline">
-          <div
-            v-for="(step, idx) in shippingProgressData"
-            :key="idx"
-            class="custom-timeline-item"
-          >
-            <el-icon
-              :style="{
-                color: step.status === 1 ? '#409EFF' : '#C0C4CC',
-                fontSize: '20px',
-                verticalAlign: 'middle'
-              }"
-            >
-              <circle-filled />
-            </el-icon>
-            <span class="timeline-label">{{ step.content }}</span>
-            <span class="timeline-label" style="margin-left:20px;color:#888;">{{ step.time }}</span>
-          </div>
-        </div>
-      </div>
-    </el-dialog>
+      :model-data="shippingProgressData"
+    />
   </div>
 </template>
 
@@ -224,6 +180,8 @@ import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import ModelInfoDialog from '@/components/SignIn/ModelInfoDialog.vue'
 import AmountDialog from '@/components/SignIn/AmountDialog.vue'
+import ProgressDialog from '@/components/SignIn/ProgressDialog.vue'
+import ShippingProgressDialog from '@/components/SignIn/ShippingProgressDialog.vue'
 import { EventBus } from '@/components/SignIn/eventBus.js'
 
 // 数据状态
@@ -237,27 +195,25 @@ const amountDialogVisible = ref(false)
 const progressDialogVisible = ref(false)
 const selectedModel = ref(null)
 const selectedAmount = ref(null)
-const progressData = ref([])
+const progressData = ref(null)
 const shippingProgressDialogVisible = ref(false)
-const shippingProgressData = ref([])
-
-import { CircleFilled } from '@element-plus/icons-vue'
+const shippingProgressData = ref(null)
 
 // 使用 Vue Router
 const router = useRouter()
 const route = useRoute()
+
 // 监听路由变化
 watch(
   () => route.query,
   (newQuery) => {
-    console.log('newQuery', newQuery)
-    // 判断 payUrl 存在且为非空字符串
     if (typeof newQuery.payUrl === 'string' && newQuery.payUrl.trim() !== '') {
       fetchPartAuditData()
     }
   },
   { immediate: true }
 )
+
 // 格式化日期
 const formatDate = (date) => {
   return new Date(date).toLocaleString()
@@ -271,12 +227,12 @@ const getStatusType = (status) => {
     reject: 'danger',
     pending: 'warning',
     pending_processing: 'warning',
-    processing: 'danger', // 加工中
-    completed_not_collected: 'warning', // 加工完成-未揽货
-    collected: 'success', // 已揽货
-    in_transit: 'danger', // 运输中
-    waiting_for_pickup: 'warning', // 待取件
-    delivered: 'success' // 已签收
+    processing: 'danger',
+    completed_not_collected: 'warning',
+    collected: 'success',
+    in_transit: 'danger',
+    waiting_for_pickup: 'warning',
+    delivered: 'success'
   }
   return types[status] || 'info'
 }
@@ -289,12 +245,12 @@ const getStatusText = (status) => {
     reject: '已拒绝',
     pending: '待付款',
     pending_processing: '待加工',
-    processing: '加工中', // 加工中
-    completed_not_collected: '加工完成-未揽货', // 加工完成-未揽货
-    collected: '已揽货', // 已揽货
-    in_transit: '运输中', // 运输中
-    waiting_for_pickup: '待取件', // 待取件
-    delivered: '已签收' // 已签收
+    processing: '加工中',
+    completed_not_collected: '加工完成-未揽货',
+    collected: '已揽货',
+    in_transit: '运输中',
+    waiting_for_pickup: '待取件',
+    delivered: '已签收'
   }
   return texts[status] || status
 }
@@ -316,11 +272,6 @@ const handleSearch = () => {
   }, 300)
 }
 
-// 查看详情
-const viewDetails = (record) => {
-  ElMessage.info(`查看详情: ${record.order_no}`)
-}
-
 // 打开模型信息对话框
 const openModelInfoDialog = (row) => {
   selectedModel.value = row
@@ -330,69 +281,19 @@ const openModelInfoDialog = (row) => {
 // 打开加工金额对话框
 const openAmountDialog = (row) => {
   selectedAmount.value = row
-  console.log('打开加工金额对话框，数据:', row)
   amountDialogVisible.value = true
 }
 
-// 打开物流信息对话框
-const openShippingProgressDialog = async (row) => {
-  shippingProgressDialogVisible.value = true
-  shippingProgressData.value = []
-  try {
-    // 假设用 order_no 作为参数，如需调整请改为对应字段
-    const res = await service.post('/api/logistics/track_get', { order_no: row.order_no }, { withCredentials: true })
-    // 假设返回格式为 { data: { result: [{track_Info: {track_events: [...]}}] } }
-    let events = []
-    if (res.data && res.data.result && res.data.result[0] && res.data.result[0].track_Info && Array.isArray(res.data.result[0].track_Info.track_events)) {
-      events = res.data.result[0].track_Info.track_events
-    }
-    // 格式化为进度条需要的数据
-    shippingProgressData.value = events.map(item => ({
-      content: item.process_content,
-      time: item.process_time ? formatTrackTime(item.process_time) : '',
-      status: item.track_node_code === 'DELIVERED' || item.track_node_code === 'ARRIVED' ? 1 : 0 // 你可以根据实际业务判断已完成节点
-    }))
-  } catch (err) {
-    ElMessage.error('获取物流进度失败')
-    shippingProgressData.value = []
-  }
-}
-
-// 格式化物流事件时间
-const formatTrackTime = (timeString) => {
-  if (!timeString || timeString.includes('0001-01-01')) return '时间未知'
-  return new Date(timeString).toLocaleString('zh-CN', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
-}
-
 // 打开加工进度对话框
-const openProgressDialog = async (row) => {
-  console.log('打开加工进度对话框时的row', row)
+const openProgressDialog = (row) => {
+  progressData.value = row
   progressDialogVisible.value = true
-  progressData.value = []
-  try {
-    const res = await service.get('/api/orders/query_order_progress', {
-      params: { orderInfoAccessId: row.order_no }
-    })
-    // 假设res.data是数组
-    if (Array.isArray(res.data)) {
-      // 格式化为进度条需要的数据
-      progressData.value = res.data.map(item => ({
-        processName: item.processName,
-        processStatus: item.processStatus
-      }))
-    } else {
-      progressData.value = []
-    }
-  } catch (err) {
-    console.log('暂无加工结果')
-    progressData.value = []
-  }
+}
+
+// 打开物流信息对话框
+const openShippingProgressDialog = (row) => {
+  shippingProgressData.value = row
+  shippingProgressDialogVisible.value = true
 }
 
 // 初始化支付
@@ -409,21 +310,17 @@ const initiatePayment = (record) => {
   }
   router.push({ name: 'UnifiedPaymentCenter' })
 }
+
 import service from '@/utils/request'
 
 // 获取零件信息
 const fetchPartAuditData = async () => {
   try {
-    // 获取所有订单信息
     const response_all = await service.get('/api/orders/get_orders_info', { withCredentials: true })
-    console.log('获取所有订单信息', response_all)
     if (response_all.status != 200) {
       throw new Error('网络响应不是 OK')
     }
-      // 更新 filteredRecords
-      filteredRecords.value = response_all.data
-      console.log('cnc订单数据:', filteredRecords.value)
-
+    filteredRecords.value = response_all.data
   } catch (error) {
     console.error('请求失败:', error)
     ElMessage.error('获取信息失败')
@@ -432,26 +329,11 @@ const fetchPartAuditData = async () => {
 
 // 初始化
 onMounted(() => {
-  fetchPartAuditData(); // 直接调用获取数据的方法
+  fetchPartAuditData()
 })
 </script>
 
 <style scoped>
-.custom-timeline {
-  display: flex;
-  flex-direction: column;
-  gap: 18px;
-  margin-top: 20px;
-}
-.custom-timeline-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-.timeline-label {
-  font-size: 16px;
-}
-
 .part-audit {
   padding: 20px;
   background-color: #f9f9f9;
@@ -493,13 +375,5 @@ onMounted(() => {
 .el-tag {
   font-size: 14px;
   padding: 5px 10px;
-}
-
-.progress-content {
-  padding: 20px;
-}
-
-.el-timeline {
-  margin-top: 20px;
 }
 </style>

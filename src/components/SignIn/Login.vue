@@ -148,7 +148,7 @@ const handleEmailLogin = async () => {
 const handleGoogleLogin = async () => {
   try {
     const response = await axios.get(
-      'http://localhost:8000/api/login/login',
+      '/api/login/login',
       { withCredentials: true }
     )
     

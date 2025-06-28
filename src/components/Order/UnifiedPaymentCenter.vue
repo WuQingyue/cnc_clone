@@ -190,8 +190,8 @@ const handlePaymentSuccess = async (paypalOrder) => {
         const res = await service.post('/api/orders/jlc_order', { payUrl: payUrl }, { withCredentials: true })
         console.log('jlc下单', res)
         if(res.status === 200) { 
-          const logistics_res = await service.post('/api/logistics/order_create', { order_no: record.order_no }, { withCredentials: true })
-          console.log('物流下单', logistics_res)
+            const logistics_res = await service.post('/api/logistics/order_create', { logistics_id: record.logistics_info_id }, { withCredentials: true })
+            console.log('物流下单', logistics_res)
           } 
     }
       router.push({ 

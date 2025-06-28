@@ -76,8 +76,6 @@ Total : 112 files,  25212 codes, 1053 comments, 2291 blanks, all 28556 lines
 | [src/components/PriceInquiry/ReceiptDelivery.vue](/src/components/PriceInquiry/ReceiptDelivery.vue) | Vue | 111 | 0 | 11 | 122 |
 | [src/components/PriceInquiry/TotalInfo.vue](/src/components/PriceInquiry/TotalInfo.vue) | Vue | 373 | 10 | 33 | 416 |
 | [src/components/SignIn/AmountDialog.vue](/src/components/SignIn/AmountDialog.vue) | Vue | 70 | 3 | 8 | 81 |
-| [src/components/SignIn/CNC\_Logistics.vue](/src/components/SignIn/CNC_Logistics.vue) | Vue | 285 | 17 | 28 | 330 |
-| [src/components/SignIn/CNC\_Operation.vue](/src/components/SignIn/CNC_Operation.vue) | Vue | 292 | 17 | 28 | 337 |
 | [src/components/SignIn/DataDashboard.vue](/src/components/SignIn/DataDashboard.vue) | Vue | 526 | 19 | 68 | 613 |
 | [src/components/SignIn/Login.vue](/src/components/SignIn/Login.vue) | Vue | 212 | 24 | 35 | 271 |
 | [src/components/SignIn/LogisticsInfo.vue](/src/components/SignIn/LogisticsInfo.vue) | Vue | 15 | 0 | 3 | 18 |
