@@ -1,5 +1,9 @@
 <template>
   <div id="app">
+    <div v-if="isLoading" class="global-loading-mask">
+      <div class="spinner"></div>
+      <span>正在跳转登录页…</span>
+    </div>
     <!-- 管理员界面 -->
     <Admin v-if="userStore.checkIsAdmin()" />
     
@@ -36,6 +40,37 @@ const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
 
+const isLoading = ref(false)
+
+// 登录状态检测方法
+const checkLoginStatus = async () => {
+  try {
+    const user_Info = await service.get(
+      '/api/login/check_login',
+      { withCredentials: true }
+    )
+    if (user_Info.data.success) {
+      userStore.setUser(user_Info.data)
+    } else {
+      userStore.clearUser()
+      isLoading.value = true        // 开始加载
+      setTimeout(() => {            // 可选：延迟跳转更平滑
+        router.push('/login').finally(() => {
+          isLoading.value = false   // 跳转后关闭 loading
+        })
+      }, 500)                       // 0.5秒体验更自然，可调整
+    }
+  } catch (error) {
+    userStore.clearUser()
+    isLoading.value = true
+    setTimeout(() => {
+      router.push('/login').finally(() => {
+        isLoading.value = false
+      })
+    }, 500)
+  }
+}
+
 // 初始化检查用户登录状态
 onMounted(() => {
   // 从 localStorage 获取用户信息
@@ -43,14 +78,23 @@ onMounted(() => {
   if (savedUser) {
     try {
       const userData = JSON.parse(savedUser)
-      console.log('已从本地存储恢复用户信息:', userData)
+      userStore.setUser(userData)
     } catch (error) {
-      console.error('解析本地存储的用户信息失败:', error)
       localStorage.removeItem('user')
       userStore.clearUser()
     }
   } 
+  // 首次挂载时检测登录
+  checkLoginStatus()
 })
+// 监听路由变化，每次路由变化都检测登录
+watch(
+  () => route.fullPath,
+  () => {
+    checkLoginStatus()
+  }
+)
+
 // 监听路由变化
 watch(
   () => route.query,
@@ -172,6 +216,28 @@ html, body {
   color: var(--text-color-secondary);
 }
 
+.global-loading-mask {
+  position: fixed;
+  z-index: 9999;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.7);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #409EFF;
+  border-radius: 50%;
+  width: 40px; height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 12px;
+}
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
 
 @media (max-width: 1200px) {
   .container {

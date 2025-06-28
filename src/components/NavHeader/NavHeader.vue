@@ -112,7 +112,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue'
+import { ref, onMounted, onUnmounted,watch } from 'vue'
 import { useRouter } from 'vue-router'
 import { ShoppingCart, ArrowUpBold, ArrowDownBold, Flag } from '@element-plus/icons-vue'
 import { useUserStore } from '@/store/user'
@@ -152,7 +152,13 @@ const hideAbout = (menu) => {
     activeSubmenu2.value = null
   }
 }
-
+watch(
+  () => userStore.isLoggedIn,
+  (isLoggedIn) => {
+    // 这里可以做一些额外处理，比如关闭下拉菜单等
+    // 但通常不需要，模板会自动响应
+  }
+)
 import service from '@/utils/request'
 const handleCommand = async (command) => {
   switch (command) {
@@ -190,20 +196,20 @@ const handleCommand = async (command) => {
 }
 
 onMounted(() => {
-  checkLoginStatus()
+  // checkLoginStatus()
 });
-const checkLoginStatus = async () => {
-  const uesr_Info = await service.get(
-      '/api/login/check_login',
-      { withCredentials: true }
-  )
-  if(uesr_Info.status == 200){
-    userStore.setUser(uesr_Info.data)
-  }else{
-    ElMessage.error('用户登录已失效，请重新登录')
-    router.push('/login')
-  }
-}
+// const checkLoginStatus = async () => {
+//   const uesr_Info = await service.get(
+//       '/api/login/check_login',
+//       { withCredentials: true }
+//   )
+//   if(uesr_Info.status == 200){
+//     userStore.setUser(uesr_Info.data)
+//   }else{
+//     ElMessage.error('用户登录已失效，请重新登录')
+//     router.push('/login')
+//   }
+// }
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
