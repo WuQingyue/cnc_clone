@@ -34,6 +34,65 @@
         <el-option label="待取件" value="waiting_for_pickup" />
         <el-option label="已签收" value="delivered" />
       </el-select>
+      <!-- 运费比例调整1 -->
+      <div class="shipping-rate-adjust">
+        <el-tooltip
+          content="请输入大于0的小数，如0.65"
+          placement="top"
+          effect="light"
+          :open-delay="200"
+        >
+          <el-input
+            v-model="shippingRateInput1"
+            :placeholder="`${shippingRate1}`"
+            class="shipping-rate-input"
+            @mouseenter="showShippingRateTooltip(1)"
+            @mouseleave="hideShippingRateTooltip"
+            clearable
+            type="number"
+            :min="`${shippingRate1}`"
+            step="0.01"
+            style="width: 120px;"
+          />
+        </el-tooltip>
+        <el-button
+          type="primary"
+          plain
+          class="shipping-rate-btn"
+          @click="updateJlcFreightRate(shippingRateInput1)"
+          style="background: #e6f7ff; color: #1890ff; border: none; margin-left: 2px;"
+        >确定</el-button>
+      </div>
+
+      <!-- 运费比例调整2 -->
+      <div class="shipping-rate-adjust">
+        <el-tooltip
+          content="请输入大于0的小数，如0.65"
+          placement="top"
+          effect="light"
+          :open-delay="200"
+        >
+          <el-input
+            v-model="shippingRateInput2"
+            :placeholder="`${shippingRate2}`"
+            class="shipping-rate-input"
+            @mouseenter="showShippingRateTooltip()"
+            @mouseleave="hideShippingRateTooltip"
+            clearable
+            type="number"
+            :min="`${shippingRate2}`"
+            step="0.01"
+            style="width: 120px;"
+          />
+        </el-tooltip>
+        <el-button
+          type="primary"
+          plain
+          class="shipping-rate-btn"
+          @click="updateYtFreightRate(shippingRateInput2)"
+          style="background: #e6f7ff; color: #1890ff; border: none; margin-left: 2px;"
+        >确定</el-button>
+      </div>
     </div>
 
     <!-- 数据表格 -->
@@ -293,7 +352,73 @@ const fetchPartAuditData = async () => {
 // 初始化
 onMounted(() => {
   fetchPartAuditData(); // 直接调用获取数据的方法
+  getFreightRate()
 })
+
+const shippingRate1 = ref(1) // 默认比例
+const shippingRate2 = ref(1)
+const shippingRateInput1 = ref('')
+const shippingRateInput2 = ref('')
+
+// 获取运费比例
+const getFreightRate = async () => {
+  try {
+    const res = await service.get('/api/logistics/getFreightRate', { withCredentials: true })
+    if (res.status === 200) {
+      shippingRate1.value = res.data.jlc_ratio
+      shippingRate2.value = res.data.yt_ratio
+    }
+    console.log('运费比例1:', shippingRate1.value)
+    console.log('运费比例2:', shippingRate2.value)
+  } catch (e) {
+    // 错误处理
+    console.log('获取运费比例1失败:', e)
+  }
+}
+
+// 更新运费比例1
+const updateJlcFreightRate = async (rate) => {
+  console.log('更新运费比例1', rate)
+  if (!rate || rate<= 0) {
+    ElMessage.error('请输入大于0的小数，如0.65')
+    return
+  }
+  try {
+    const res = await service.post('/api/logistics/updateJlcFreightRate', { rate: rate }, { withCredentials: true })
+    if (res.status === 200) {
+      ElMessage.success('运费比例已更新')
+      shippingRate1.value = res.data.jlc_ratio
+      getFreightRate()
+    } else {
+      throw new Error('更新失败')
+    }
+  } catch (e) {
+    ElMessage.error('更新运费比例失败')
+  }
+}
+
+// 更新运费比例2
+const updateYtFreightRate = async (rate) => {
+  if (!rate || rate<= 0) {
+    ElMessage.error('请输入大于0的小数，如0.65')
+    return
+  }
+  try {
+    const res = await service.post('/api/logistics/updateYtFreightRate', { rate: rate }, { withCredentials: true })
+    if (res.status === 200) {
+      ElMessage.success('运费比例已更新')
+      shippingRate2.value = res.data.yt_ratio
+      getFreightRate()
+    } else {
+      throw new Error('更新失败')
+    }
+  } catch (e) {
+    ElMessage.error('更新运费比例失败')
+  }
+}
+// 鼠标悬停时显示tooltip（可选，Element Plus 的 tooltip 默认已处理）
+const showShippingRateTooltip = (which) => {}
+const hideShippingRateTooltip = () => {}
 </script>
 
 <style scoped>
@@ -338,5 +463,19 @@ onMounted(() => {
 .el-tag {
   font-size: 14px;
   padding: 5px 10px;
+}
+
+.shipping-rate-adjust {
+  display: flex;
+  align-items: center;
+  margin-left: 10px;
+}
+.shipping-rate-input {
+  width: 120px;
+}
+.shipping-rate-btn {
+  margin-left: 2px;
+  padding: 0 12px;
+  min-width: 60px;
 }
 </style>

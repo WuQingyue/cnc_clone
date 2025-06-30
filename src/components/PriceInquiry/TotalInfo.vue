@@ -181,9 +181,26 @@ const submitOrder = async () => {
 const goBack = () => {
   router.go(-1) // 使用 router 实例进行跳转
 }
-
+const shippingRate1 = ref(1) // 默认比例
+const shippingRate2 = ref(1)
+// 获取运费比例
+const getFreightRate = async () => {
+  try {
+    const res = await service.get('/api/logistics/getFreightRate', { withCredentials: true })
+    if (res.status === 200) {
+      shippingRate1.value = res.data.jlc_ratio
+      shippingRate2.value = res.data.yt_ratio
+    }
+    console.log('运费比例1:', shippingRate1.value)
+    console.log('运费比例2:', shippingRate2.value)
+  } catch (e) {
+    // 错误处理
+    console.log('获取运费比例1失败:', e)
+  }
+}
 const priceResult = ref([])
 const fetchPrice = async () => {
+  getFreightRate()
   try {
     const response = await service.get('/api/logistics/price-trial', {
       params: {
@@ -201,7 +218,7 @@ const fetchPrice = async () => {
     ShippingTime.value = priceE2.interval_day
     price_E1.value = priceE1.convert_amount 
     price_E2.value = priceE2.convert_amount
-    TotalShippingFee.value = shippingFee.value + carriageFee.value
+    TotalShippingFee.value = shippingFee.value*(1+shippingRate1.value) + carriageFee.value*(1+shippingRate2.value)
     ElMessage.success('获取价格信息成功')
   } catch (error) {
     console.error('请求失败:', error)
