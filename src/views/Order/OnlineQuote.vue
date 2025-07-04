@@ -78,13 +78,15 @@ const handleOrder = ({fileInfoAccessId,
       sizeZ,
       modelVolume,
       modelSurfaceArea,
-      file_name}) => {
-  console.log('productModelAccessId', productModelAccessId)
+      file_name,
+      upload_history_id}) => {
+  console.log('upload_history_id', upload_history_id)
   isOrdering.value = true // 设置为 true 以显示 FileList 组件
   // 设置记录的其他属性
   const record = {
     selected: true,
     fileName:file_name,
+    upload_history_id:upload_history_id,
     remarks: '',
     quantity: 1,
     material: '铝合金-6061',

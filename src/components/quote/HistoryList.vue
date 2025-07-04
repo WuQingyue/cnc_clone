@@ -147,14 +147,16 @@ const handleOrder = async (row) => {
   service.post(`/api/upload/get_analysis_result?data=${fileInfoAccessId.value}`, { withCredentials: true })
   .then(response => {
       // 发射事件，将数据传递给父组件
-      emit('fileInfo', { fileInfoAccessId: fileInfoAccessId.value, 
+      emit('fileInfo', { 
+      fileInfoAccessId: fileInfoAccessId.value, 
       productModelAccessId:response.data.data.productModelAccessId,
       sizeX:response.data.data.sizeX,
       sizeY:response.data.data.sizeY,
       sizeZ:response.data.data.sizeZ,
       modelVolume:response.data.data.modelVolume,
       modelSurfaceArea:response.data.data.modelSurfaceArea,
-      file_name: row.file_name  // 添加文件名
+      file_name: row.file_name,  // 添加文件名
+      upload_history_id:row.id
     })
     })
 }

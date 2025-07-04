@@ -16,6 +16,7 @@
       <p v-if="feeDetails">加工费: ¥{{ feeDetails.processing_cost.toFixed(2) }}</p>
       <p v-if="feeDetails">加急费: ¥{{ feeDetails.expedited_price.toFixed(2) }}</p>
       <p v-if="feeDetails">表面处理费: ¥{{ feeDetails.surface_cost.toFixed(2) }}</p>
+      <p v-if="feeDetails">总金额: ¥{{ feeDetails.total_price.toFixed(2) }}</p>
     </div>
     <template #footer>
       <el-button @click="handleClose">关闭</el-button>

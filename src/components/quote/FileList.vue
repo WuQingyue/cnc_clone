@@ -104,7 +104,7 @@
           <button class="blue-button">
             <div class="inquiry-link" @click="handleConfirm">提交询价</div>
           </button>
-          <button class="white-button">
+          <button class="white-button" @click="handleAddToCart">
             <el-icon><ShoppingCart /></el-icon>
             <span>加入购物车</span>
           </button>
@@ -143,7 +143,6 @@ const fetchPrices = async () => {
   console.log('获取勾选的数据', selectedDatas);
 
   try {
-    
     const requestData = selectedDatas.map(item => ({
       materialAccessId: item.materialAccessId,
       crafts: [
@@ -291,7 +290,6 @@ const deletePart = (index) => {
   console.log('localRecords.value', localRecords.value)
 }
 
-
 const openParameterDialog = (record) => {
   selectedRecord.value = record; // 设置当前选中的记录
   showParameterDialog.value = true; // 显示对话框
@@ -337,7 +335,23 @@ const selectedTotalPrice = computed(() => {
     .toFixed(2); // 保留两位小数
 });
 
-
+// 新增：加入购物车逻辑
+const handleAddToCart = async () => {
+  try {
+    const payload = localRecords.value
+    console.log('加入购物车的数据:', payload)
+    const response = await service.post('/api/orders/add_to_cart', payload, { withCredentials: true })
+    console.log('加入购物车的返回数据:', response.data.success)
+    if (response.data.success) {
+      ElMessage.success('已加入购物车')
+    } else {
+      ElMessage.error('加入购物车失败')
+    }
+  } catch (error) {
+    console.error('加入购物车失败:', error.response?.data || error.message)
+    ElMessage.error('加入购物车失败，请检查网络连接')
+  }
+}
 
 const handleConfirm = async () => {
   // 筛选出被选中的记录

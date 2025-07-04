@@ -110,7 +110,16 @@ const routes = [
     name: 'Login',
     component: () => import('@/components/SignIn/Login.vue'),
     meta: {
-      title: '登录 - SmartCNC',
+      title: '登录',
+      guest: true
+    }
+  },
+  {
+    path: '/cart',
+    name: 'Cart',
+    component: () => import('@/components/Cart/cart.vue'),
+    meta: {
+      title: '购物车',
       guest: true
     }
   },

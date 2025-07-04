@@ -1,16 +1,18 @@
 import axios from 'axios'
 import { ElMessage } from 'element-plus'
-import { useAuthStore } from '@/store/modules/auth'
+import { useAppStore } from '@/store/app' // 引入我们刚创建的 store
 
 // 创建 axios 实例
 const service = axios.create({
   baseURL: '',
-  timeout: 15000
+  timeout: 150000
 })
 
 // 请求拦截器
 service.interceptors.request.use(
   async config => {
+    const appStore = useAppStore()
+    appStore.startLoading()
     const auth = (await import('@/store/modules/auth')).useAuthStore()
     if (auth.token) {
       config.headers['Authorization'] = `Bearer ${auth.token}`
@@ -18,6 +20,8 @@ service.interceptors.request.use(
     return config
   },
   error => {
+    const appStore = useAppStore()
+    appStore.finishLoading()
     console.error('请求错误:', error)
     return Promise.reject(error)
   }
@@ -26,6 +30,8 @@ service.interceptors.request.use(
 // 响应拦截器
 service.interceptors.response.use(
   async response => {
+    const appStore = useAppStore()
+    appStore.finishLoading()
     const res = response
     console.log("res",res)
     if (res.status !== 200) {
@@ -43,6 +49,8 @@ service.interceptors.response.use(
     return res
   },
   error => {
+    const appStore = useAppStore()
+    appStore.finishLoading()
     console.error('响应错误:', error)
     ElMessage.error(error.message || '网络错误')
     return Promise.reject(error)
