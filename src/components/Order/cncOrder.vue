@@ -183,7 +183,7 @@ import AmountDialog from '@/components/SignIn/AmountDialog.vue'
 import ProgressDialog from '@/components/SignIn/ProgressDialog.vue'
 import ShippingProgressDialog from '@/components/SignIn/ShippingProgressDialog.vue'
 import { EventBus } from '@/components/SignIn/eventBus.js'
-
+import service from '@/utils/request'
 // 数据状态
 const searchQuery = ref('')
 const timeRange = ref('week')
@@ -295,9 +295,23 @@ const openShippingProgressDialog = (row) => {
   shippingProgressData.value = row
   shippingProgressDialogVisible.value = true
 }
-
+const totalAmount = ref(0)
+const getTotalAmount = async (processingFeeId) => {
+  try {
+    const response = await service.get(`/api/orders/processing_fees/${processingFeeId}`, { withCredentials: true })
+    if (response.status != 200) {
+      throw new Error('网络响应不是 OK')
+    }
+    totalAmount.value = await response.data.total_price
+  } catch (error) {
+    console.error('请求失败:', error)
+    totalAmount.value = null
+  }
+}
 // 初始化支付
-const initiatePayment = (record) => {
+const initiatePayment = async (record) => {
+  await getTotalAmount(record.processing_fee_id)
+  console.log('totalAmount.value',totalAmount.value)
   EventBus.data = { 
     id: record.id,
     order_no: record.order_no,
@@ -306,12 +320,12 @@ const initiatePayment = (record) => {
     processing_fee_id: record.processing_fee_id,
     status: record.status,
     model_info_id: record.model_info_id,
-    operation: record.operation 
+    operation: record.operation,
+    total_amount: totalAmount.value
   }
   router.push({ name: 'UnifiedPaymentCenter' })
 }
 
-import service from '@/utils/request'
 
 // 获取零件信息
 const fetchPartAuditData = async () => {

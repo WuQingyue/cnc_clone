@@ -196,8 +196,37 @@ const handleCommand = async (command) => {
 }
 
 onMounted(() => {
-  // checkLoginStatus()
+  // 检查 window.translate 是否存在
+  if (window.translate) {
+    
+    // ‼️ 修改点：所有 translate 前面加上 window.
+    window.translateConfig = {
+      container: '#translate',
+      excludeSelectors: [
+        '.no-translate',
+        '.el-icon',
+        '.el-dropdown',
+        'script',
+        'style'
+      ],
+      defaultLang: 'zh',
+      detectLanguage: true,
+      translateDelay: 100,
+      cache: true
+    };
+
+    // ‼️ 修改点
+    window.translate.language.setDefaultTo('chinese_simplified');
+    window.translate.progress.api.startUITip();
+    window.translate.listener.start();
+    window.translate.execute();
+    
+    console.log('translate.js initialized.');
+  } else {
+    console.error('translate.js library not loaded.');
+  }
 });
+
 // const checkLoginStatus = async () => {
 //   const uesr_Info = await service.get(
 //       '/api/login/check_login',

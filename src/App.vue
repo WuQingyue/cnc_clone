@@ -1,26 +1,29 @@
 <template>
   <div id="app">
-    <div v-if="isLoading" class="global-loading-mask">
+    <div v-if="appStore.isLoading" class="global-loading-mask">
       <div class="spinner"></div>
-      <span>正在跳转登录页…</span>
+      <span>正在加载，请稍候…</span>
     </div>
-    <!-- 管理员界面 -->
-    <Admin v-if="userStore.checkIsAdmin()" />
-    
-    <!-- 普通用户界面 -->
-    <div v-else>
-      <!-- 顶部导航栏 -->
-      <nav-header />
+    <!-- 界面内容，使用 v-show 可以在加载完毕后保留 DOM，避免重新渲染 -->
+    <div v-show="!appStore.isLoading" style="height: 100%; display: flex; flex-direction: column;">
+      <!-- 管理员界面 -->
+      <Admin v-if="userStore.checkIsAdmin()" />
+      
+      <!-- 普通用户界面 -->
+      <div v-else>
+        <!-- 顶部导航栏 -->
+        <nav-header />
 
-      <!-- 路由视图 -->
-      <router-view v-slot="{ Component }">
-        <transition name="fade" mode="out-in">
-          <component :is="Component" />
-        </transition>
-      </router-view>
+        <!-- 路由视图 -->
+        <router-view v-slot="{ Component }">
+          <transition name="fade" mode="out-in">
+            <component :is="Component" />
+          </transition>
+        </router-view>
 
-      <!-- 页脚 -->
-      <nav-footer />
+        <!-- 页脚 -->
+        <nav-footer />
+      </div>
     </div>
   </div>
 </template>
@@ -29,6 +32,7 @@
 import { ref,watch, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useUserStore } from '@/store/user'
+import { useAppStore } from '@/store/app'
 import { ElMessage } from 'element-plus'
 import axios from 'axios'
 import NavHeader from '@/components/NavHeader/NavHeader.vue'
@@ -39,7 +43,7 @@ import service from '@/utils/request'
 const route = useRoute()
 const router = useRouter()
 const userStore = useUserStore()
-
+const appStore = useAppStore()
 const isLoading = ref(false)
 
 // 登录状态检测方法
@@ -53,21 +57,16 @@ const checkLoginStatus = async () => {
       userStore.setUser(user_Info.data)
     } else {
       userStore.clearUser()
-      isLoading.value = true        // 开始加载
-      setTimeout(() => {            // 可选：延迟跳转更平滑
-        router.push('/login').finally(() => {
-          isLoading.value = false   // 跳转后关闭 loading
-        })
-      }, 500)                       // 0.5秒体验更自然，可调整
+      // 如果未登录，并且当前不在登录页，则跳转
+      if (route.path !== '/login') {
+        router.push('/login')
+      }
     }
   } catch (error) {
     userStore.clearUser()
-    isLoading.value = true
-    setTimeout(() => {
-      router.push('/login').finally(() => {
-        isLoading.value = false
-      })
-    }, 500)
+    if (route.path !== '/login') {
+      router.push('/login')
+    }
   }
 }
 
@@ -87,11 +86,26 @@ onMounted(() => {
   // 首次挂载时检测登录
   checkLoginStatus()
 })
+
 // 监听路由变化，每次路由变化都检测登录
 watch(
   () => route.fullPath,
   () => {
     checkLoginStatus()
+  }
+)
+
+watch(
+  () => route.fullPath,
+  (newPath, oldPath) => {
+    // 避免从登录回调页跳转时重复检查
+    if (newPath.startsWith('/login') || oldPath.startsWith('/login')) {
+      return
+    }
+    // 仅在非登录页和非管理员页面时检查
+    if (!newPath.startsWith('/login') && !newPath.startsWith('/admin')) {
+      checkLoginStatus()
+    }
   }
 )
 
@@ -184,6 +198,32 @@ html, body {
   flex-direction: column;
 }
 
+.global-loading-mask {
+  position: fixed;
+  z-index: 9999;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(255,255,255,0.8); /* 稍微调高不透明度 */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  backdrop-filter: blur(4px); /* 添加毛玻璃效果，现代浏览器支持 */
+  -webkit-backdrop-filter: blur(4px);
+  color: var(--text-color-secondary);
+  font-size: 16px;
+}
+.spinner {
+  border: 4px solid #f3f3f3;
+  border-top: 4px solid #409EFF;
+  border-radius: 50%;
+  width: 40px; height: 40px;
+  animation: spin 1s linear infinite;
+  margin-bottom: 15px; /* 增加间距 */
+}
+@keyframes spin {
+  0% { transform: rotate(0deg);}
+  100% { transform: rotate(360deg);}
+}
 .container {
   width: 100%;
   max-width: 1200px;
