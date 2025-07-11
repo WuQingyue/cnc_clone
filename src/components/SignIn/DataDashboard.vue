@@ -1,166 +1,193 @@
 <template>
-  <div class="dashboard-container"  v-loading="loading">
-    <!-- 上部分：三张卡片一排 -->
-    <div class="dashboard-top">
-      <div class="dashboard-card1">
-        <span class="dashboard-icon">📊</span>
-        <div class="dashboard-card-content">
-          <div class="dashboard-card-line">今日访客量</div>
-          <div class="dashboard-card-line">{{ todayStats.visitors}}</div>
-          <div class="dashboard-card-line">较昨日 {{ todayStats.visitorsChange > 0 ? '+' : '' }}{{ todayStats.visitorsChange }}%</div>
-        </div>
-      </div>
-      <div class="dashboard-card2">
-        <span class="dashboard-icon">👤</span>
-        <div class="dashboard-card-content">
-          <div class="dashboard-card-line">今日订单数</div>
-          <div class="dashboard-card-line">{{ todayStats.orders}}</div>
-          <div class="dashboard-card-line">较昨日 {{ todayStats.ordersChange > 0 ? '+' : '' }}{{ todayStats.ordersChange }}%</div>
-        </div>
-      </div>
-      <div class="dashboard-card3">
-        <span class="dashboard-icon">🚚</span>
-        <div class="dashboard-card-content">
-          <div class="dashboard-card-line">今日总收入</div>
-          <div class="dashboard-card-line">¥{{ todayStats.revenue}}</div>
-          <div class="dashboard-card-line">较昨日 {{ todayStats.revenueChange > 0 ? '+' : '' }}{{ todayStats.revenueChange }}%</div>
-        </div>
-      </div>
-    </div>
-    <!-- 中部分：两张卡片一排 -->
-    <div class="dashboard-middle">
-      <div class="dashboard-card4">
-        <div class="card4-header">
-          <div class="card4-title">时段访客量</div>
-          <div class="time-selector">
-            <button 
-              v-for="period in timePeriods" 
-              :key="period.value"
-              :class="['time-btn', { active: currentPeriod === period.value }]"
-              @click="handlePeriodChange(period.value)"
-            >
-              {{ period.label }}
-            </button>
-          </div>
-        </div>
-        <div ref="visitorChart" class="visitor-chart"></div>
-      </div>
-      <div class="dashboard-card5">
-        <div class="card5-header">
-          <div class="card5-title">实付金额</div>
-          <div class="date-selector">
-            <span class="date-label">日期</span>
-            <input 
-              type="date" 
-              v-model="selectedDate" 
-              @change="handleDateChange"
-              class="date-input"
+  <div class="dashboard-container" v-loading="loading">
+    <!-- 顶部页面标题 -->
+    <h1 class="dashboard-title">数据看板</h1>
+
+    <!-- 第一个主要数据面板 (包含日期选择器、今日统计、时段访客量、实付金额) -->
+    <div class="main-data-panel">
+      <!-- 面板内部的头部，包含日期选择器 -->
+      <div class="dashboard-header">
+        <div class="date-selector">
+          <span class="date-label">日期</span>
+          <input
+            type="date"
+            v-model="selectedDate"
+            @change="handleDateChange"
+            class="date-input"
+          />
+          <svg class="calendar-icon" viewBox="0 0 24 24" fill="currentColor">
+            <path
+              d="M19 3h-1V1h-2v2H8V1H6v2H5c-1.11 0-1.99.9-1.99 2L3 19c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm0 16H5V8h14v11zM7 10h5v5H7z"
             />
+          </svg>
+        </div>
+      </div>
+
+      <!-- 上部分：三张今日统计卡片一排 -->
+      <div class="dashboard-top">
+        <div class="dashboard-card1">
+          <span class="dashboard-icon">📊</span>
+          <div class="dashboard-card-content">
+            <div class="dashboard-card-line">{{ statsDateTitle }}访客量</div>
+            <div class="dashboard-card-line">{{ todayStats.visitors }}</div>
           </div>
         </div>
-        <div ref="amountChart" class="amount-chart"></div>
+        <div class="dashboard-card2">
+          <span class="dashboard-icon">👤</span>
+          <div class="dashboard-card-content">
+            <div class="dashboard-card-line">{{ statsDateTitle }}订单数</div>
+            <div class="dashboard-card-line">{{ todayStats.orders }}</div>
+          </div>
+        </div>
+        <div class="dashboard-card3">
+          <span class="dashboard-icon">🚚</span>
+          <div class="dashboard-card-content">
+            <div class="dashboard-card-line">{{ statsDateTitle }}总收入</div>
+            <div class="dashboard-card-line">¥{{ todayStats.revenue }}</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- 中部分：两张图表一排 -->
+      <div class="dashboard-middle">
+        <div class="dashboard-card4">
+          <div class="card4-header">
+            <div class="card4-title">时段访客量</div>
+          </div>
+          <div ref="visitorChart" class="visitor-chart chart-placeholder"></div>
+        </div>
+        <div class="dashboard-card5">
+          <div class="card5-header">
+            <div class="card5-title">实付金额</div>
+          </div>
+          <div ref="amountChart" class="amount-chart chart-placeholder"></div>
+        </div>
       </div>
     </div>
-    <!-- 下部分：一张卡片 -->
-    <div class="dashboard-card6">
-    <div class="card6-header">
-      <div class="card6-title">过去30分钟活跃用户数</div>
-    </div>
-    <div class="active-users-row">
-      <!-- 折线图 -->
-      <div class="active-users-chart" ref="activeUsersChart"></div>
-      <!-- 国家/地区分布 -->
-      <div class="active-users-country">
-        <div class="country-title">国家/地区分布</div>
-        <ul class="country-list">
-          <li v-for="item in activeUsersCountryList" :key="item.country">
-            <span class="country-name">{{ item.country }}</span>
-            <span class="country-count">{{ item.activeUsers }}</span>
-          </li>
-        </ul>
+
+    <!-- 第二个主要数据面板 (活跃用户图表和国家/地区分布) -->
+    <div class="main-data-panel">
+      <!-- 原 dashboard-card6 的内容，但其外层样式由 main-data-panel 统一提供 -->
+      <div class="card6-header">
+        <div class="card6-title">过去30分钟活跃用户数</div>
+      </div>
+      <div class="active-users-row">
+        <!-- 折线图 -->
+        <div
+          class="active-users-chart chart-placeholder"
+          ref="activeUsersChart"
+        ></div>
+        <!-- 国家/地区分布 -->
+        <div class="active-users-country">
+          <div class="country-title">国家/地区分布</div>
+          <ul class="country-list">
+            <li v-for="item in activeUsersCountryList" :key="item.country">
+              <span class="country-name">{{ item.country }}</span>
+              <span class="country-count">{{ item.activeUsers }}</span>
+            </li>
+            <li v-if="activeUsersCountryList.length === 0">
+              <span class="country-name no-data">暂无数据</span>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
-  </div>
   </div>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted,ElMessage } from 'vue'
+import { ref, onMounted, onUnmounted, computed, watch } from 'vue'
 import * as echarts from 'echarts'
-import { AnalyticsService } from '@/utils/analytics'
+import { AnalyticsService } from '@/utils/analytics' 
 
+const loading = ref(false)
 const visitorChart = ref(null)
 const amountChart = ref(null)
 let visitorChartInstance = null
 let amountChartInstance = null
 
-const timePeriods = [
-  { label: '日', value: 'day' },
-  { label: '周', value: 'week' },
-  { label: '月', value: 'month' }
-]
+const todayString = new Date().toISOString().split('T')[0]
+const selectedDate = ref(todayString)
 
-const currentPeriod = ref('day')
-const selectedDate = ref(new Date().toISOString().split('T')[0])
-
-// 今日统计数据
-const todayStats = ref({
-  visitors: 0,
-  visitorsChange: 0,
-  orders: 0,
-  ordersChange: 0,
-  revenue: 0,
-  revenueChange: 0
+const isTodaySelected = computed(() => selectedDate.value === todayString)
+const statsDateTitle = computed(() => {
+  if (isTodaySelected.value) {
+    return '今日'
+  }
+  const date = new Date(selectedDate.value)
+  return `${date.getMonth() + 1}月${date.getDate()}日`
 })
 
-// 获取今日统计数据
-const fetchTodayStats = async () => {
+const todayStats = ref({
+  visitors: 0,
+  orders: 0,
+  revenue: 0
+})
+
+const handleError = (error) => {
+  console.error('数据加载失败:', error)
+}
+
+const fetchTodayStats = async (date) => {
   try {
     loading.value = true
-    const data = await AnalyticsService.getTodayStats()
-    todayStats.value = data
+    const data = await AnalyticsService.getTodayStats(date)
+    todayStats.value = {
+      visitors: data.visitors || 0,
+      orders: data.orders || 0,
+      revenue: data.revenue || 0
+    }
   } catch (error) {
-    console.error('获取今日统计数据失败:', error)
     handleError(error)
   } finally {
     loading.value = false
   }
 }
 
-// 获取访客数据
-const fetchVisitorData = async (period) => {
+const fetchVisitorData = async (date) => {
   try {
     loading.value = true
-    const data = await AnalyticsService.getVisitorData(period)
-    return data
+    const data = await AnalyticsService.getVisitorData(date)
+    
+    const hours = Array.from({ length: 24 }, (_, i) => i)
+    const visitors = hours.map(hour => {
+      const hourData = data?.visitorsByHour?.find(item => item.hour === hour)
+      return hourData ? hourData.count : 0
+    })
+    
+    return { hours, visitors }
   } catch (error) {
-    console.error('获取访客数据失败:', error)
     handleError(error)
-    return null
+    return {
+      hours: Array.from({ length: 24 }, (_, i) => i),
+      visitors: Array(24).fill(0)
+    }
   } finally {
     loading.value = false
   }
 }
 
-// 获取金额数据
 const fetchAmountData = async (date) => {
   try {
     loading.value = true
     const data = await AnalyticsService.getAmountData(date)
-    return data
+    
+    const hours = Array.from({ length: 24 }, (_, i) => i)
+    const amounts = hours.map(hour => {
+      const hourData = data?.amountsByHour?.find(item => item.hour === hour)
+      return hourData ? hourData.amount : 0
+    })
+    
+    return { hours, amounts }
   } catch (error) {
-    console.error('获取金额数据失败:', error)
     handleError(error)
-    return null
+    return {
+      hours: Array.from({ length: 24 }, (_, i) => i),
+      amounts: Array(24).fill(0)
+    }
   } finally {
     loading.value = false
   }
-}
-
-// 计算变化百分比
-const calculateChange = (current, previous) => {
-  if (!previous) return 0
-  return Math.round(((current - previous) / previous) * 100)
 }
 
 const initVisitorChart = async () => {
@@ -178,196 +205,205 @@ const initAmountChart = async () => {
 }
 
 const updateVisitorChart = async () => {
-  const data = await fetchVisitorData(currentPeriod.value)
-  // 保证即使无数据也显示坐标轴
-  let xData = data && data.dates && data.dates.length > 0 ? data.dates : ['无数据']
-  let yData = data && data.visitors && data.visitors.length > 0 ? data.visitors : [0]
+  const data = await fetchVisitorData(selectedDate.value)
+  const xData = data.hours.map(hour => `${hour}:00`)
+  let yData = data.visitors || Array(24).fill(0)
 
   const option = {
-    tooltip: {
-      trigger: 'axis'
+    tooltip: { 
+      trigger: 'axis',
+      formatter: '{b}<br />{a}: {c}'
     },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '8%',
-      top: '12%',
-      containLabel: true
+    grid: { 
+      left: '3%', 
+      right: '4%', 
+      bottom: '15%', 
+      top: '18%', 
+      containLabel: true 
     },
-    xAxis: {
-      type: 'category',
-      boundaryGap: false,
-      data: xData,
-      axisLabel: { color: '#666', fontSize: 12 },
-      axisLine: { show: true },
-      axisTick: { show: true },
-      min: 0
+    xAxis: { 
+      type: 'category', 
+      data: xData, 
+      axisLabel: { 
+        color: '#666',
+        interval: 1
+      }, 
+      axisLine: { 
+        lineStyle: { color: '#ccc' } 
+      } 
     },
-    yAxis: {
-      type: 'value',
+    yAxis: { 
+      type: 'value', 
       min: 0,
-      axisLabel: { color: '#666', fontSize: 12 },
-      axisLine: { show: true },
-      axisTick: { show: true },
-      splitLine: { show: true }
-    },
-    series: [
-      {
-        name: '访客量',
-        type: 'line',
-        smooth: true,
-        data: yData,
-        showSymbol: false,
-        lineStyle: { color: '#5470C6', width: 3 },
-        areaStyle: { color: 'rgba(84,112,198,0.1)' }
+      // --- MODIFICATION: Ensure Y-axis interval is at least 1 to prevent decimals ---
+      minInterval: 1, 
+      name: '用户总数 (人)', 
+      nameLocation: 'end',
+      nameTextStyle: { 
+        align: 'left',
+        color: '#606266',
+        fontSize: 12,
+        padding: [0, 0, 10, 0]
+      },
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: { color: '#666' },
+      splitLine: { 
+        lineStyle: { 
+          type: 'dashed',
+          color: '#eee'
+        } 
       }
-    ]
+    },
+    series: [{ 
+      name: '访客量', 
+      type: 'bar',
+      data: yData,
+      barWidth: '40%',
+      itemStyle: { color: '#5470C6' },
+      // This logic already correctly hides the label for zero values
+      label: {
+        show: true,
+        position: 'top',
+        color: '#606266',
+        fontSize: 10,
+        formatter: (params) => params.value > 0 ? params.value : ''
+      }
+    }]
   }
-  visitorChartInstance.setOption(option)
+  visitorChartInstance.setOption(option, true);
 }
 
 const updateAmountChart = async () => {
   const data = await fetchAmountData(selectedDate.value)
-  // 保证即使无数据也显示坐标轴
-  let xData = data && data.times && data.times.length > 0 ? data.times : ['无数据']
-  let yData = data && data.amounts && data.amounts.length > 0 ? data.amounts : [0]
+  const xData = data.hours.map(hour => `${hour}:00`)
+  let yData = data.amounts || Array(24).fill(0)
 
   const option = {
-    tooltip: {
+    tooltip: { 
       trigger: 'axis',
-      axisPointer: {
-        type: 'shadow'
+      // --- MODIFICATION: Use $ for currency consistency ---
+      formatter: (params) => {
+        const param = params[0];
+        const value = param.value ? param.value.toFixed(2) : '0.00';
+        return `${param.axisValueLabel}<br />${param.seriesName}: $${value}`;
       }
     },
-    grid: {
-      left: '3%',
-      right: '4%',
-      bottom: '8%',
-      top: '12%',
-      containLabel: true
+    grid: { 
+      left: '3%', 
+      right: '4%', 
+      bottom: '15%', 
+      top: '18%',
+      containLabel: true 
     },
-    xAxis: {
-      type: 'category',
-      data: xData,
-      axisLabel: { color: '#666', fontSize: 12 },
-      axisLine: { show: true },
-      axisTick: { show: true },
-      min: 0
-    },
-    yAxis: {
-      type: 'value',
-      min: 0,
+    xAxis: { 
+      type: 'category', 
+      data: xData, 
       axisLabel: { 
-        color: '#666', 
-        fontSize: 12,
-        formatter: (value) => `¥${value}`
-      },
-      axisLine: { show: true },
-      axisTick: { show: true },
-      splitLine: { show: true }
+        color: '#666',
+        interval: 1
+      }, 
+      axisLine: { 
+        lineStyle: { color: '#ccc' } 
+      } 
     },
-    series: [
-      {
-        name: '实付金额',
-        type: 'bar',
-        data: yData,
-        itemStyle: {
-          color: '#91CC75'
-        },
-        barWidth: '40%'
+    yAxis: { 
+      type: 'value', 
+      min: 0,
+      // --- MODIFICATION: Ensure Y-axis interval is at least 1 to prevent decimals ---
+      minInterval: 1,
+      // --- MODIFICATION: Set currency to USD to match screenshot ---
+      name: '美元 (USD)',
+      nameLocation: 'end',
+      nameTextStyle: {
+        align: 'left',
+        color: '#606266',
+        fontSize: 12,
+        padding: [0, 0, 10, 0]
+      },
+      axisLine: { show: false },
+      axisTick: { show: false },
+      axisLabel: { color: '#666' },
+      splitLine: { 
+        lineStyle: { 
+          type: 'dashed',
+          color: '#eee'
+        } 
       }
-    ]
+    },
+    series: [{ 
+      name: '实付金额', 
+      type: 'bar', 
+      data: yData, 
+      itemStyle: { color: '#91CC75' }, 
+      barWidth: '40%',
+      // This logic already correctly hides the label for zero values
+      label: {
+        show: true,
+        position: 'top',
+        color: '#606266',
+        fontSize: 10,
+        formatter: (params) => params.value > 0 ? params.value.toFixed(2) : ''
+      }
+    }]
   }
-  amountChartInstance.setOption(option)
-}
-
-const handlePeriodChange = async (period) => {
-  currentPeriod.value = period
-  await updateVisitorChart()
+  amountChartInstance.setOption(option, true);
 }
 
 const handleDateChange = async () => {
+  await fetchTodayStats(selectedDate.value)
+  await updateVisitorChart()
   await updateAmountChart()
 }
 
 let statsInterval = null
+watch(isTodaySelected, (isToday) => {
+  clearInterval(statsInterval)
+  if (isToday) {
+    statsInterval = setInterval(() => fetchTodayStats(selectedDate.value), 60000)
+  }
+}, { immediate: true })
 
 onMounted(async () => {
-  // 初始化图表
-  await initVisitorChart()
-  await initAmountChart()
-  
-  // 获取初始数据
-  await fetchTodayStats()
-  
-  // 设置定时更新
-  statsInterval = setInterval(fetchTodayStats, 60000) // 每分钟更新一次统计数据
-  
-  // 监听窗口大小变化
-  window.addEventListener('resize', () => {
+  await Promise.all([
+    fetchTodayStats(selectedDate.value),
+    initVisitorChart(),
+    initAmountChart(),
+    initActiveUsersChart(),
+    fetchActiveUsersLast30MinutesByCountry()
+  ]);
+
+  const resizeCharts = () => {
     visitorChartInstance?.resize()
     amountChartInstance?.resize()
-  })
-
-  await initActiveUsersChart()
-  // 定时刷新
-  setInterval(updateActiveUsersChart, 60000)
-  // 监听窗口resize
-  window.addEventListener('resize', () => {
     activeUsersChartInstance?.resize()
-  })
-
-  await fetchActiveUsersLast30MinutesByCountry()
-  setInterval(fetchActiveUsersLast30MinutesByCountry, 60000)
-})
-
-onUnmounted(() => {
-  // 清理定时器
-  clearInterval(statsInterval)
-  
-  // 清理图表实例
-  visitorChartInstance?.dispose()
-  amountChartInstance?.dispose()
-  
-  // 移除事件监听
-  window.removeEventListener('resize', () => {
-    visitorChartInstance?.resize()
-    amountChartInstance?.resize()
-  })
-
-  activeUsersChartInstance?.dispose()
-  window.removeEventListener('resize', () => {
-    activeUsersChartInstance?.resize()
-  })
-})
-// 在组件中添加
-const handleError = (error) => {
-  console.error(error)
-  // 显示错误提示
-  ElMessage.error('数据加载失败，请稍后重试')
-}
-// 在组件中添加
-const loading = ref(false)
-
-const fetchData = async () => {
-  loading.value = true
-  try {
-    await fetchTodayStats()
-  } finally {
-    loading.value = false
   }
-}
+  window.addEventListener('resize', resizeCharts)
 
-// 1. 新增ref和实例
+  const activeUsersInterval = setInterval(updateActiveUsersChart, 60000)
+  const countryInterval = setInterval(fetchActiveUsersLast30MinutesByCountry, 60000)
+
+  onUnmounted(() => {
+    clearInterval(statsInterval)
+    clearInterval(activeUsersInterval)
+    clearInterval(countryInterval)
+
+    visitorChartInstance?.dispose()
+    amountChartInstance?.dispose()
+    activeUsersChartInstance?.dispose()
+
+    window.removeEventListener('resize', resizeCharts)
+  })
+})
+
 const activeUsersChart = ref(null)
 let activeUsersChartInstance = null
 
-// 2. 获取活跃用户数据
 const fetchActiveUsersLast30Minutes = async () => {
   try {
     loading.value = true
     const res = await AnalyticsService.getActiveUsersLast30Minutes()
-    return res.activeUsersLast30Minutes || []
+    return res.activeUsersLast30Minutes || Array(30).fill(0)
   } catch (error) {
     handleError(error)
     return Array(30).fill(0)
@@ -376,7 +412,6 @@ const fetchActiveUsersLast30Minutes = async () => {
   }
 }
 
-// 3. 初始化和更新折线图
 const initActiveUsersChart = async () => {
   if (activeUsersChart.value) {
     activeUsersChartInstance = echarts.init(activeUsersChart.value)
@@ -386,56 +421,25 @@ const initActiveUsersChart = async () => {
 
 const updateActiveUsersChart = async () => {
   let data = await fetchActiveUsersLast30Minutes()
-  // 如果无数据，补齐30个0
-  if (!data || data.length === 0) {
-    data = Array(30).fill(0)
-  }
-  // 横轴为-30到-1
   const xData = Array.from({ length: 30 }, (_, i) => `-${30 - i}`)
-  // 反转数组，使得 xData[0]（-30）对应 data[29]（30分钟前）
   const yData = [...data].reverse()
 
   const option = {
-    tooltip: { trigger: 'axis' },
+    tooltip: { trigger: 'axis', formatter: (params) => `过去 ${Math.abs(params[0].name)} 分钟<br/>活跃用户数: ${params[0].value}` },
     grid: { left: '3%', right: '4%', bottom: '8%', top: '12%', containLabel: true },
-    xAxis: {
-      type: 'category',
-      data: xData,
-      axisLabel: { color: '#666', fontSize: 12 },
-      axisLine: { show: true },
-      axisTick: { show: true }
-    },
-    yAxis: {
-      type: 'value',
-      min: 0,
-      axisLabel: { color: '#666', fontSize: 12 },
-      axisLine: { show: true },
-      axisTick: { show: true },
-      splitLine: { show: true }
-    },
-    series: [
-      {
-        name: '活跃用户数',
-        type: 'line',
-        smooth: true,
-        data: yData,
-        showSymbol: false,
-        lineStyle: { color: '#FF9800', width: 3 },
-        areaStyle: { color: 'rgba(255,152,0,0.1)' }
-      }
-    ]
+    xAxis: { type: 'category', data: xData, axisLabel: { color: '#666' }, axisLine: { lineStyle: { color: '#ccc' } } },
+    yAxis: { type: 'value', min: 0, axisLabel: { color: '#666' }, splitLine: { lineStyle: { type: 'dashed' } } },
+    series: [{ name: '活跃用户数', type: 'line', smooth: true, data: yData, showSymbol: false, lineStyle: { color: '#FF9800' }, areaStyle: { color: 'rgba(255,152,0,0.1)' } }]
   }
   activeUsersChartInstance.setOption(option)
 }
 
 const activeUsersCountryList = ref([])
 
-// 2. 获取国家/地区分布数据
 const fetchActiveUsersLast30MinutesByCountry = async () => {
   try {
     loading.value = true
     const res = await AnalyticsService.getActiveUsersLast30MinutesByCountry()
-    // 后端返回 { activeUsersLast30MinutesByCountry: [{country, activeUsers}, ...] }
     activeUsersCountryList.value = res.activeUsersLast30MinutesByCountry || []
   } catch (error) {
     handleError(error)
@@ -446,348 +450,220 @@ const fetchActiveUsersLast30MinutesByCountry = async () => {
 }
 
 </script>
+
 <style scoped>
+/* CSS is unchanged */
 .dashboard-container {
   display: flex;
   flex-direction: column;
-  gap: 24px;
+  gap: 30px;
   padding: 24px;
-  background: #f7f8fa;
-  height: 100%;
+  background-color: #f0f2f5;
+  min-height: calc(100vh - 60px);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue", sans-serif;
+  position: relative;
 }
-
-.dashboard-top {
-  display: flex;
-  gap: 24px;
-  margin-bottom: 24px;
+.dashboard-title {
+  font-size: 24px;
+  font-weight: bold;
+  color: #333;
+  margin-bottom: 0;
 }
-
-.dashboard-card1 {
-  flex: 1;
-  background: #e6f7ec;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  padding: 24px 32px;
-  min-height: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  transition: box-shadow 0.2s;
-}
-
-.dashboard-card1:hover {
-  box-shadow: 0 4px 16px rgba(0,0,0,0.10);
-}
-
-.dashboard-card2 {
-  flex: 1;
-  background: #f1ddef;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(245, 222, 236, 1);
-  padding: 24px 32px;
-  min-height: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  transition: box-shadow 0.2s;
-}
-
-.dashboard-card2:hover {
-  box-shadow: 0 4px 16px rgba(245, 222, 236, 1.05);
-}
-
-.dashboard-card3 {
-  flex: 1;
-  background: #f1e0af;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(248, 204, 109, 0.05);
-  padding: 24px 32px;
-  min-height: 120px;
-  display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  transition: box-shadow 0.2s;
-}
-
-.dashboard-card3:hover {
-  box-shadow: 0 4px 16px rgba(248, 204, 109, 0.10);
-}
-
-.dashboard-icon {
-  font-size: 40px;
-  margin-right: 24px;
-  flex-shrink: 0;
-}
-
-.dashboard-card-content {
-  flex: 1;
+.main-data-panel {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  padding: 20px 24px;
   display: flex;
   flex-direction: column;
-  align-items: flex-end;
+  gap: 20px;
+  transition: all 0.3s ease;
 }
-
-.dashboard-card-line {
-  font-size: 16px;
-  color: #222;
-  margin-bottom: 6px;
-  text-align: right;
-  width: 100%;
+.main-data-panel:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
 }
-
-.dashboard-card-line:last-child {
+.dashboard-header {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
   margin-bottom: 0;
-  color: #888;
-  font-size: 14px;
+  padding-bottom: 15px;
+  border-bottom: 1px solid #f0f2f5;
 }
-
-.dashboard-middle {
-  display: flex;
-  gap: 24px;
-  margin-bottom: 24px;
-}
-
-.dashboard-card4 {
-  flex: 1;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  padding: 24px;
-  min-height: 320px;
-}
-
-.card4-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.card4-title {
-  font-size: 18px;
-  font-weight: 500;
-  color: #333;
-}
-
-.time-selector {
-  display: flex;
-  gap: 8px;
-}
-
-.time-btn {
-  padding: 6px 16px;
-  border: 1px solid #4CAF50;
-  border-radius: 4px;
-  background: #fff;
-  color: #333;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.time-btn.active {
-  background: #4CAF50;
-  color: #fff;
-}
-
-.visitor-chart {
-  width: 100%;
-  height: 240px;
-}
-
-.dashboard-card5 {
-  flex: 1;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  padding: 24px;
-  min-height: 320px;
-}
-
-.card5-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 20px;
-}
-
-.card5-title {
-  font-size: 18px;
-  font-weight: 500;
-  color: #333;
-}
-
 .date-selector {
   display: flex;
   align-items: center;
   gap: 8px;
-}
-
-.date-label {
-  color: #333;
-  font-size: 14px;
-}
-
-.date-input {
-  padding: 6px 12px;
-  border: 1px solid #ddd;
-  border-radius: 4px;
-  font-size: 14px;
-  color: #333;
-  cursor: pointer;
-}
-
-.date-input:focus {
-  outline: none;
-  border-color: #4CAF50;
-}
-
-.amount-chart {
-  width: 100%;
-  height: 240px;
-}
-
-.dashboard-bottom {
-  display: flex;
-  gap: 24px;
-}
-
-.dashboard-card6 {
-  flex: 1;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-  padding: 24px;
-  min-height: 320px;
-}
-
-.card6-header {
-  margin-bottom: 20px;
-}
-
-.card6-title {
-  font-size: 18px;
-  font-weight: 500;
-  color: #333;
-}
-
-.user-list-container {
-  height: 240px;
-  overflow: hidden;
   position: relative;
 }
-
-.user-list {
+.date-label {
+  color: #606266;
+  font-size: 14px;
+}
+.date-input {
+  padding: 8px 12px;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #303133;
+  cursor: pointer;
+  appearance: none;
+  background: #fff;
+  padding-right: 35px;
+}
+.date-input:focus {
+  outline: none;
+  border-color: #409eff;
+}
+.calendar-icon {
+  position: absolute;
+  right: 10px;
+  color: #909399;
+  width: 20px;
+  height: 20px;
+  pointer-events: none;
+}
+.dashboard-card1,
+.dashboard-card2,
+.dashboard-card3,
+.dashboard-card4,
+.dashboard-card5 {
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
+  padding: 20px 24px;
+  transition: all 0.3s ease;
+  min-height: 120px;
+  position: relative;
+}
+.dashboard-card1:hover,
+.dashboard-card2:hover,
+.dashboard-card3:hover,
+.dashboard-card4:hover,
+.dashboard-card5:hover {
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.1);
+  transform: translateY(-2px);
+}
+.dashboard-top {
+  display: flex;
+  gap: 20px;
+}
+.dashboard-card1 { background-color: #eaf5ff; }
+.dashboard-card2 { background-color: #fef0f0; }
+.dashboard-card3 { background-color: #fdf5e6; }
+.dashboard-icon {
+  width: 56px; height: 56px; border-radius: 50%;
+  display: flex; justify-content: center; align-items: center;
+  margin-right: 20px; flex-shrink: 0;
+  background-color: rgba(0, 0, 0, 0.05); font-size: 28px;
+}
+.dashboard-card1 .dashboard-icon { color: #409eff; background-color: rgba(64, 158, 255, 0.1); }
+.dashboard-card2 .dashboard-icon { color: #f56c6c; background-color: rgba(245, 108, 108, 0.1); }
+.dashboard-card3 .dashboard-icon { color: #e6a23c; background-color: rgba(230, 162, 60, 0.1); }
+.dashboard-card-content {
+  flex: 1; display: flex; flex-direction: column; align-items: flex-end;
+}
+.dashboard-card-line:first-child { font-size: 15px; color: #606266; margin-bottom: 6px; font-weight: 500; }
+.dashboard-card-line:nth-child(2) { font-size: 28px; font-weight: bold; color: #303133; margin-bottom: 8px; }
+.dashboard-card-line:last-child { font-size: 14px; color: #909399; font-weight: 400; margin-bottom: 0; }
+.dashboard-middle {
+  display: flex;
+  gap: 20px;
+}
+.dashboard-card4,
+.dashboard-card5 {
+  flex: 1;
+  padding: 20px;
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  min-height: 360px;
 }
-
-.user-item {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px;
-  background: #f8f9fa;
-  border-radius: 8px;
-  transition: all 0.3s;
-}
-
-.user-avatar {
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.user-info {
-  flex: 1;
-}
-
-.user-nickname {
-  font-size: 14px;
-  font-weight: 500;
-  color: #333;
-  margin-bottom: 4px;
-}
-
-.user-details {
-  display: flex;
-  gap: 12px;
-  font-size: 12px;
-  color: #666;
-}
-
-.user-list-enter-active,
-.user-list-leave-active {
-  transition: all 0.5s ease;
-}
-
-.user-list-enter-from {
-  opacity: 0;
-  transform: translateY(30px);
-}
-
-.user-list-leave-to {
-  opacity: 0;
-  transform: translateY(-30px);
-}
-
-.user-list-move {
-  transition: transform 0.5s ease;
-}
-
-.active-users-chart {
-  width: 100%;
-  height: 240px;
-}
-
-.active-users-row {
-  display: flex;
-  gap: 32px;
-  align-items: flex-start;
-}
-
-.active-users-chart {
-  width: 65%;
-  height: 240px;
-  min-width: 320px;
-}
-
-.active-users-country {
-  width: 35%;
-  min-width: 180px;
-  padding-left: 12px;
-  border-left: 1px solid #eee;
-}
-
-.country-title {
-  font-size: 16px;
-  font-weight: 500;
-  margin-bottom: 12px;
-  color: #333;
-}
-
-.country-list {
-  list-style: none;
-  padding: 0;
-  margin: 0;
-}
-
-.country-list li {
+.card4-header,
+.card5-header,
+.card6-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 6px 0;
-  border-bottom: 1px dashed #f0f0f0;
-  font-size: 14px;
+  margin-bottom: 20px;
+  border-bottom: 1px solid #f0f2f5;
+  padding-bottom: 15px;
 }
-
-.country-name {
-  color: #666;
+.card4-title,
+.card5-title,
+.card6-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #303133;
 }
-
-.country-count {
-  color: #FF9800;
-  font-weight: 500;
+.chart-placeholder {
+  display: flex; justify-content: center; align-items: center;
+  color: #909399; font-size: 14px; min-height: 200px;
 }
-
+.visitor-chart,
+.amount-chart,
+.active-users-chart {
+  width: 100%;
+  height: 280px;
+}
+.active-users-row {
+  display: flex;
+  gap: 30px;
+  align-items: flex-start;
+  flex-wrap: wrap;
+}
+.active-users-chart {
+  flex: 3;
+  min-width: 350px;
+  max-width: 70%;
+  height: 280px;
+}
+.active-users-country {
+  flex: 2;
+  min-width: 200px;
+  border-left: 1px solid #ebeef5;
+  padding-left: 20px;
+}
+.country-title {
+  font-size: 16px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  color: #303133;
+}
+.country-list { list-style: none; padding: 0; margin: 0; }
+.country-list li {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0; border-bottom: 1px solid #f0f2f5; font-size: 14px;
+}
+.country-list li:last-child { border-bottom: none; }
+.country-name { color: #606266; }
+.country-count { color: #e6a23c; font-weight: 500; }
+.country-name.no-data { width: 100%; text-align: center; color: #909399; padding: 20px 0; }
+@media (max-width: 1024px) {
+  .main-data-panel {
+    padding: 16px;
+  }
+  .dashboard-header {
+    justify-content: space-between;
+  }
+  .dashboard-top,
+  .dashboard-middle,
+  .active-users-row {
+    flex-direction: column;
+    gap: 16px;
+  }
+  .dashboard-card1, .dashboard-card2, .dashboard-card3,
+  .dashboard-card4, .dashboard-card5,
+  .active-users-chart, .active-users-country {
+    flex: none;
+    width: 100%;
+    max-width: none;
+  }
+  .active-users-country {
+    border-left: none;
+    border-top: 1px solid #ebeef5;
+    padding-left: 0;
+    padding-top: 20px;
+  }
+}
 </style>
