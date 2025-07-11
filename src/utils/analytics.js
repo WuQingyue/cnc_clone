@@ -3,21 +3,23 @@ import service from '@/utils/request'
 
 export const AnalyticsService = {
   // 获取今日统计数据
-  async getTodayStats() {
+   async getTodayStats(date) {
     try {
-      const response = await service.get(`/api/ga4/today-stats`)
+      const response = await service.get(`/api/ga4/today-stats`, {
+        params: { date } // 将日期作为参数传递
+      })
       return response.data
     } catch (error) {
-      console.error('获取今日统计数据失败:', error)
+      console.error('获取统计数据失败:', error)
       throw error
     }
   },
 
   // 获取访客数据
-  async getVisitorData(period) {
+  async getVisitorData(date) { // 参数从 period 改为 date
     try {
       const response = await service.get(`/api/ga4/visitor-data`, {
-        params: { period }
+        params: { date } // 将 date 作为参数发送
       })
       return response.data
     } catch (error) {

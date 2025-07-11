@@ -54,8 +54,8 @@
         <!-- 加工参数列 -->
         <el-table-column label="加工参数" width="220" align="center">
           <template #default="scope">
-            <div 
-              class="parameter-info-cell" 
+            <div
+              class="parameter-info-cell"
               @click="openParameterDialog(scope.row)"
             >
               <div class="parameter-details">
@@ -94,7 +94,7 @@
         <el-table-column prop="quantity" label="数量" width="100" align="center" />
         <el-table-column label="小计(元)" width="140" align="center">
           <template #default="scope">
-            {{ scope.row.price ? scope.row.price.toFixed(2) : '0.00' }}
+            {{ scope.row.totalPrice.toFixed(2) }}
           </template>
         </el-table-column>
         <el-table-column label="操作" fixed="right" align="center">
@@ -130,26 +130,18 @@
           <el-button
             type="primary"
             :disabled="selectedItems.length === 0"
-            @click="checkout"
+            @click="submitInquiry"
           >提交询价</el-button>
         </div>
       </div>
     </div>
 
-    <!-- 结算对话框 -->
-    <el-dialog v-model="checkoutDialogVisible" title="结算成功" width="300">
-      <div>感谢您的购买！已成功结算。</div>
-      <template #footer>
-        <el-button type="primary" @click="checkoutDialogVisible = false">确定</el-button>
-      </template>
-    </el-dialog>
-    
     <!-- 参数编辑对话框 -->
-    <ParameterInfo 
+    <ParameterInfo
       :visible="showParameterDialog"
       @update:visible="showParameterDialog = $event"
       @confirm="handleParameterConfirm"
-      :record="currentEditRecord"  
+      :record="currentEditRecord"
     />
   </div>
 </template>
@@ -158,96 +150,20 @@
 import { ref, computed, watch, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { Document, Edit } from '@element-plus/icons-vue'
-import ParameterInfo from '../quote/ParameterInfo.vue' 
-// ★★★★★ FIX 1: Import the parameters list for lookup ★★★★★
-import { parametersList } from '../quote/AutomationTool.js' 
+import ParameterInfo from '../quote/ParameterInfo.vue'
+import { parametersList } from '../quote/AutomationTool.js'
 import service from '@/utils/request'
+import { useRouter } from 'vue-router'
+
+const router = useRouter()
 
 const cart = ref([])
 const loading = ref(false)
-const checkoutDialogVisible = ref(false)
 const showParameterDialog = ref(false)
 const currentEditRecord = ref(null)
 
 const currentPage = ref(1)
 const pageSize = ref(10)
-
-const recalculateCartPrices = async () => {
-  if (cart.value.length === 0) {
-    return;
-  }
-  
-  try {
-    const requestData = cart.value.map(item => {
-      // ★★★★★ FIX 2: Look up the materialAccessId using the material name ★★★★★
-      let foundMaterialId = null;
-      for (const category of parametersList) {
-        const materialInfo = category.children.find(mat => mat.materialName === item.material);
-        if (materialInfo) {
-          foundMaterialId = materialInfo.materialAccessId;
-          break; // Exit the loop once found
-        }
-      }
-      
-      if (!foundMaterialId) {
-        console.error(`Material ID not found for material name: "${item.material}". Using original ID as fallback.`);
-        foundMaterialId = item.materialAccessId; // Fallback to the old ID if not found
-      }
-
-      return {
-        materialAccessId: foundMaterialId, // Use the looked-up ID
-        crafts: [
-          {
-            craftAccessId: item.craftAccessId1,
-            craftAttributeAccessIds: [
-              item.craftAttributeColorAccessIds1,
-              item.craftAttributeGlossinessAccessIds1,
-              item.craftAttributeFileAccessIds1
-            ].flat().filter(Boolean) // Keep the .flat() fix
-          },
-          {
-            craftAccessId: item.craftAccessId2,
-            craftAttributeAccessIds: [
-              item.craftAttributeColorAccessIds2,
-              item.craftAttributeGlossinessAccessIds2,
-              item.craftAttributeFileAccessIds2
-            ].flat().filter(Boolean) // Keep the .flat() fix
-          }
-        ].filter(craft => craft.craftAccessId),
-        productModelAccessId: item.productModelAccessId,
-        goodsQuantity: item.quantity,
-        toleranceAccessId: item.toleranceAccessId,
-        roughnessAccessId: item.roughnessAccessId,
-        deliveryTypeCode: item.deliveryTypeCode || 'BD',
-      };
-    });
-
-    console.log('向后端请求价格，requestData:', JSON.stringify(requestData, null, 2));
-    
-    const response = await service.post('/api/price/price', requestData, { withCredentials: true });
-    
-    if (response.status === 200 && Array.isArray(response.data)) {
-      const priceInfos = response.data;
-      console.log('获取到的价格信息:', priceInfos);
-      
-      cart.value.forEach((item, index) => {
-        if (index < priceInfos.length) {
-          item.price = priceInfos[index].price;
-        }
-      });
-
-      updateTotal();
-      ElMessage.success('价格已更新');
-    } else {
-      console.error('获取价格信息失败，返回数据格式不正确:', response.data);
-      ElMessage.error('价格更新失败');
-    }
-    
-  } catch (error) {
-    console.error('价格计算请求失败:', error.response?.data || error.message);
-    ElMessage.error(`价格更新失败: ${error.response?.data?.detail?.[0]?.msg || error.message}`);
-  }
-};
 
 const fetchCart = async () => {
   loading.value = true
@@ -261,7 +177,7 @@ const fetchCart = async () => {
         const cartInfo = item.cart || {}
         return {
           id: cartInfo.id,
-          price: 0,
+          totalPrice: cartInfo.price, // 这里的 price 应该是该商品的总价（单价*数量）
           quantity: cartInfo.quantity,
           expected_delivery_date: cartInfo.expected_delivery_date,
           file_name: size.file_name,
@@ -270,18 +186,20 @@ const fetchCart = async () => {
           height: size.height,
           volume: size.volume,
           surface_area: size.surface_area,
-          fileInfoAccessId: size.fileInfoAccessId, 
+          // 处理工艺1相关信息
           craftAccessId1: size.craftAccessId1,
           craftAttributeColorAccessIds1: size.craftAttributeColorAccessIds1,
           craftAttributeGlossinessAccessIds1: size.craftAttributeGlossinessAccessIds1,
           craftAttributeFileAccessIds1: size.craftAttributeFileAccessIds1,
+          // 处理工艺2相关信息
           craftAccessId2: size.craftAccessId2,
           craftAttributeColorAccessIds2: size.craftAttributeColorAccessIds2,
           craftAttributeGlossinessAccessIds2: size.craftAttributeGlossinessAccessIds2,
           craftAttributeFileAccessIds2: size.craftAttributeFileAccessIds2,
+          getSurfaceTreatmentLabel: size.getSurfaceTreatmentLabel,
 
-          material: processing.material, // This name is now used for the lookup
-          surface_treatment: processing.surface_treatment,
+          material: processing.material,
+          surface_treatment: processing.surface_treatment, // 布尔值
           treatment1_option: processing.treatment1_option,
           treatment1_color: processing.treatment1_color,
           treatment1_gloss: processing.treatment1_gloss,
@@ -292,18 +210,19 @@ const fetchCart = async () => {
           treatment2_drawing: processing.treatment2_drawing,
           tolerance: processing.tolerance,
           roughness: processing.roughness,
-          hasThread: processing.hasThread, 
-          hasAssembly: processing.hasAssembly, 
-          materialAccessId: processing.materialAccessId, // Keep original ID as a potential fallback
-          
+          hasThread: processing.has_thread,
+          hasAssembly: processing.has_assembly,
+          notes: processing.notes,
+          materialAccessId: processing.materialAccessId,
+
           toleranceAccessId: item.toleranceAccessId || '',
           roughnessAccessId: item.roughnessAccessId || '',
           preview_url: item.preview_url || '',
           productModelAccessId: item.productModelAccessId || '',
           deliveryTypeCode: item.deliveryTypeCode || 'BD',
+          fileInfoAccessId: item.fileInfoAccessId || '',
         }
       });
-      await recalculateCartPrices();
     } else {
       ElMessage.error('购物车数据获取失败')
     }
@@ -327,7 +246,7 @@ const totalAmount = ref(0)
 
 const updateTotal = () => {
   totalAmount.value = selectedItems.value.reduce(
-    (sum, item) => sum + (item.price || 0) * item.quantity, 0
+    (sum, item) => sum + (item.totalPrice || 0), 0
   )
 }
 
@@ -343,21 +262,120 @@ watch(filteredCart, () => {
   updateTotal()
 }, { deep: true })
 
-const removeItem = (rowToRemove) => {
-  const index = cart.value.findIndex(item => item.id === rowToRemove.id)
-  if (index !== -1) {
-    cart.value.splice(index, 1)
+const removeItem = async (rowToRemove) => {
+  try {
+    // 实际项目中这里可能需要调用后端接口删除购物车项
+    // const res = await service.post('/api/orders/remove_cart_item', { id: rowToRemove.id }, { withCredentials: true });
+    // if (!res.data.success) {
+    //   ElMessage.error('移除商品失败');
+    //   return;
+    // }
 
-    if (filteredCart.value.length === 0 && currentPage.value > 1) {
-      currentPage.value--
+    const index = cart.value.findIndex(item => item.id === rowToRemove.id)
+    if (index !== -1) {
+      cart.value.splice(index, 1)
+
+      if (filteredCart.value.length === 0 && currentPage.value > 1) {
+        currentPage.value--
+      }
+      updateTotal();
+      ElMessage.success('已移除商品')
     }
-
-    ElMessage.success('已移除商品')
+  } catch (err) {
+    ElMessage.error('移除商品失败，请稍后再试。')
+    console.error(err)
   }
 }
 
-const checkout = () => {
-  checkoutDialogVisible.value = true
+const submitInquiry = async () => {
+  if (selectedItems.value.length === 0) {
+    ElMessage.warning('请选择要询价的商品！')
+    return
+  }
+
+  // 映射 selectedItems 为后端 `save_selected_datas` 接口所需的格式
+  const payload = selectedItems.value.map(item => {
+    let foundCategoryName = ''
+    let materialAccessId = ''
+    for (const category of parametersList) {
+      const materialExists = category.children.some(material => material.materialName === item.material)
+      if (materialExists) {
+        materialAccessId = category.children.find(material => material.materialName === item.material).materialAccessId
+        foundCategoryName = category.name
+        break
+      }
+    }
+
+    return {
+      EstimatedDeliveryTime: item.expected_delivery_date,
+      categoryName: foundCategoryName || '',
+      clampingCost: 0.0,
+      craftAccessId1: item.craftAccessId1,
+      craftAccessId2: item.craftAccessId2,
+      craftAttributeColorAccessIds1: item.craftAttributeColorAccessIds1,
+      craftAttributeColorAccessIds2: item.craftAttributeColorAccessIds2,
+      craftAttributeFileAccessIds1: item.craftAttributeFileAccessIds1,
+      craftAttributeFileAccessIds2: item.craftAttributeFileAccessIds2,
+      craftAttributeGlossinessAccessIds1: item.craftAttributeGlossinessAccessIds1,
+      craftAttributeGlossinessAccessIds2: item.craftAttributeGlossinessAccessIds2,
+      getSurfaceTreatmentLabel: item.getSurfaceTreatmentLabel,
+      
+      deliveryTypeCode: item.deliveryTypeCode,
+      engineeringCost: 0.0,
+      expeditedPrice: 0.0,
+      fileInfoAccessId: item.fileInfoAccessId,
+      fileName: item.file_name, // 修正：后端期望 fileName
+      glossiness: item.treatment1_gloss, // 修正：后端期望 glossiness
+      glossiness2: item.treatment2_gloss, // 修正：后端期望 glossiness2
+      hasAssembly: item.hasAssembly,
+      hasThread: item.hasThread,
+      material: item.material,
+      materialAccessId: materialAccessId || '',
+      materialCost: 0.0,
+      modelSurfaceArea: item.surface_area,
+      modelVolume: item.volume,
+      pricePerUnit: item.totalPrice / item.quantity,
+      processingCost: 0.0,
+      productModelAccessId: item.productModelAccessId,
+      quantity: item.quantity,
+      remarks: item.notes || '',
+      roughness: item.roughness,
+      roughnessAccessId: item.roughnessAccessId,
+      selected: true,
+      selectedColor: item.treatment1_color, // 修正：后端期望 selectedColor
+      selectedColor2: item.treatment2_color, // 修正：后端期望 selectedColor2
+      selectedTreatment: item.treatment1_option, // 修正：后端期望 selectedTreatment
+      selectedTreatment2: item.treatment2_option, // 修正：后端期望 selectedTreatment2
+      sizeX: item.length, // 修正：后端期望 sizeX
+      sizeY: item.width, // 修正：后端期望 sizeY
+      sizeZ: item.height, // 修正：后端期望 sizeZ
+      surfaceCost: 0.0,
+      surfaceTreatment: item.surface_treatment ? 'need' : 'none',
+      tolerance: item.tolerance,
+      toleranceAccessId: item.toleranceAccessId,
+      totalPrice: item.totalPrice,
+      uploadedFileName: item.treatment1_drawing, // 修正：后端期望 uploadedFileName
+      uploadedFileName2: item.treatment2_drawing, // 修正：后端期望 uploadedFileName2
+    }
+  })
+
+  try {
+    loading.value = true
+    // 确保请求路径正确，根据您的图片，应该是 /api/price/save_selected_datas
+    // 但图片显示的是 /api/orders/save_selected_datas，请根据实际API路径调整
+    const res = await service.post('/api/orders/save_selected_datas', payload, { withCredentials: true })
+    if (res.data.success) {
+      ElMessage.success('询价数据已提交，即将跳转到询价页面。')
+      router.push('/price-inquiry')
+    } else {
+      ElMessage.error(res.data.msg || '提交询价失败。')
+    }
+  } catch (err) {
+    ElMessage.error('提交询价失败，请稍后再试。')
+    console.error(err)
+  } finally {
+    loading.value = false
+  }
 }
 
 const openParameterDialog = (record) => {
@@ -377,7 +395,7 @@ const openParameterDialog = (record) => {
   const mappedRecord = {
     id: record.id,
     material: record.material,
-    categoryName: foundCategoryName, 
+    categoryName: foundCategoryName,
     surfaceTreatment: record.surface_treatment ? 'need' : 'none',
     quantity: record.quantity,
     tolerance: record.tolerance,
@@ -393,8 +411,8 @@ const openParameterDialog = (record) => {
     selectedColor2: record.treatment2_color,
     glossiness2: record.treatment2_gloss,
     uploadedFileName2: record.treatment2_drawing,
-    pricePerUnit: record.price,
-    totalPrice: record.price * record.quantity,
+    pricePerUnit: record.price / record.quantity,
+    totalPrice: record.price,
     materialAccessId: record.materialAccessId,
     craftAccessId1: record.craftAccessId1,
     craftAttributeColorAccessIds1: record.craftAttributeColorAccessIds1,
@@ -404,13 +422,14 @@ const openParameterDialog = (record) => {
     craftAttributeColorAccessIds2: record.craftAttributeColorAccessIds2,
     craftAttributeGlossinessAccessIds2: record.craftAttributeGlossinessAccessIds2,
     craftAttributeFileAccessIds2: record.craftAttributeFileAccessIds2,
+    getSurfaceTreatmentLabel: record.getSurfaceTreatmentLabel,
     deliveryTypeCode: record.deliveryTypeCode,
     productModelAccessId: record.productModelAccessId,
     fileInfoAccessId: record.fileInfoAccessId,
     roughnessAccessId: record.roughnessAccessId,
     toleranceAccessId: record.toleranceAccessId
   }
-  
+
   currentEditRecord.value = mappedRecord
   showParameterDialog.value = true
 }
@@ -422,7 +441,6 @@ const handleParameterConfirm = (newParameters) => {
     const updatedRecord = {
       ...originalRecord,
       material: newParameters.material,
-      categoryName: newParameters.categoryName,
       surface_treatment: newParameters.surfaceTreatment === 'need',
       quantity: newParameters.quantity,
       tolerance: newParameters.tolerance,
@@ -438,7 +456,7 @@ const handleParameterConfirm = (newParameters) => {
       treatment2_color: newParameters.selectedColor2,
       treatment2_gloss: newParameters.glossiness2,
       treatment2_drawing: newParameters.uploadedFileName2,
-      price: newParameters.pricePerUnit,
+      totalPrice: newParameters.totalPrice, // 确保这里是 total price
       materialAccessId: newParameters.materialAccessId,
       craftAccessId1: newParameters.craftAccessId1,
       craftAttributeColorAccessIds1: newParameters.craftAttributeColorAccessIds1,
@@ -448,6 +466,7 @@ const handleParameterConfirm = (newParameters) => {
       craftAttributeColorAccessIds2: newParameters.craftAttributeColorAccessIds2,
       craftAttributeGlossinessAccessIds2: newParameters.craftAttributeGlossinessAccessIds2,
       craftAttributeFileAccessIds2: newParameters.craftAttributeFileAccessIds2,
+      getSurfaceTreatmentLabel: newParameters.getSurfaceTreatmentLabel,
       deliveryTypeCode: newParameters.deliveryTypeCode,
       productModelAccessId: newParameters.productModelAccessId,
       roughnessAccessId: newParameters.roughnessAccessId,
@@ -515,7 +534,7 @@ const handleParameterConfirm = (newParameters) => {
   border-radius: 4px;
   border: 1px solid #ebeef5;
   transition: all 0.3s;
-  vertical-align: middle; 
+  vertical-align: middle;
 }
 .preview-image:hover {
   transform: scale(1.1);
@@ -537,7 +556,7 @@ const handleParameterConfirm = (newParameters) => {
   position: relative;
   background-color: #e6f7ff;
   border: 1px dashed #409eff;
-  padding: 4px; 
+  padding: 4px;
   text-align: left;
   cursor: pointer;
 }
@@ -548,7 +567,7 @@ const handleParameterConfirm = (newParameters) => {
   font-size: 12px;
 }
 .parameter-details div {
-  margin: 2px 0; 
+  margin: 2px 0;
   line-height: 1.3;
 }
 .model-info-details {

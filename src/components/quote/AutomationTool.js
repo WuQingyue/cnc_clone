@@ -17,6 +17,7 @@ export const parametersList = reactive([
           useful: true
         },
         {
+          materialCategory: "铝合金",
           materialAccessId: "adb54094f48645a0a85432adb3164bbd",
           materialName: "铝合金-7075",
           materialCode: "A8",

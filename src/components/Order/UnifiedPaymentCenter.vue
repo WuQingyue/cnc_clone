@@ -1,56 +1,54 @@
 <template>
-  <div class="payment-center">
-    <!-- 顶部导航栏 -->
-    <div class="navbar">
-      <img src="@/assets/images/logo.png" alt="Logo" class="logo" />
-      <span class="title">统一支付中心</span>
-    </div>
+  <div class="payment-center-wrapper">
+    <div class="payment-card">
+      <h2 class="page-title">统一支付中心</h2>
 
-    <!-- 商品总额展示 -->
-    <div class="amount-section">
-      <div class="amount-value">
-        ${{ totalAmount.toFixed(2) }}
+      <!-- 商品总额展示 -->
+      <div class="amount-section">
+        <div class="amount-value">
+          ${{ totalAmount.toFixed(2) }}
+        </div>
+        <div class="amount-label">订单总额（美元）</div>
       </div>
-      <div class="amount-label">订单总额（美元）</div>
-    </div>
 
-    <!-- 支付方式选择 -->
-    <div class="info-box">
-      <div class="info-header">
-        <strong>选择支付方式</strong>
+      <!-- 支付方式选择 -->
+      <div class="payment-methods-section">
+        <div class="section-header">
+          <strong>选择支付方式</strong>
+        </div>
+        <div class="payment-option">
+          <el-radio-group v-model="selectedPaymentMethod">
+            <el-radio label="paypal" size="large">PayPal 支付</el-radio>
+          </el-radio-group>
+        </div>
       </div>
-      <div class="payment-methods">
-        <el-radio-group v-model="selectedPaymentMethod">
-          <el-radio label="paypal" size="large" border>PayPal 支付</el-radio>
-        </el-radio-group>
-      </div>
-    </div>
 
-    <!-- 支付操作 -->
-    <div class="action-box">
-      <el-button
-        type="primary"
-        class="pay-button"
-        @click="onPayClick"
-        :loading="loading"
+      <!-- 支付操作 -->
+      <div class="action-box">
+        <el-button
+          type="primary"
+          class="pay-button"
+          @click="onPayClick"
+          :loading="loading"
+        >
+          立即支付
+        </el-button>
+      </div>
+
+      <!-- PayPal 支付对话框 -->
+      <el-dialog
+        v-model="paypalDialogVisible"
+        title="PayPal 支付"
+        width="400px"
+        :close-on-click-modal="false"
+        @closed="cleanupPayPalButton"
       >
-        立即支付
-      </el-button>
+        <div class="paypal-container-wrapper">
+          <p>请在下方 PayPal 窗口中完成支付。</p>
+          <div ref="paypalButtonContainer" class="paypal-button-host"></div>
+        </div>
+      </el-dialog>
     </div>
-
-    <!-- PayPal 支付对话框 -->
-    <el-dialog
-      v-model="paypalDialogVisible"
-      title="PayPal 支付"
-      width="400px"
-      :close-on-click-modal="false"
-      @closed="cleanupPayPalButton"
-    >
-      <div class="paypal-container-wrapper">
-        <p>请在下方 PayPal 窗口中完成支付。</p>
-        <div ref="paypalButtonContainer" class="paypal-button-host"></div>
-      </div>
-    </el-dialog>
   </div>
 </template>
 <script setup>
@@ -200,85 +198,111 @@
   </script>
 
 <style scoped>
-.payment-center {
-  padding: 20px;
-  background-color: #f9f9f9;
-  border-radius: 8px;
-  max-width: 500px;
-  margin: 30px auto;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-}
-
-.navbar {
+/* Main wrapper for the payment component */
+.payment-center-wrapper {
   display: flex;
-  align-items: center;
-  padding-bottom: 20px;
-  border-bottom: 1px solid #eee;
-  margin-bottom: 20px;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: calc(100vh - 60px);
+  padding: 80px 20px 30px 20px;
+  background-color: #f0f2f5;
 }
 
-.logo {
-  width: 40px;
-  height: 40px;
-  margin-right: 15px;
+/* The central payment card */
+.payment-card {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.08);
+  padding: 35px 40px;
+  max-width: 480px;
+  width: 100%;
+  box-sizing: border-box;
 }
 
-.title {
-  font-size: 22px;
-  font-weight: 600;
+.page-title {
+  font-size: 26px;
+  font-weight: 700;
   color: #333;
+  text-align: center;
+  margin-bottom: 30px;
 }
 
 .amount-section {
-  margin: 30px 0 20px 0;
+  margin: 25px 0 35px 0;
   text-align: center;
 }
 
 .amount-value {
-  font-size: 48px;
+  font-size: 56px;
   font-weight: bold;
   color: #1a1a1a;
-  letter-spacing: 2px;
+  letter-spacing: 1.5px;
 }
 
 .amount-label {
-  font-size: 18px;
+  font-size: 17px;
   color: #666;
-  margin-top: 8px;
+  margin-top: 10px;
 }
 
-.info-box {
-  margin-top: 20px;
-  background-color: white;
-  border-radius: 8px;
-  padding: 20px 25px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.05);
+.payment-methods-section {
+  margin-top: 30px;
+  padding: 20px 0;
+  border-top: 1px solid #eee;
 }
 
-.info-header {
-  margin-bottom: 15px;
-  font-size: 16px;
+.section-header {
+  margin-bottom: 18px;
+  font-size: 18px;
   font-weight: 600;
+  color: #333;
 }
 
-.payment-methods .el-radio-group {
+.payment-option .el-radio-group {
   width: 100%;
 }
 
-.payment-methods .el-radio {
+.payment-option .el-radio {
   width: 100%;
   margin: 0;
-  height: 50px;
+  padding: 15px 20px;
+  border: 1px solid #dcdfe6;
+  border-radius: 8px;
+  transition: all 0.2s ease-in-out;
+}
+
+.payment-option .el-radio.is-checked {
+  border-color: #007bff;
+  background-color: #e6f7ff;
+}
+
+.payment-option .el-radio:hover {
+  border-color: #007bff;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.payment-option .el-radio__input {
+    vertical-align: middle;
+}
+
+.payment-option .el-radio__label {
+  font-size: 16px;
+  font-weight: 500;
+  color: #333;
+  margin-left: 10px;
 }
 
 .action-box {
-  margin-top: 30px;
-  text-align: right;
+  margin-top: 40px;
+  text-align: center;
 }
 
 .pay-button {
-  font-size: 16px;
-  padding: 12px 30px;
+  width: 100%;
+  max-width: 280px;
+  font-size: 18px;
+  padding: 14px 0;
+  border-radius: 8px;
   --el-button-bg-color: #007bff;
   --el-button-border-color: #007bff;
   --el-button-hover-bg-color: #0056b3;
@@ -290,8 +314,9 @@
 }
 
 .paypal-container-wrapper p {
-  margin-bottom: 20px;
-  color: #666;
+  margin-bottom: 25px;
+  color: #555;
+  font-size: 15px;
 }
 
 .paypal-button-host {

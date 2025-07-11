@@ -20,7 +20,7 @@
     </div>
 
     <!-- 地址列表 -->
-    <el-table :data="savedAddresses" style="width: 100%">
+    <el-table :data="savedAddresses" style="width: 100%" v-loading="loading">
       <el-table-column prop="name" label="联系人" />
       <el-table-column prop="phone" label="联系电话" />
       <el-table-column prop="fullAddress" label="详细地址" />
@@ -48,8 +48,7 @@
             </el-button>
           </template>
 
-          <!-- 修改和删除按钮 -->
-          <el-button type="text" @click="editAddress(scope.row)">修改</el-button>
+          <!-- 删除按钮 -->
           <el-button type="text" @click="deleteAddress(scope.row)">删除</el-button>
         </template>
       </el-table-column>
@@ -58,6 +57,7 @@
     <!-- 新增/编辑地址表单 -->
     <div v-if="showForm" class="address-form">
       <el-form :model="addressForm" label-width="100px" :rules="rules" ref="addressFormRef">
+        <!-- 表单内容... -->
         <el-form-item label="联系人" prop="name">
           <el-input v-model="addressForm.name" placeholder="请输入联系人姓名" />
         </el-form-item>
@@ -119,11 +119,10 @@
 </template>
 
 <script>
-import { ref, watch } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
-import { countryList,productList } from './DeliveryInfo'
-import axios from 'axios'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { countryList, productList } from './DeliveryInfo'
 import service from '@/utils/request'
 
 export default {
@@ -132,30 +131,25 @@ export default {
     Plus
   },
   props: {
-  visible: Boolean,
-  selectedAddress: {
-    type: Object,
-    default: null
-  }
-},
-
+    visible: Boolean,
+    selectedAddress: {
+      type: Object,
+      default: null
+    }
+  },
   emits: ['update:visible', 'save-address', 'use-address'],
   setup(props, { emit }) {
-    watch(() => props.selectedAddress, (newVal) => {
-        console.log('收到selectedAddress变化:', newVal)
-        if (newVal) {
-          // 更宽松的比较方式
-          const foundAddress = savedAddresses.value.find(addr => addr.address_id === newVal.address_id )
-          
-          
-          if (foundAddress) {
-            console.log('找到匹配地址:', foundAddress)
-            useAddress(foundAddress)
-          } else {
-            console.log('未找到匹配地址')
-          }
-        }
-      }, { immediate: true, deep: true })  // 添加deep:true深度监听
+    const loading = ref(false);
+    
+    // ★★★ 修改点 1: 移除存在竞态条件的 watch 侦听器 ★★★
+    // watch(() => props.selectedAddress, (newVal) => {
+    //     if (newVal) {
+    //       const foundAddress = savedAddresses.value.find(addr => addr.address_id === newVal.address_id )
+    //       if (foundAddress) {
+    //         useAddress(foundAddress)
+    //       }
+    //     }
+    //   }, { immediate: true, deep: true })
 
     const dialogVisible = ref(false)
     const showForm = ref(false)
@@ -163,16 +157,7 @@ export default {
     const addressFormRef = ref(null)
 
     const addressForm = ref({
-      name: '',
-      phone: '',
-      region: {
-        postway: '',
-        country: '',
-        province: '',
-        city: '',
-        postCode:''
-      },
-      detail: ''
+      name: '', phone: '', region: { postway: '', country: '', province: '', city: '', postCode:'' }, detail: ''
     })
 
     const rules = {
@@ -187,105 +172,59 @@ export default {
     }
     
     const regionDetail = ref({
-      postway:'',
-      countryName: '',
-      countryCode: '',
-      provinceName: '',
-      cityName: '',
-      detail: '',
-      postCode:'',
-      postName:''
+      postway:'', countryName: '', countryCode: '', provinceName: '', cityName: '', detail: '', postCode:'', postName:''
     })
     const productGroupsList = ref(
       productList[0].Entity.map(productGroup =>({
-        value:productGroup.ShippingMethodCode,
-        label: productGroup.ShippingMethodName,
-        children:[]
+        value:productGroup.ShippingMethodCode, label: productGroup.ShippingMethodName, children:[]
       })) 
     )
     const countryOptions = ref([])
   
     const handlePostwayChange = async (value) => {
-      console.log('value[0]',value[0])
-      const response = await service.get('/api/logistics/get_country', {
-            params: { ProductCode: value[0] },
-          },{ withCredentials: true })
-      countryOptions.value = response.data.map(country =>({
-        value:country.CountryCode,
-        label: country.CountryCNname
-      }))
+      const response = await service.get('/api/logistics/get_country', { params: { ProductCode: value[0] } },{ withCredentials: true })
+      countryOptions.value = response.data.map(country =>({ value:country.CountryCode, label: country.CountryCNname }))
       regionDetail.value.postway = value[0]
       const productGroup = productGroupsList.value.find(productGroup => productGroup.value === value[0])
       regionDetail.value.postName = productGroup.label
-      console.log('value[0]',value[0])
-      console.log('productGroupsList.value',productGroupsList.value)
-      const country = productGroupsList.value.find(country => country.value === value[0])
-      console.log('country',country)
-      console.log('regionDetail',regionDetail.value)
     }
    
     const provinceOptions = ref([])
     const handleCountryChange = async (value) => {
-      console.log('value[0]',value[0])
-      const response = await service.get('/api/logistics/get_region1', {
-            params: { country_code: value[0] },
-          },{ withCredentials: true })
-      console.log('response',response)
-      provinceOptions.value = response.data.Data.map(country =>({
-        value:country.RegionName,
-        label: country.RegionName
-      }))
+      const response = await service.get('/api/logistics/get_region1', { params: { country_code: value[0] } },{ withCredentials: true })
+      provinceOptions.value = response.data.Data.map(country =>({ value:country.RegionName, label: country.RegionName }))
       const province = countryOptions.value.find(province => province.value === value[0])
-      console.log('province',province)
       regionDetail.value.countryCode = province.value
       regionDetail.value.countryName = province.label
-      console.log('regionDetail',regionDetail.value)
     }
 
     const cityOptions = ref([])
     const handleProvinceChange = async (value) => {
-      console.log('value[0]',value[0])
       regionDetail.value.provinceName = value[0]
-      const response = await service.get('/api/logistics/get_region2', {
-            params: { country: regionDetail.value.countryCode,region1:regionDetail.value.provinceName },
-          },{ withCredentials: true })
-      console.log('response',response)
-      cityOptions.value = response.data.Data.map(country =>({
-        value:country.RegionName,
-        label: country.RegionName
-      }))
-      console.log('cityOptions',cityOptions.value)
-      // const city = provinceOptions.value.find(city => city.value === value[0])
-      // console.log('city',city)
-      // regionDetail.value.cityName = city.value
-      console.log('regionDetail',regionDetail.value)
+      const response = await service.get('/api/logistics/get_region2', { params: { country: regionDetail.value.countryCode,region1:regionDetail.value.provinceName } },{ withCredentials: true })
+      cityOptions.value = response.data.Data.map(country =>({ value:country.RegionName, label: country.RegionName }))
     }
+
     const postCodeOptions = ref([])
     const handleCityChange = async (value) => {
       regionDetail.value.cityName = value[0]
-      const response = await service.get('/api/logistics/get_postcode', {
-            params: { country: regionDetail.value.countryCode,region1:regionDetail.value.provinceName,region2:regionDetail.value.cityName },
-          },{ withCredentials: true })
-      console.log('response',response)
-      postCodeOptions.value = response.data.Data.map(postcode =>({
-        value:postcode,
-        label: postcode
-      }))
-      console.log('postCodeOptions',postCodeOptions.value)
-      console.log('regionDetail',regionDetail.value)
-      }
+      const response = await service.get('/api/logistics/get_postcode', { params: { country: regionDetail.value.countryCode,region1:regionDetail.value.provinceName,region2:regionDetail.value.cityName } },{ withCredentials: true })
+      postCodeOptions.value = response.data.Data.map(postcode =>({ value:postcode, label: postcode }))
+    }
+
     const handlePostCodeChange = async (value) => {
-    regionDetail.value.postCode = value[0]
-    console.log('regionDetail',regionDetail.value)
+      regionDetail.value.postCode = value[0]
     }
     
     watch(() => addressForm.value.detail, (val) => {
       regionDetail.value.detail = val
-      console.log('regionDetail',regionDetail.value)
     })
 
     watch(() => props.visible, (val) => {
       dialogVisible.value = val
+      if (val) {
+        fetchAddresses();
+      }
     })
 
     watch(() => dialogVisible.value, (val) => {
@@ -298,79 +237,36 @@ export default {
         return
       }
       showForm.value = true
-      addressForm.value = {
-        name: '',
-        phone: '',
-        region: [],
-        detail: ''
-      }
+      addressForm.value = { name: '', phone: '', region: [], detail: '' }
     }
 
     const useAddress = (address) => {
-      savedAddresses.value.forEach(item => {
-        item.isUsing = item === address
-      })
+      savedAddresses.value.forEach(item => { item.isUsing = item === address })
       emit('use-address', address)
     }
 
     const setDefaultAddress = async (address) => {
-      savedAddresses.value.forEach(item => {
-        item.isDefault = item === address
-      })
-      const response = await service.post(
-      '/api/address/set_default_address',
-      {
-        address_id: address.address_id
-      },
-      { withCredentials: true }
-    )
-    console.log('更新默认地址response',response)
+      savedAddresses.value.forEach(item => { item.isDefault = item === address })
+      await service.post('/api/address/set_default_address', { address_id: address.address_id }, { withCredentials: true })
     }
 
     const saveAddress = async () => {
       if (!addressFormRef.value) return
-
       await addressFormRef.value.validate(async (valid) => {
         if (valid) {
-          // 1. 本地 address（用于本地表格展示）
-          const address = { 
-            ...addressForm.value,
-            fullAddress: regionDetail.value.detail + ' ' + regionDetail.value.cityName + ',' + regionDetail.value.provinceName + ' ' + regionDetail.value.postCode + ' ' + regionDetail.value.countryCode,
-            isDefault: savedAddresses.value.length === 0,
-            isUsing: savedAddresses.value.length === 0,
-            postName: regionDetail.value.postName,
-            countryCode: regionDetail.value.countryCode
-          }
-
-          // 2. 后端需要的数据结构
-          const addressPayload = {
-            contact_name: addressForm.value.name,
-            contact_phone: addressForm.value.phone,
-            detail_address: addressForm.value.detail,
-            is_active: false,
-            is_default: false,
-            shipping_method: regionDetail.value.postway || '',
-            countryCode: regionDetail.value.countryCode || '',
-            province: regionDetail.value.provinceName || '',
-            city: regionDetail.value.cityName || '',
-            postal_code: regionDetail.value.postCode || ''
-          }
-
+          const address = { ...addressForm.value, fullAddress: regionDetail.value.detail + ' ' + regionDetail.value.cityName + ',' + regionDetail.value.provinceName + ' ' + regionDetail.value.postCode + ' ' + regionDetail.value.countryCode, isDefault: savedAddresses.value.length === 0, isUsing: savedAddresses.value.length === 0, postName: regionDetail.value.postName, countryCode: regionDetail.value.countryCode, shippingMethod: regionDetail.value.postway, }
+          const addressPayload = { contact_name: addressForm.value.name, contact_phone: addressForm.value.phone, detail_address: addressForm.value.detail, is_active: false, is_default: false, shipping_method: regionDetail.value.postway || '', countryCode: regionDetail.value.countryCode || '', province: regionDetail.value.provinceName || '', city: regionDetail.value.cityName || '', post_name: regionDetail.value.postName || '', postal_code: regionDetail.value.postCode || '' }
           try {
-            // 3. 发送给后端
             const response = await service.post('/api/address/add_address', addressPayload, { withCredentials: true })
             if (response.status === 200) {
               ElMessage.success('地址保存成功')
-              // 4. 本地保存（不影响后端）
-              savedAddresses.value.push(address)
+              await fetchAddresses();
               showForm.value = false
               emit('save-address', address)
               if (address.isUsing) {
                 emit('use-address', address)
               }
-            } else {
-              ElMessage.error('地址保存失败')
-            }
+            } else { ElMessage.error('地址保存失败') }
           } catch (error) {
             ElMessage.error('地址保存失败')
             console.error('地址保存出错:', error)
@@ -384,40 +280,89 @@ export default {
     }
   
     const fetchAddresses = async () => {
+      loading.value = true;
       try {
         const response = await service.get('/api/address/get_user_addresses', { withCredentials: true })
-        if (response.status === 200 && Array.isArray(response.data)) {
-          savedAddresses.value = response.data.map(addr => ({
+        if (response.data.success === true) {
+          // ★★★ 修改点 2: 映射地址列表，并将 isUsing 初始化为 false，以确保每次打开弹窗时状态是干净的 ★★★
+          savedAddresses.value = response.data.data.map(addr => ({
             address_id: addr.id,
             name: addr.contact_name,
             phone: addr.contact_phone,
-            detail: addr.detail_address, 
+            detail: addr.detail_address,
             shippingMethod: addr.shipping_method,
-            countryCode: addr.country,
+            countryCode: addr.countryCode,
             provinceName: addr.province,
             cityName: addr.city,
             postCode: addr.postal_code,
             isDefault: addr.is_default,
-            isUsing: addr.is_active,
-            fullAddress: addr.detail_address + ' ' + addr.city + ',' + addr.province + ' ' + addr.postal_code + ' ' + addr.country,
-            
-          }))
-          console.log('savedAddresses',savedAddresses.value)
+            isUsing: false, // 替换 `addr.is_active`，确保初始状态为未使用
+            postName: addr.post_name,
+            fullAddress: addr.detail_address + ' ' + addr.city + ',' + addr.province + ' ' + addr.postal_code + ' ' + addr.countryCode,
+          }));
+
+          // ★★★ 修改点 3: 在数据加载后，根据父组件传入的 selectedAddress 设置“已用”状态 ★★★
+          if (props.selectedAddress) {
+            const currentlyUsedAddress = savedAddresses.value.find(
+              addr => addr.address_id === props.selectedAddress.address_id
+            );
+            if (currentlyUsedAddress) {
+              // 直接修改状态，不触发 useAddress 中的 emit 事件
+              currentlyUsedAddress.isUsing = true;
+            }
+          }
+
         } else if (response.status === 200 && Array.isArray(response.data.data)) {
-          // 如果后端返回 { data: [...] }
           savedAddresses.value = response.data.data
         }
       } catch (error) {
         ElMessage.error('获取地址列表失败')
         console.error('获取地址失败:', error)
+      } finally {
+        loading.value = false;
       }
     }
 
-    onMounted(() => {
-      fetchAddresses()
-    })
+    const deleteAddress = async (addressToDelete) => {
+      try {
+        await ElMessageBox.confirm(
+          '此操作将永久删除该地址, 是否继续?',
+          '提示',
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+          }
+        )
+        console.log(addressToDelete)
+        // 用户确认后，执行删除
+        const response = await service.delete(
+          `/api/address/delete_address/${addressToDelete.address_id}`, 
+          { withCredentials: true }
+        );
+
+        if (response.data.success) {
+          ElMessage.success('删除成功');
+          // 从本地数组中移除该地址，以更新UI
+          savedAddresses.value = savedAddresses.value.filter(
+            (addr) => addr.address_id !== addressToDelete.address_id
+          );
+        } else {
+          ElMessage.error(response.data.detail || '删除失败');
+        }
+      } catch (error) {
+        if (error === 'cancel') {
+          ElMessage.info('已取消删除');
+        } else {
+          console.error('删除地址失败:', error);
+          ElMessage.error('删除地址失败，请稍后重试');
+        }
+      }
+    }
 
     return {
+      deleteAddress,
+      loading,
       dialogVisible,
       showForm,
       addressForm,
@@ -443,14 +388,13 @@ export default {
     }
   }
 }
-import { onMounted } from 'vue'
-
 </script>
 
 <style scoped>
+/* 样式保持不变 */
 .cascader-container {
   display: flex;
-  gap: 10px; /* 控制组件之间的间距 */
+  gap: 10px;
 }
 .dialog-header {
   font-size: 18px;
@@ -458,46 +402,37 @@ import { onMounted } from 'vue'
   color: #303133;
   margin-bottom: 20px;
 }
-
 .address-list-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
   margin: 20px 0;
 }
-
 .saved-address-info {
   color: #606266;
 }
-
 .address-form {
   margin-top: 20px;
 }
-
 .form-buttons {
   display: flex;
   justify-content: center;
   gap: 20px;
   margin-top: 30px;
 }
-
 :deep(.el-cascader) {
   width: 100%;
 }
-
 :deep(.el-textarea) {
   width: 100%;
 }
-
 :deep(.el-form-item__content) {
   width: 100%;
 }
-
 :deep(.el-dialog__body) {
   max-height: 80vh;
   overflow-y: auto;
 }
-
 .default-tag {
   display: inline-block;
   padding: 4px 8px;
@@ -507,15 +442,12 @@ import { onMounted } from 'vue'
   font-size: 12px;
   margin: 0 8px;
 }
-
 :deep(.el-button--text) {
   color: #303133;
 }
-
 :deep(.el-button--text:hover) {
   color: #409EFF;
 }
-
 :deep(.el-table .cell) {
   display: flex;
   align-items: center;

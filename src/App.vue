@@ -1,11 +1,12 @@
 <template>
   <div id="app">
-    <div v-if="appStore.isLoading" class="global-loading-mask">
+    <!-- <div v-if="appStore.isLoading" class="global-loading-mask">
       <div class="spinner"></div>
       <span>正在加载，请稍候…</span>
-    </div>
+    </div> -->
     <!-- 界面内容，使用 v-show 可以在加载完毕后保留 DOM，避免重新渲染 -->
-    <div v-show="!appStore.isLoading" style="height: 100%; display: flex; flex-direction: column;">
+    <!-- <div v-show="!appStore.isLoading" style="height: 100%; display: flex; flex-direction: column;"> -->
+    <div style="height: 100%; display: flex; flex-direction: column;">
       <!-- 管理员界面 -->
       <Admin v-if="userStore.checkIsAdmin()" />
       
@@ -15,7 +16,7 @@
         <nav-header />
 
         <!-- 路由视图 -->
-        <router-view v-slot="{ Component }">
+        <router-view v-slot="{ Component }" :key="route.fullPath">
           <transition name="fade" mode="out-in">
             <component :is="Component" />
           </transition>

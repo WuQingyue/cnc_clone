@@ -111,7 +111,7 @@ const handleUploadSuccess = (response, file) => {
     }})
 
         service.post('/api/upload/analyze_model', {
-      clientId: "b68aa5a6c5636b5e994352b4c33bbd0b",
+      clientId: "bcfc5bc581325b287abfbdba0f70399c",
       fileInfoAccessIds:  [response.data[0].fileInfoAccessId]
     }, {
       withCredentials: true

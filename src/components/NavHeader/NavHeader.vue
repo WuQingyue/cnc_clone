@@ -1,4 +1,3 @@
-
 <template>
   <header class="nav-header" :class="{ 'is-fixed': isScrolled }">
     <div class="container">
@@ -6,6 +5,7 @@
         <!-- Logo -->
         <div class="logo">
           <router-link to="/">
+            <!-- Keeping logo.png as it is, although image shows 'Tongtron' -->
             <img src="@/assets/images/logo.png" alt="SmartCNC">
           </router-link>
         </div>
@@ -16,60 +16,15 @@
             <li class="menu-item">
               <router-link to="/quote">在线报价</router-link>
             </li>
-            <!-- <li class="menu-item">
-              <router-link to="/sales-promotion">CNC1元打样</router-link>
-            </li>
-            <li class="menu-item">
-              <el-icon style="color: red"><Flag /></el-icon>
-              <router-link to="/coupons">领券中心</router-link>
-            </li> -->
             <li class="menu-item">
               <router-link to="/materials">材料介绍</router-link>
             </li>
             <li class="menu-item">
               <router-link to="/cnc_order">我的订单</router-link>
             </li>
-            <!-- 服务指引下拉菜单 -->
-            <!-- <li class="menu-item has-submenu" 
-                @click="toggleService('service')" 
-                @mouseenter="showService('service')"
-                @mouseleave="hideService('service')">
-              <span class="menu-title">
-                服务指引
-                <el-icon class="submenu-icon" :class="{ 'is-active': activeSubmenu === 'service' }">
-                  <ArrowUpBold v-if="activeSubmenu === 'service'" />
-                  <ArrowDownBold v-else />
-                </el-icon>
-              </span>
-              <div class="submenu" :class="{ 'is-visible': activeSubmenu === 'service' }">
-                <router-link to="/service-guidance">服务指引</router-link>
-                <router-link to="/user-evaluation">客户评价</router-link>
-                <router-link to="/technical-column">技术专栏</router-link>
-                <router-link to="/forum">技术论坛</router-link>
-              </div>
-            </li> -->
-            <!-- 关于我们下拉菜单 -->
-            <!-- <li class="menu-item has-submenu" 
-              @click="toggleAbout('about')" 
-              @mouseenter="showAbout('about')"
-              @mouseleave="hideAbout('about')">
-              <span class="menu-title">
-                关于我们
-                <el-icon class="submenu-icon" :class="{ 'is-active': activeSubmenu2 === 'about' }">
-                  <ArrowUpBold v-if="activeSubmenu2 === 'about'" />
-                  <ArrowDownBold v-else />
-                </el-icon>
-              </span>
-              <div class="submenu" :class="{ 'is-visible': activeSubmenu2 === 'about' }">
-                <router-link to="/news">公司动态</router-link>
-                <router-link to="/about">公司简介</router-link>
-              </div>
-            </li>
-            <li class="menu-item">
-              <router-link to="/contact">联系我们</router-link>
-            </li> -->
-            <!-- 购物车按钮 -->
-            <li class="menu-item">
+            
+            <!-- 购物车按钮 - 添加 'shopping-cart-item' 类用于右对齐 -->
+            <li class="menu-item shopping-cart-item">
               <el-button class="action-button no-border" @click="$router.push('/cart')" type="default">
                 <el-icon><ShoppingCart /></el-icon>
                 <span>购物车</span>
@@ -88,17 +43,28 @@
               </template>
               <!-- 已登录状态 -->
               <template v-else>
-                <Profile>
-                  <template #trigger>
-                    <div class="user-info">
-                      <el-avatar 
-                        :size="32" 
-                        :src="userStore.user.picture" 
-                      />
-                      <span>{{ userStore.user.user_name }}</span>
-                    </div>
+                <!-- START MODIFICATION -->
+                <el-dropdown trigger="hover" @command="handleCommand">
+                  <!-- Dropdown Trigger -->
+                  <div class="user-info">
+                    <el-avatar 
+                      :size="32" 
+                      :src="userStore.user.picture" 
+                    />
+                    <span class="username">{{ userStore.user.user_name }}</span>
+                    <!-- Add an arrow icon to indicate dropdown -->
+                    <el-icon class="el-icon--right"><ArrowDown /></el-icon>
+                  </div>
+                  <!-- Dropdown Menu -->
+                  <template #dropdown>
+                    <el-dropdown-menu>
+                      <!-- <el-dropdown-item command="profile">个人中心</el-dropdown-item>
+                      <el-dropdown-item command="orders">我的订单</el-dropdown-item> -->
+                      <el-dropdown-item divided command="logout">退出登录</el-dropdown-item>
+                    </el-dropdown-menu>
                   </template>
-                </Profile>
+                </el-dropdown>
+                <!-- END MODIFICATION -->
               </template>
             </li>
           </ul>
@@ -112,24 +78,30 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted,watch } from 'vue'
+import { ref, onMounted, onUnmounted, watch, nextTick, onUpdated } from 'vue'
 import { useRouter } from 'vue-router'
-import { ShoppingCart, ArrowUpBold, ArrowDownBold, Flag } from '@element-plus/icons-vue'
+// Import ElDropdown components and ArrowDown icon
+import { ElDropdown, ElDropdownMenu, ElDropdownItem } from 'element-plus'
+import { ShoppingCart, ArrowUpBold, ArrowDownBold, Flag, ArrowDown } from '@element-plus/icons-vue' // Ensure ArrowDown is imported
 import { useUserStore } from '@/store/user'
 import { ElMessage } from 'element-plus'
-import Profile from '@/views/Profile/Profile.vue'
+// import Profile from '@/views/Profile/Profile.vue' // Profile component is no longer needed here
 import axios from 'axios'
+import service from '@/utils/request'
+
 const router = useRouter()
 const userStore = useUserStore()
 
 const isScrolled = ref(false)
 const activeSubmenu2 = ref(null)
-const isUserMenuVisible = ref(false)
-const activeSubmenu = ref(null)
+const isUserMenuVisible = ref(false) // This might become redundant with el-dropdown
+const activeSubmenu = ref(null) // This might become redundant with el-dropdown
 
 const handleScroll = () => {
   isScrolled.value = window.scrollY > 0
 }
+
+// These functions for toggling submenus might become redundant if all dropdowns are el-dropdown
 const toggleService = (menu) => {
   activeSubmenu.value = activeSubmenu.value === menu ? null : menu
 }
@@ -152,14 +124,14 @@ const hideAbout = (menu) => {
     activeSubmenu2.value = null
   }
 }
+
 watch(
   () => userStore.isLoggedIn,
   (isLoggedIn) => {
-    // 这里可以做一些额外处理，比如关闭下拉菜单等
-    // 但通常不需要，模板会自动响应
+    // 登录状态变化时的处理
   }
 )
-import service from '@/utils/request'
+
 const handleCommand = async (command) => {
   switch (command) {
     case 'profile':
@@ -196,16 +168,16 @@ const handleCommand = async (command) => {
 }
 
 onMounted(() => {
-  // 检查 window.translate 是否存在
+  window.addEventListener('scroll', handleScroll)
+  
+  // 初始化翻译功能
   if (window.translate) {
-    
-    // ‼️ 修改点：所有 translate 前面加上 window.
     window.translateConfig = {
       container: '#translate',
       excludeSelectors: [
         '.no-translate',
         '.el-icon',
-        '.el-dropdown',
+        '.el-dropdown', // Exclude el-dropdown to prevent issues with its content
         'script',
         'style'
       ],
@@ -215,7 +187,6 @@ onMounted(() => {
       cache: true
     };
 
-    // ‼️ 修改点
     window.translate.language.setDefaultTo('chinese_simplified');
     window.translate.progress.api.startUITip();
     window.translate.listener.start();
@@ -225,47 +196,41 @@ onMounted(() => {
   } else {
     console.error('translate.js library not loaded.');
   }
-});
 
-// const checkLoginStatus = async () => {
-//   const uesr_Info = await service.get(
-//       '/api/login/check_login',
-//       { withCredentials: true }
-//   )
-//   if(uesr_Info.status == 200){
-//     userStore.setUser(uesr_Info.data)
-//   }else{
-//     ElMessage.error('用户登录已失效，请重新登录')
-//     router.push('/login')
-//   }
-// }
+  // 初始化谷歌登录
+  initializeGoogleLogin()
+});
 
 onUnmounted(() => {
   window.removeEventListener('scroll', handleScroll)
 })
+
 const initializeGoogleLogin = () => {
-   if (window.gapi) {
+  if (window.gapi) {
     window.gapi.load('auth2', () => {
-      const auth2 = window.gapi.auth2.init({
+      window.gapi.auth2.init({
         client_id: 'your-google-client-id'
       });
       
-    window.google.accounts.id.initialize({
-      client_id: 'your-google-client-id',
-      callback: handleCredentialResponse
-    })
-    window.google.accounts.id.renderButton(
-      document.getElementById('googleButton'),
-      { 
-        theme: 'outline', 
-        size: 'large',
-        text: '使用Google账号登录',
-        width: 250
-      }
-    )
+      window.google.accounts.id.initialize({
+        client_id: 'your-google-client-id',
+        callback: handleCredentialResponse
+      })
+      window.google.accounts.id.renderButton(
+        document.getElementById('googleButton'),
+        { 
+          theme: 'outline', 
+          size: 'large',
+          text: '使用Google账号登录',
+          width: 250
+        }
+      )
     });
+  } else {
+    console.warn('Google API (gapi) not loaded. Google login button will not render.');
   }
 }
+
 const handleCredentialResponse = async (response) => {
   try {
     await userStore.handleGoogleLogin(response)
@@ -274,7 +239,6 @@ const handleCredentialResponse = async (response) => {
     console.error('登录失败：', error)
   }
 }
-import { nextTick, onUpdated } from 'vue'
 
 nextTick(() => {
   if (window.translate && typeof window.translate.execute === 'function') {
@@ -285,7 +249,7 @@ nextTick(() => {
     if (window.translate.listener && typeof window.translate.listener.start === 'function') {
       window.translate.listener.start();
     }
-  }else {
+  } else {
     console.warn('translate.js 未加载完成，window.translate 不可用');
   }
 });
@@ -296,314 +260,335 @@ onUpdated(() => {
   }
 });
 </script>
+
 <style lang="scss" scoped>
-  :root {
-    --primary-color: #007BFF;
-    --border-color: #dcdfe6;
-  }
-  
-  .nav-header {
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 100;
-    background: white;
-    box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+:root {
+  --primary-color: #007BFF;
+  --border-color: #dcdfe6;
+}
+
+.nav-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 100;
+  background: white;
+  box-shadow: none;
+  width: 100%;
+  min-width: 0;
+  padding: 0;
+
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
     width: 100%;
-    min-width: 0;
-    padding: 0;
-  
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      width: 100%;
-      padding: 0 15px;
-      box-sizing: border-box;
-      // 不设置高度
-      @media (max-width: 1200px) {
-        max-width: 100vw;
-        padding: 0 8px;
-      }
+    padding: 0 15px;
+    box-sizing: border-box;
+
+    @media (max-width: 1200px) {
+      padding: 0 8px;
+    }
+    @media (max-width: 768px) {
+      padding: 0 4px;
+    }
+    @media (max-width: 480px) {
+      padding: 0 2vw;
+    }
+  }
+
+  .header-content {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    height: auto;
+    padding: 15px 0;
+    flex-wrap: nowrap;
+  }
+
+  .logo {
+    flex: 0 0 auto;
+    height: 28px;
+    margin-right: 40px;
+    display: flex;
+    align-items: center;
+
+    img {
+      height: 100%;
+      width: auto;
+      display: block;
+      max-width: 120px;
+
       @media (max-width: 768px) {
-        padding: 0 4px;
+        max-width: 80px;
+        height: 24px;
       }
       @media (max-width: 480px) {
-        padding: 0 2vw;
+        max-width: 60px;
+        height: 20px;
       }
     }
-    .header-content {
+  }
+
+  .nav-menu {
+    flex: 1;
+    display: flex;
+    justify-content: flex-end;
+    min-width: 0;
+
+    .menu-list {
       display: flex;
-      flex-wrap: wrap; // 允许内容换行
+      flex-wrap: nowrap;
+      gap: 24px;
+      list-style-type: none;
+      margin: 0;
+      padding: 0;
       align-items: center;
       width: 100%;
-      min-width: 0;
-      height: auto; // 高度自适应
-      padding: 8px 0;
-      gap: 0.5vw;
-      // 不设置min/max-height
+
+      @media (max-width: 768px) {
+        gap: 15px;
+      }
+      @media (max-width: 480px) {
+        gap: 10px;
+      }
     }
-    .logo {
-      flex: 0 0 auto;
-      height: 40px;
-      margin-right: 2vw;
+
+    .menu-item {
+      color: #666;
+      font-size: 15px;
+      text-decoration: none;
+      padding: 0;
+      white-space: nowrap;
+      text-align: center;
+      transition: color 0.3s ease;
       display: flex;
       align-items: center;
-      img {
-        height: 100%;
-        width: auto;
-        display: block;
-        max-width: 120px;
-        @media (max-width: 768px) {
-          max-width: 80px;
-        }
-        @media (max-width: 480px) {
-          max-width: 60px;
-        }
-      }
-    }
-    .nav-menu {
-      flex: 1 1 200px;
-      min-width: 0;
-      .menu-list {
-        display: flex;
-        flex-wrap: wrap; // 允许菜单项换行
-        gap: 1vw;
-        list-style-type: none;
-        margin: 0;
-        padding: 0;
-        align-items: center;
-        width: 100%;
-        @media (max-width: 768px) {
-          gap: 0.5vw;
-        }
-        @media (max-width: 480px) {
-          gap: 0.2vw;
-        }
-      }
-      .menu-item {
-        color: #333;
-        font-size: clamp(12px, 1.1vw, 16px);
+      justify-content: center;
+      flex: 0 0 auto;
+
+      a,
+      .menu-title {
+        color: inherit;
         text-decoration: none;
-        padding: 0 0.6vw;
-        min-width: 0;
         white-space: nowrap;
-        text-align: center;
-        transition: color 0.3s ease;
         display: flex;
         align-items: center;
         justify-content: center;
-        flex: 0 1 auto;
-        margin-bottom: 4px; // 换行时有间距
-        a,
-        .menu-title {
-          color: #333;
-          text-decoration: none;
-          white-space: nowrap;
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          font-size: inherit;
-          &:hover {
-            color: var(--primary-color);
-          }
+        font-size: inherit;
+
+        &:hover {
+          color: var(--primary-color);
         }
-        &.has-submenu {
-          position: relative;
-          cursor: pointer;
-          .menu-title {
-            display: flex;
-            align-items: center;
-            gap: 0.3vw;
-            .submenu-icon {
-              font-size: 0.9em;
-              transition: transform 0.3s ease;
-              margin-left: 0.3vw;
-              &.is-active {
-                transform: rotate(360deg);
-              }
-            }
-          }
-          .submenu {
-            position: absolute;
-            top: 100%;
-            left: 0;
-            background: #fff;
-            min-width: 120px;
-            padding: 0.4em 0;
-            border-radius: 4px;
-            box-shadow: 0 2px 12px rgba(0, 0, 0, 0.1);
-            opacity: 0;
-            visibility: hidden;
-            transform: translateY(10px);
-            transition: all 0.3s ease;
-            z-index: 1000;
-            font-size: clamp(12px, 1vw, 14px);
-            &.is-visible {
-              opacity: 1;
-              visibility: visible;
-              transform: translateY(0);
-            }
-            a {
-              display: block;
-              padding: 0.4em 1em;
-              color: #333;
-              text-decoration: none;
-              transition: all 0.3s ease;
-              font-size: inherit;
-              &:hover {
-                color: var(--primary-color);
-                background: #f5f7fa;
-              }
-              &.active {
-                color: var(--primary-color);
-              }
-            }
-          }
-          &:hover {
-            .menu-title {
-              color: var(--primary-color);
-            }
-          }
-        }
-        &.user-area {
-          gap: 0.5vw;
-          .action-button {
-            margin-left: 0;
-          }
-        }
+      }
+
+      // 购物车项及后续项目右对齐
+      &.shopping-cart-item {
+        margin-left: auto;
+      }
+
+      .el-icon {
+        font-size: 1.1em;
+        margin-right: 4px;
       }
     }
   }
-  
-  /* 新增：无边框按钮样式 */
-  .action-button.no-border {
-    border: none !important;
+}
+
+/* 无边框按钮样式 */
+.action-button.no-border {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  outline: none !important;
+  color: #666;
+  padding: 0;
+  transition: color 0.3s ease;
+  font-size: inherit;
+  display: flex;
+  align-items: center;
+
+  &:hover,
+  &:focus {
     background: transparent !important;
-    box-shadow: none !important;
-    outline: none !important;
-    color: #333;
-    padding: 0 0.7vw;
-    transition: background 0.2s;
-    font-size: inherit;
-  }
-  .action-button.no-border:hover,
-  .action-button.no-border:focus {
-    background: #f5f7fa !important;
     color: var(--primary-color) !important;
   }
-  
-  .user-area {
-    display: flex;
-    align-items: center;
-    gap: 0.5vw;
-    font-size: inherit;
+}
+
+/* 购物车按钮特定样式 */
+.menu-item.shopping-cart-item .action-button {
+  color: var(--primary-color);
+
+  &:hover {
+    color: var(--primary-color) !important;
   }
+}
+
+.user-area {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: inherit;
+
+  /* Style for el-dropdown trigger */
   .user-info {
     display: flex;
     align-items: center;
-    gap: 0.5vw;
+    gap: 8px;
     cursor: pointer;
-    padding: 0.2em 0.5em;
+    padding: 4px 6px;
     border-radius: 4px;
     font-size: inherit;
+    color: #666; /* Ensure text color is consistent */
+
+    span {
+      color: inherit; /* Inherit color from parent .user-info */
+    }
+
+    .el-icon--right {
+      margin-left: 4px; /* Adjust spacing for the dropdown arrow */
+      margin-right: 0; /* Override default margin-right if any */
+      font-size: 1em; /* Adjust icon size if needed */
+    }
   }
+
   .user-info:hover {
     background-color: #f5f7fa;
+    color: var(--primary-color); /* Highlight on hover */
+
+    .username {
+      color: var(--primary-color);
+    }
   }
-  .user-info .username {
+
+  .username {
     max-width: 80px;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-  .user-submenu {
-    width: 200px;
-    padding: 0;
-    font-size: clamp(12px, 1vw, 16px);
-    .user-header {
-      padding: 1em;
-      display: flex;
-      align-items: center;
-      gap: 0.7vw;
-      border-bottom: 1px solid #eee;
-      .user-info {
-        flex: 1;
-        overflow: hidden;
-        .name {
-          font-weight: 500;
-          margin-bottom: 4px;
-        }
-        .email {
-          font-size: 0.8em;
-          color: #999;
-          overflow: hidden;
-          text-overflow: ellipsis;
-        }
-      }
-    }
-    .menu-items {
-      padding: 0.5em 0;
-      a {
-        display: block;
-        padding: 0.5em 1em;
-        color: #333;
-        text-decoration: none;
-        transition: all 0.3s;
-        font-size: inherit;
-        &:hover {
-          color: var(--primary-color);
-          background: #f5f7fa;
-        }
-      }
-    }
-  }
-  .login-options {
-    margin-top: 1.5vw;
+}
+
+/* No longer needed as Profile component is removed */
+// .user-submenu {
+//   width: 200px;
+//   padding: 0;
+//   font-size: clamp(12px, 1vw, 16px);
+
+//   .user-header {
+//     padding: 1em;
+//     display: flex;
+//     align-items: center;
+//     gap: 0.7vw;
+//     border-bottom: 1px solid #eee;
+
+//     .user-info {
+//       flex: 1;
+//       overflow: hidden;
+
+//       .name {
+//         font-weight: 500;
+//         margin-bottom: 4px;
+//       }
+
+//       .email {
+//         font-size: 0.8em;
+//         color: #999;
+//         overflow: hidden;
+//         text-overflow: ellipsis;
+//       }
+//     }
+//   }
+
+//   .menu-items {
+//     padding: 0.5em 0;
+
+//     a {
+//       display: block;
+//       padding: 0.5em 1em;
+//       color: #333;
+//       text-decoration: none;
+//       transition: all 0.3s;
+//       font-size: inherit;
+
+//       &:hover {
+//         color: var(--primary-color);
+//         background: #f5f7fa;
+//       }
+//     }
+//   }
+// }
+
+.login-options {
+  margin-top: 1.5vw;
+  display: flex;
+  justify-content: center;
+  font-size: inherit;
+
+  #googleButton {
+    width: 100%;
     display: flex;
     justify-content: center;
-    font-size: inherit;
-    #googleButton {
-      width: 100%;
-      display: flex;
-      justify-content: center;
-    }
   }
-  
-  /* 小屏幕适配，减小字体和间距 */
-  @media (max-width: 768px) {
-    .nav-header .logo {
-      margin-right: 1vw;
-      height: 32px;
-      img {
-        max-width: 60px;
-      }
-    }
-    .nav-header .nav-menu .menu-list {
-      gap: 0.3vw;
-    }
-    .nav-header .menu-item {
-      font-size: clamp(11px, 2.5vw, 14px);
-      padding: 0 0.4vw;
-    }
-    .user-info .username {
-      max-width: 60px;
-    }
-  }
-  @media (max-width: 480px) {
-    .nav-header .logo {
-      margin-right: 0.5vw;
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+  .nav-header .logo {
+    margin-right: 20px;
+    height: 24px;
+
+    img {
+      max-width: 80px;
       height: 24px;
-      img {
-        max-width: 40px;
-      }
-    }
-    .nav-header .menu-item {
-      font-size: clamp(10px, 3vw, 13px);
-      padding: 0 0.2vw;
-    }
-    .user-info .username {
-      max-width: 40px;
     }
   }
+
+  .nav-header .header-content {
+    padding: 10px 0;
+  }
+
+  .nav-header .nav-menu .menu-list {
+    gap: 15px;
+    font-size: 14px;
+  }
+
+  .nav-header .menu-item {
+    font-size: 14px;
+  }
+
+  .user-info .username {
+    max-width: 60px;
+  }
+}
+
+@media (max-width: 480px) {
+  .nav-header .logo {
+    margin-right: 10px;
+    height: 20px;
+
+    img {
+      max-width: 60px;
+      height: 20px;
+    }
+  }
+
+  .nav-header .header-content {
+    padding: 8px 0;
+  }
+
+  .nav-header .nav-menu .menu-list {
+    gap: 8px;
+    font-size: 13px;
+  }
+
+  .nav-header .menu-item {
+    font-size: 13px;
+  }
+
+  .user-info .username {
+    max-width: 40px;
+  }
+}
 </style>

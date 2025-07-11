@@ -4,29 +4,32 @@
     <!-- 文件上传部分或文件列表部分 -->
     <div class="quote-section">
       <template v-if="isOrdering">
+        <!-- ★★★★★ MODIFICATION 1: Listen for the 'listEmpty' event ★★★★★ -->
         <file-list 
           :selectedRecords="selectedRecords"
           :currentProcess="currentProcess"
+          @listEmpty="handleListEmpty"
         />
       </template>
-      <div class="upload-header">
-        <h2 class="section-title">上传图纸</h2>
-        <div class="button-group">
-          <button class="blue-button" @click="openGuidance">CNC下单必看</button>
-          <button class="gray-button" @click="openGuidance2D">2D文件转换须知</button>
-          <button class="gray-button" @click="openGuidanceSecret">保密协议</button>
+      <!-- This part is shown only when isOrdering is false -->
+        <div class="upload-header">
+          <h2 class="section-title">上传图纸</h2>
+          <div class="button-group">
+            <button class="blue-button" @click="openGuidance">CNC下单必看</button>
+            <button class="gray-button" @click="openGuidance2D">2D文件转换须知</button>
+            <button class="gray-button" @click="openGuidanceSecret">保密协议</button>
+          </div>
         </div>
-      </div>
-      <file-uploader 
-        :process-info="currentProcess"
-        @update-history="handleUpdateHistory"
-      />
-    
+        <file-uploader 
+          :process-info="currentProcess"
+          @update-history="handleUpdateHistory"
+        />
     </div>
 
     <!-- 历史记录组件 -->
     <history-list
       :history-data="historyData"
+      :loading="isHistoryLoading"
       @refresh="fetchHistory(currentProcess?.type)"
       @fileInfo="handleOrder"
       @delete="handleDelete"
@@ -39,7 +42,6 @@
 
 <script setup>
 import { ref, onMounted } from 'vue'
-import axios from 'axios'
 import { ElMessage } from 'element-plus'
 import FileUploader from '@/components/quote/FileUploader.vue'
 import HistoryList from '@/components/quote/HistoryList.vue'
@@ -47,16 +49,24 @@ import FileList from '@/components/quote/FileList.vue'
 import CustomerGuidance from '@/views/NavHeader/CustomerGuidance/CustomerGuidance.vue'
 import { processList } from '@/components/quote/processList.js'
 import { roughness, tolerance } from '@/components/quote/AutomationTool.js'
+import service from '@/utils/request'
 
 const currentProcess = ref(null)
 const historyData = ref([])
-const isOrdering = ref(false) // 控制是否显示 FileList 组件
-const selectedRecords = ref({}) // 存储选中的记录
+const isOrdering = ref(false)
+const selectedRecords = ref({})
+const isHistoryLoading = ref(false)
 
-import service from '@/utils/request'
+// ★★★★★ MODIFICATION 2: Create the event handler method ★★★★★
+const handleListEmpty = () => {
+  console.log("File list is empty. Hiding FileList and showing uploader.");
+  isOrdering.value = false;
+};
+
 const fetchHistory = async (processType) => {
   if (!processType) return
   
+  isHistoryLoading.value = true
   try {
     const response = await service.get(
       `/api/upload/history/${processType}`,
@@ -68,6 +78,8 @@ const fetchHistory = async (processType) => {
     }
   } catch (error) {
     ElMessage.error('获取历史记录失败')
+  } finally {
+    isHistoryLoading.value = false
   }
 }
 
@@ -81,8 +93,7 @@ const handleOrder = ({fileInfoAccessId,
       file_name,
       upload_history_id}) => {
   console.log('upload_history_id', upload_history_id)
-  isOrdering.value = true // 设置为 true 以显示 FileList 组件
-  // 设置记录的其他属性
+  isOrdering.value = true
   const record = {
     selected: true,
     fileName:file_name,
@@ -139,7 +150,8 @@ const handleOrder = ({fileInfoAccessId,
 }
 
 const handleDelete = async (id) => {
-  console.log('删除:', id)
+  console.log(`子组件已成功删除记录 (ID: ${id})，父组件正在刷新历史列表...`);
+  await fetchHistory(currentProcess.value?.type);
 }
 
 onMounted(() => {
@@ -157,13 +169,11 @@ const openGuidance = () => {
 }
 const openGuidance2D = () => {
   guidanceRef.value?.openDialog()
-  // 切换到2D文件转换须知
   guidanceRef.value?.switchComponent('FileGuidance')
 }
 
 const openGuidanceSecret = () => {
   guidanceRef.value?.openDialog()
-  // 切换到保密协议
   guidanceRef.value?.switchComponent('SecretGuidance')
 }
 

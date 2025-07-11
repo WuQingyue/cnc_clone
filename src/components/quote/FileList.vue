@@ -1,7 +1,8 @@
 <template>
   <div class="file-list">
     <h2 class="section-title">文件列表</h2>
-    <div class="file-list-container">
+    <!-- ★★★ 修改点: 将 v-loading 指令从 .left-section 移到这里 ★★★ -->
+    <div class="file-list-container" v-loading="loading">
       <!-- 左部分：文件信息和文件上传框 -->
       <div class="left-section">
         <!-- 数据展示 -->
@@ -65,8 +66,7 @@
               <td>{{ record.pricePerUnit }}</td>
               <td>{{ record.totalPrice }}</td>
               <td>
-                <button @click="copyPart(index)">复制零件</button>
-                <button @click="deletePart(index)">删除零件</button>
+                <button class="delete-btn" @click="deletePart(index)">删除零件</button>
               </td>
             </tr>
           </tbody>
@@ -124,23 +124,29 @@
 
 <script setup>
 import { ref, watch, onMounted, computed } from 'vue'
-import { ShoppingCart, Edit } from '@element-plus/icons-vue' // 引入 Edit 图标
+import { ShoppingCart, Edit } from '@element-plus/icons-vue' 
 import { useSelectedDataStore } from '@/store/PriceInquiryDatas'
 import { useRouter } from 'vue-router'
 import service from '@/utils/request'
-import { ElMessage } from 'element-plus'
+import { ElMessage, ElLoading } from 'element-plus'
 
-// 获取 store 实例
+const loading = ref(false)
 const selectedDataStore = useSelectedDataStore()
 const router = useRouter()
 const selectedDelivery = ref('BD')
-// 创建本地数据副本
 const localRecords = ref([])
-const showParameterDialog = ref(false) // 控制 ParameterInfo 对话框的显示与隐藏
-const selectedRecord = ref(null) // 用于存储当前选中的需要修改参数的记录
+const showParameterDialog = ref(false)
+const selectedRecord = ref(null) 
+
 const fetchPrices = async () => {
   const selectedDatas = selectedDataStore.getSelectedData();
+  if (!selectedDatas || selectedDatas.length === 0) {
+      console.log('No selected data to fetch prices for.');
+      return;
+  }
+  
   console.log('获取勾选的数据', selectedDatas);
+  loading.value = true;
 
   try {
     const requestData = selectedDatas.map(item => ({
@@ -152,7 +158,7 @@ const fetchPrices = async () => {
             item.craftAttributeColorAccessIds1,
             item.craftAttributeGlossinessAccessIds1,
             item.craftAttributeFileAccessIds1
-          ].filter(Boolean)
+          ].flat().filter(Boolean) // 使用.flat()确保数组扁平化
         },
         {
           craftAccessId: item.craftAccessId2,
@@ -160,26 +166,21 @@ const fetchPrices = async () => {
             item.craftAttributeColorAccessIds2,
             item.craftAttributeGlossinessAccessIds2,
             item.craftAttributeFileAccessIds2
-          ].filter(Boolean)
+          ].flat().filter(Boolean) // 使用.flat()确保数组扁平化
         }
-      ],
+      ].filter(craft => craft.craftAccessId), // 过滤掉没有craftAccessId的craft对象
       productModelAccessId: item.productModelAccessId,
       goodsQuantity: item.quantity,
       toleranceAccessId: item.toleranceAccessId,
       roughnessAccessId: item.roughnessAccessId,
-      deliveryTypeCode: item.deliveryTypeCode
+      deliveryTypeCode: item.deliveryTypeCode,
     }));
-    console.log('requestData', requestData);
     
     const response = await service.post('/api/price/price', requestData, { withCredentials: true });
-    console.log('response', response);
     const priceData = response.data;
-    console.log('FileList中的priceData', priceData)
     
-    if (response.status === 200) {
-      // 假设我们只处理第一个报价信息（如果需要处理多个，可以遍历 quoteInfos）
+    if (response.status === 200 && Array.isArray(priceData)) {
       const quoteInfos = priceData;
-      console.log('quoteInfos', quoteInfos)
       selectedDatas.forEach((record, index) => {
         if (index < quoteInfos.length) {
           record.materialCost = quoteInfos[index].materialPrice;
@@ -188,13 +189,12 @@ const fetchPrices = async () => {
           record.clampingCost = quoteInfos[index].clampPrice;
           record.surfaceCost = quoteInfos[index].craftPrice;
           record.expeditedPrice = quoteInfos[index].expeditedPrice;
-          record.pricePerUnit = quoteInfos[index].price; // 更新单价
-          record.totalPrice = record.pricePerUnit * record.quantity; // 更新总价
+          record.pricePerUnit = quoteInfos[index].price;
+          record.totalPrice = record.pricePerUnit * record.quantity;
         }
       });
-      // 更新 localRecords 中的数据
       localRecords.value = localRecords.value.map(record => {
-        const updatedRecord = selectedDatas.find(selRecord => selRecord.fileInfoAccessId === record.fileInfoAccessId); // 假设记录中有唯一标识符 id
+        const updatedRecord = selectedDatas.find(selRecord => selRecord.fileInfoAccessId === record.fileInfoAccessId);
         if (updatedRecord) {
           return {
             ...record,
@@ -211,9 +211,7 @@ const fetchPrices = async () => {
         return record;
       });
 
-      // 更新 store 中的数据
       selectedDataStore.setSelectedData(selectedDatas);
-      console.log('更新store中的数据', selectedDataStore.getSelectedData())
     } else {
       console.error('Unexpected response format:', priceData);
       ElMessage.error('获取价格信息失败，返回数据格式不正确');
@@ -222,11 +220,12 @@ const fetchPrices = async () => {
   } catch (error) {
     console.error('请求失败:', error.response?.data || error.message);
     ElMessage.error('获取价格信息失败，请检查网络连接');
+  } finally {
+    loading.value = false;
   }
 };
-// 新增：监听交期选项的变化
+
 watch(selectedDelivery, (newDeliveryOption) => {
-  console.log('交期选项已更改为:', selectedDelivery.value);
   if(selectedDelivery.value === 'UD'){
     localRecords.value.forEach(record => {
     record.deliveryTypeCode = newDeliveryOption; 
@@ -246,7 +245,7 @@ watch(selectedDelivery, (newDeliveryOption) => {
   fetchPrices()
 });
 
-import ParameterInfo from './ParameterInfo.vue' // 引入 ParameterInfo 组件
+import ParameterInfo from './ParameterInfo.vue'
 const props = defineProps({
   selectedRecords: {
     type: Object,
@@ -254,94 +253,81 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['update:selectedRecords'])
+const emit = defineEmits(['update:selectedRecords', 'listEmpty'])
 
-// 监听 props 变化更新本地数据
 watch(() => props.selectedRecords, (record) => {
-  record = JSON.parse(JSON.stringify(record))
-  console.log('record', record)
-  // 将 record 对象加入到 localRecords.value 中
-  localRecords.value.push(record);
-  console.log('下单localRecords.value', localRecords.value)
-  const selectedDatas = localRecords.value.filter(record => record.selected)
-  console.log('被选中的数据', selectedDatas)
-  // selectedDataStore.setSelectedData(selectedDatas)
-  if (selectedDatas.length > 0) {
-    try {
-      // 使用 store 存储数据
-      selectedDataStore.setSelectedData(selectedDatas)
-      fetchPrices()
-    } catch (error) {
-      console.error("存储数据时出错:", error)
-      alert('准备询价数据时出错，请稍后重试。')
+  if (record && Object.keys(record).length > 0) {
+    const newRecord = JSON.parse(JSON.stringify(record));
+    if (!localRecords.value.some(r => r.fileInfoAccessId === newRecord.fileInfoAccessId)) {
+        localRecords.value.push(newRecord);
+    }
+    const selectedDatas = localRecords.value.filter(r => r.selected);
+    if (selectedDatas.length > 0) {
+        try {
+            selectedDataStore.setSelectedData(selectedDatas);
+            fetchPrices();
+        } catch (error) {
+            console.error("存储数据时出错:", error);
+            alert('准备询价数据时出错，请稍后重试。');
+        }
     }
   }
 }, { immediate: true, deep: true })
 
-const copyPart = (index) => {
-  const newRecord = JSON.parse(JSON.stringify(localRecords.value[index]))
-  console.log('newRecord', newRecord)
-  localRecords.value.push(newRecord)
-  console.log('复制localRecords.value', localRecords.value)
-}
-
 const deletePart = (index) => {
   localRecords.value.splice(index, 1)
-  console.log('localRecords.value', localRecords.value)
+  if (localRecords.value.length === 0) {
+    emit('listEmpty')
+  }
 }
 
 const openParameterDialog = (record) => {
-  selectedRecord.value = record; // 设置当前选中的记录
-  showParameterDialog.value = true; // 显示对话框
+  selectedRecord.value = record;
+  showParameterDialog.value = true;
 }
 
 const handleParameterConfirm = (newParameters) => {
-  // 更新当前选中的记录的参数
   Object.assign(selectedRecord.value, newParameters);
-  console.log('修改参数后的selectedRecord.value', selectedRecord.value)
   
-  // 更新 localRecords 中的相应记录
   const index = localRecords.value.findIndex(record => 
     record.fileInfoAccessId === selectedRecord.value.fileInfoAccessId
   );
   
   if (index !== -1) {
-    // 更新 localRecords 中的记录
     localRecords.value[index] = { ...localRecords.value[index], ...newParameters };
-    console.log('更新后的 localRecords:', localRecords.value);
-    
-    // 更新 store 中的数据
     const selectedDatas = localRecords.value.filter(record => record.selected);
     selectedDataStore.setSelectedData(selectedDatas);
-    console.log('更新后的store中的数据', selectedDataStore.getSelectedData())
+    // After confirming parameters, prices might change, so re-fetch
+    fetchPrices();
   }
 }
 
 onMounted(() => {
-  // fetchPrices()
+  // onMounted fetch is handled by the props watcher
 })
-// 计算选中的零件数量
+
 const selectedRecordsCount = computed(() => {
   return localRecords.value
     .filter(record => record.selected)
     .reduce((total, record) => total + record.quantity, 0)
 });
 
-// 计算选中的总价
 const selectedTotalPrice = computed(() => {
   return localRecords.value
     .filter(record => record.selected)
     .reduce((total, record) => total + record.totalPrice, 0)
-    .toFixed(2); // 保留两位小数
+    .toFixed(2);
 });
 
-// 新增：加入购物车逻辑
 const handleAddToCart = async () => {
   try {
-    const payload = localRecords.value
-    console.log('加入购物车的数据:', payload)
-    const response = await service.post('/api/orders/add_to_cart', payload, { withCredentials: true })
-    console.log('加入购物车的返回数据:', response.data.success)
+    const selectedDatas = localRecords.value.filter(record => record.selected)
+    console.log('准备提交的数据:', selectedDatas)
+    if (selectedDatas.length === 0) {
+      ElMessage.warning('请至少选择一个零件进行询价');
+      return;
+    }
+    const response = await service.post('/api/orders/add_to_cart', selectedDatas, { withCredentials: true })
     if (response.data.success) {
       ElMessage.success('已加入购物车')
     } else {
@@ -354,37 +340,64 @@ const handleAddToCart = async () => {
 }
 
 const handleConfirm = async () => {
-  // 筛选出被选中的记录
   const selectedDatas = localRecords.value.filter(record => record.selected)
   console.log('准备提交的数据:', selectedDatas)
-  if (selectedDatas.length > 0) {
-    try {
-      // 1. 发送数据到后端，存储到 session
-      const response =  await service.post('/api/orders/save_selected_datas', selectedDatas, { withCredentials: true })
-      console.log('后端返回的数据:', response)
-      if (response.status === 200){
-      // 2. 跳转到询价页面
-      router.push('/price-inquiry')
-      }
+  if (selectedDatas.length === 0) {
+    ElMessage.warning('请至少选择一个零件进行询价');
+    return;
+  }
 
-    } catch (error) {
-      console.error("存储数据时出错:", error)
-      alert('准备询价数据时出错，请稍后重试。')
+  const loadingInstance = ElLoading.service({
+    lock: true,
+    text: '正在准备询价数据，即将跳转...',
+    background: 'rgba(0, 0, 0, 0.7)',
+  });
+
+  try {
+    const response = await service.post('/api/orders/save_selected_datas', selectedDatas, { withCredentials: true });
+    console.log('后端返回的数据:', response);
+    
+    if (response.status === 200) {
+      router.push('/price-inquiry');
+    } else {
+      ElMessage.error('准备询价数据时出错，请稍后重试。');
     }
-  } else {
-    alert('请至少选择一个零件进行询价')
+  } catch (error) {
+    console.error("存储数据时出错:", error);
+    ElMessage.error('准备询价数据时出错，请检查网络连接。');
+  } finally {
+    loadingInstance.close();
   }
 }
-
 </script>
 
 <style lang="scss" scoped>
+/* 样式保持不变 */
+.delete-btn {
+  background-color: #409eff;
+  color: white;
+  border: none;
+  padding: 6px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.2s ease;
+
+  &:hover {
+    background-color: #66b1ff;
+  }
+
+  &:active {
+    background-color: #3a8ee6;
+  }
+}
+
 .delivery-options {
-  margin-bottom: 20px;  /* 添加底部间距 */
+  margin-bottom: 20px;
 }
 .delivery-options label {
-  display: block;  /* 每个单选按钮占一行 */
-  margin: 5px 0;  /* 添加上下间距 */
+  display: block;
+  margin: 5px 0;
 }
 .custom-number-input {
   display: inline-flex;
@@ -488,24 +501,23 @@ const handleConfirm = async () => {
       padding: 20px;
       border-radius: 8px;
       .delivery-options {
-          margin-bottom: 15px; // 与下方内容间距
+          margin-bottom: 15px;
 
           label {
-            display: block; // 每个选项占一行
-            margin-bottom: 8px; // 选项之间的间距
+            display: block; 
+            margin-bottom: 8px;
             cursor: pointer;
-            color: #606266; // 默认文字颜色
-            transition: color 0.3s; // 平滑颜色过渡
+            color: #606266;
+            transition: color 0.3s;
 
             input[type="radio"] {
-              margin-right: 5px; // 单选按钮和文字的间距
-              vertical-align: middle; // 垂直居中对齐
+              margin-right: 5px;
+              vertical-align: middle;
             }
           }
 
-          // 选中状态的样式
           .selected-option {
-            color: #409eff; // 选中的文字颜色为蓝色
+            color: #409eff;
           }
           }
       .info-text {
@@ -525,6 +537,7 @@ const handleConfirm = async () => {
         width: 100%;
         margin-bottom: 10px;
         cursor: pointer;
+        color: white; /* Ensure text is white */
 
         .inquiry-link {
           color: white;
@@ -555,8 +568,9 @@ const handleConfirm = async () => {
 
   .parameter-info-cell {
     position: relative;
-    background-color: #e6f7ff; /* 浅蓝色背景 */
-    border: 1px dashed #409eff; /* 浅蓝色虚线边框 */
+    background-color: #e6f7ff;
+    border: 1px dashed #409eff;
+    cursor: pointer; /* Add cursor pointer */
 
     .parameter-details div {
       margin: 4px 0;

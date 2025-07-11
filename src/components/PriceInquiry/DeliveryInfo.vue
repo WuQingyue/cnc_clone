@@ -1,6 +1,7 @@
 <template>
   <div class="delivery-info">
-    <el-card class="info-card">
+    <!-- ★★★ 修改点 1: 在卡片上添加 v-loading 指令 ★★★ -->
+    <el-card class="info-card" v-loading="loading">
       <template #header>
         <div class="card-header">
           <span>发货信息</span>
@@ -77,27 +78,6 @@
             </div>
           </div>
         </el-form-item>
-
-        <!-- 包装要求 -->
-        <el-form-item label="包装要求" required>
-          <div class="form-item-content">
-            <package-requirements v-model="deliveryForm.packageType" />
-          </div>
-        </el-form-item>
-
-        <!-- 收据/送货单 -->
-        <el-form-item label="收据/送货单" required>
-          <div class="form-item-content">
-            <receipt-delivery v-model="deliveryForm.receiptType" />
-          </div>
-        </el-form-item>
-
-        <!-- 发货方式 -->
-        <el-form-item label="发货方式" required>
-          <div class="form-item-content">
-            <delivery-method v-model="deliveryForm.deliveryMethod" />
-          </div>
-        </el-form-item>
       </el-form>
     </el-card>
 
@@ -138,8 +118,11 @@ export default {
     AddressEditDialog,
     ContactEditDialog
   },
-  emits: ['address-selected','contact-selected'], // 添加emit
-  setup(props, { emit }) {  // 添加emit参数
+  emits: ['address-selected','contact-selected'],
+  setup(props, { emit }) {
+    // ★★★ 修改点 2: 添加 loading 状态 ★★★
+    const loading = ref(false);
+
     const deliveryForm = ref({
       address: {
         region: [],
@@ -164,26 +147,6 @@ export default {
     const orderContactHidden = ref(false)
     const techContactHidden = ref(false)
 
-    const hasAddress = computed(() => {
-      return deliveryForm.value.address.region.length > 0 && 
-             deliveryForm.value.address.detail.trim() !== ''
-    })
-
-    const hasContact = computed(() => {
-      return deliveryForm.value.contact.name.trim() !== '' && 
-             deliveryForm.value.contact.phone.trim() !== ''
-    })
-
-    const formatAddress = computed(() => {
-      const { region, detail } = deliveryForm.value.address
-      return region.join(' ') + ' ' + detail
-    })
-
-    const formatContact = computed(() => {
-      const { name, phone } = deliveryForm.value.contact
-      return `${name} ${phone}`
-    })
-
     const showAddressDialog = () => {
       addressDialogVisible.value = true
     }
@@ -192,20 +155,10 @@ export default {
       contactDialogVisible.value = true
     }
 
-    const updateAddress = (newAddress) => {
-      deliveryForm.value.address = newAddress
-    }
-
-    const updateContact = (newContact) => {
-      deliveryForm.value.contact = newContact
-    }
-
     const handleAddressSelected = (address) => {
       selectedAddress.value = address
-      console.log('收货地址：',selectedAddress.value)
       emit('address-selected', selectedAddress.value)
       addressDialogVisible.value = false
-      // 重置隐藏状态
       addressHidden.value = false
       contactHidden.value = false
       phoneHidden.value = false
@@ -214,7 +167,6 @@ export default {
     const handleContactSelected = (contact) => {
       selectedContact.value = contact
       contactDialogVisible.value = false
-      // 重置隐藏状态
       orderContactHidden.value = false
       techContactHidden.value = false
     }
@@ -222,38 +174,37 @@ export default {
     const getDefaultAddress = async () => {
       try {
         const response = await service.get('/api/address/get_default_addresses',{withCredentials:true});
-        if (response.status === 200)  {  
+        if (response.data.success === true)  {  
           selectedAddress.value = {
-            address_id:response.data.id,
-            fullAddress:response.data.detail_address + ' ' + response.data.city + ',' + response.data.province + ' ' + response.data.postal_code + ' ' + response.data.countryCode,
-            postCode:response.data.postal_code,
-            cityName: response.data.city,
-            provinceName:response.data.province,
-            countryCode: response.data.countryCode,
-            detail: response.data.address_detail,
-            name: response.data.contact_name,
-            phone:response.data.contact_phone
+            address_id:response.data.data.id,
+            fullAddress:response.data.data.detail_address + ' ' + response.data.data.city + ',' + response.data.data.province + ' ' + response.data.data.postal_code + ' ' + response.data.data.countryCode,
+            postCode:response.data.data.postal_code,
+            cityName: response.data.data.city,
+            provinceName:response.data.data.province,
+            countryCode: response.data.data.countryCode,
+            detail: response.data.data.detail_address,
+            name: response.data.data.contact_name,
+            phone:response.data.data.contact_phone,
+            shippingMethod: response.data.data.shipping_method,
+            postName: response.data.data.post_name,
           }
-          console.log('默认地址：',response.data);
           emit('address-selected', selectedAddress.value)
         }
       } catch (error) {
-        console.error('获取默认地址失败:', error);
+        console.log('获取默认地址失败:', error);
       }
     }
     const getDefaultContact = async () => {
       try {
         const response = await service.get('/api/contact/get_default_contact',{withCredentials:true});
-        console.log('默认联系人：',response.data);
-        if (response.status === 200)  {  
+        if (response.data.success === true)  {  
           selectedContact.value = {
-            contact_id: response.data.id,
-            orderName:response.data.order_contact,
-            orderPhone: response.data.order_contact_phone,
-            techName:response.data.tech_contact,
-            techPhone: response.data.tech_contact_phone,
+            contact_id: response.data.data.id,
+            orderName:response.data.data.order_contact,
+            orderPhone: response.data.data.order_contact_phone,
+            techName:response.data.data.tech_contact,
+            techPhone: response.data.data.tech_contact_phone,
           }
-          console.log('默认联系人：',response.data);
           emit('contact-selected', selectedContact.value)
         }
       } catch (error) {
@@ -261,11 +212,29 @@ export default {
       }
     }
 
+    // ★★★ 修改点 3: 创建一个统一的函数来获取初始数据并管理 loading 状态 ★★★
+    const fetchInitialData = async () => {
+        loading.value = true;
+        try {
+            await Promise.all([
+                getDefaultAddress(),
+                getDefaultContact()
+            ]);
+        } catch (error) {
+            console.error("获取初始发货信息失败:", error);
+        } finally {
+            loading.value = false;
+        }
+    };
+
     onMounted(() => {
-      getDefaultAddress();
-      getDefaultContact(); 
+        // ★★★ 修改点 4: 调用新的数据获取函数 ★★★
+        fetchInitialData();
     })
+
     return {
+      // ★★★ 修改点 5: 返回 loading 状态给模板 ★★★
+      loading,
       deliveryForm,
       addressDialogVisible,
       contactDialogVisible,
@@ -276,14 +245,8 @@ export default {
       selectedContact,
       orderContactHidden,
       techContactHidden,
-      hasAddress,
-      hasContact,
-      formatAddress,
-      formatContact,
       showAddressDialog,
       showContactDialog,
-      updateAddress,
-      updateContact,
       handleAddressSelected,
       handleContactSelected
     }

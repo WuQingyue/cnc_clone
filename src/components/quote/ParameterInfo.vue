@@ -274,7 +274,8 @@
       </div>
 
       <!-- 右侧价格信息区域 -->
-      <div class="right-section">
+      <!-- ★★★★★ MODIFICATION 1: Add v-loading directive ★★★★★ -->
+      <div class="right-section" v-loading="isPriceLoading">
         <!-- 文件信息 -->
         <div class="file-info">
           <img :src="fileImage" class="file-image" />
@@ -349,13 +350,16 @@ export default {
       type: Boolean,
       default: false
     },
-    record: { // 新增属性，用于接收 FileList.vue 中的记录
+    record: { 
       type: Object,
       default: () => ({})
     }
   },
   emits: ['update:visible', 'confirm'],
   setup(props, { emit }) {
+    // ★★★★★ MODIFICATION 2: Add loading state ref ★★★★★
+    const isPriceLoading = ref(false);
+
     const dialogVisible = ref(false)
     const selectedParameterId = ref(currentParameters.value.id)
     const materialName = ref('')
@@ -447,7 +451,6 @@ export default {
     }
 
     const confirmParameters = () => {
-      // 将更新后的参数传递给 FileList.vue
       const parameters = {
         categoryName: categoryName.value,
         material: selectedMaterial.value.materialName,
@@ -490,30 +493,26 @@ export default {
         getSurfaceTreatmentLabel: getSurfaceTreatmentLabel.value,
       }
       
-      emit('confirm', parameters) // 触发 confirm 事件
+      emit('confirm', parameters)
       dialogVisible.value = false
     }
 
-    // 当前选中分类的材料列表
     const currentMaterials = computed(() => {
       if (!currentCategory.value) return []
       return currentCategory.value.children || []
     })
 
-    // 获取选中材料的显示文本
     const getSelectedMaterialLabel = computed(() => {
       if (!selectedMaterial.value) return ''
       return `${selectedMaterial.value.materialName}`
     })
 
-    // 选择分类
     const selectCategory = (category) => {
       if (!category) return
       categoryName.value = category.name
       currentCategory.value = category
     }
 
-    // 选择材料
     const selectMaterial = (material) => {
       if (!material) return
       selectedMaterial.value = material
@@ -617,14 +616,12 @@ export default {
       }
     })
 
-    // 显示框内容
     const surfaceTreatmentDisplay = computed(() => {
       if (surfaceTreatment.value === 'none' && selectedMaterial.value) {
         return selectedMaterial.value.materialRemark || '无备注信息'
       }
       return ''
     })
-    //监听表面不做处理
     watch(surfaceTreatment, (newVal) => {
       selectedTreatment.value = '';
       glossiness.value = '';
@@ -642,11 +639,8 @@ export default {
       craftAttributeFileAccessIds2.value = '';
     })
 
-    // 表面处理一
     const selectedTreatment = ref('')
-    // 表面处理一颜色
     const selectedColor = ref('')
-    //表面处理一备注
     const surfaceTreatmentNoteDisplay = computed(() => {
       if (selectedTreatment.value) {
         const selectedItem = surfaceTreatmentData.find(item => item.craftName === selectedTreatment.value);
@@ -655,15 +649,12 @@ export default {
       return ''
     })
 
-    // 表面处理一颜色选项
     const colorOption = computed(() => {
       if (!selectedTreatment.value) return null;
       const selectedItem = surfaceTreatmentData.find(item => item.craftName === selectedTreatment.value);
       return selectedItem?.option?.optionName === '颜色' ? selectedItem.option : null;
     });
-    // 表面处理一光泽
     const glossiness = ref('');
-    // 表面处理一光泽选项计算属性
     const glossinessOptions = computed(() => {
       if (!selectedTreatment.value) return [];
       if(colorOption.value){
@@ -673,7 +664,6 @@ export default {
         return  null;
       }
     });
-    // 表面处理一图纸
     const paperOptions = computed(() => {
       if (!selectedTreatment.value) {
         return [];
@@ -696,9 +686,7 @@ export default {
     const craftAttributeGlossinessAccessIds2 = ref('')
     const craftAttributeFileAccessIds2 = ref('')
 
-    //表面处理一监听
     watch(selectedTreatment, (newVal) => {
-      // 清空选择
       selectedColor.value = '';
       glossiness.value = '';
       selectedTreatment2.value = '';
@@ -714,7 +702,6 @@ export default {
       craftAttributeColorAccessIds2.value = '';
       craftAttributeGlossinessAccessIds2.value = '';
       craftAttributeFileAccessIds2.value = '';
-      // 表面处理一默认值
       if (surfaceTreatmentData.length > 0 && !selectedTreatment.value) {
         selectedTreatment.value = surfaceTreatmentData[0].craftName
       }
@@ -745,12 +732,8 @@ export default {
       return !allowedValues.includes(selectedTreatment.value)
     })
 
-
-    // 表面处理二
     const selectedTreatment2 = ref('')
-    // 表面处理二颜色
     const selectedColor2 = ref('')
-    //表面处理二备注
     const surfaceTreatmentNoteDisplay2 = computed(() => {
       if (selectedTreatment2.value) {
         const selectedItem = surfaceTreatmentData.find(item => item.craftName === selectedTreatment2.value);
@@ -759,21 +742,17 @@ export default {
       return ''
     })
 
-    // 表面处理二颜色选项
     const colorOption2 = computed(() => {
       if (!selectedTreatment2.value) return null;
       const selectedItem = surfaceTreatmentData.find(item => item.craftName === selectedTreatment2.value);
       return selectedItem?.option?.optionName === '颜色' ? selectedItem.option : null;
     });
-    // 表面处理二光泽
     const glossiness2 = ref('');
-    // 表面处理二光泽选项计算属性
     const glossinessOptions2 = computed(() => {
       if (!selectedTreatment2.value) return [];
       const selectedItem = colorOption2.value.attrs.find(item => item.value === selectedColor2.value);
       return selectedItem?.option?.optionName === '光泽' ? selectedItem.option : null;
     });
-    // 表面处理二图纸
     const paperOptions2 = computed(() => {
       if (!selectedTreatment2.value) {
         return [];
@@ -788,10 +767,8 @@ export default {
       }
     });
 
-    //表面处理二监听
     watch(selectedTreatment2, (newVal) => {
       
-      // 表面处理二默认值
       if (surfaceTreatmentData.length > 0 && !selectedTreatment2.value) {
         selectedTreatment2.value = surfaceTreatmentData[0].craftName
       }
@@ -817,7 +794,6 @@ export default {
       }
     })
 
-    // 表面处理二禁用状态
     const isSecondTreatmentDisabled = computed(() => {
       return !selectedTreatment.value;
     });
@@ -826,7 +802,6 @@ export default {
       return !allowedValues.includes(selectedTreatment2.value)
     })
 
-    // 动态更新表面处理二的选项
     const filteredSurfaceTreatmentData = computed(() => {
       if (!selectedTreatment.value) return [];
       const selectedItem = surfaceTreatmentData.find(item => item.craftName === selectedTreatment.value);
@@ -838,22 +813,21 @@ export default {
       return [];
     });
 
-    // 重置选择
     const resetSelection = () => {
       if (parametersList.length > 0) {
-        // 默认选择的分类
         currentCategory.value = parametersList.find(category => category.name === categoryName.value)
         console.log('categoryName.value:', categoryName.value);
         console.log('currentCategory.value:', currentCategory.value);
-        // 默认选择的材料
         if (currentCategory.value) {
           selectedMaterial.value = currentCategory.value.children.find(material => material.materialName === materialName.value)
         }
       }
     }
    
-    // 获取价格信息
+    // ★★★★★ MODIFICATION 3: Update fetchPrices to manage loading state ★★★★★
     const fetchPrices = async () => {
+      if (!selectedMaterial.value) return;
+      isPriceLoading.value = true; // Start loading
       try {
         const requestData = [
           {
@@ -885,7 +859,6 @@ export default {
         ];
         const response = await service.post('/api/price/price', requestData,{withCredentials: true})
         console.log('参数对话框中的response', response)
-        // 正确解析响应数据
         const priceData = response.data
         console.log('参数对话框中的priceData', priceData)
         materialCost.value = priceData[0].materialPrice
@@ -899,35 +872,27 @@ export default {
       } catch (error) {
         console.error('请求失败:', error.response?.data || error.message)
         ElMessage.error('获取价格信息失败，请检查网络连接')
+      } finally {
+        isPriceLoading.value = false; // Stop loading
       }
     }
-    // 监听参数变化时触发价格计算和 orderAccessId 获取
+    
     watch([selectedMaterial, surfaceTreatment, selectedTreatment, selectedTreatment2, quantity, tolerance, roughness, selectedColor, selectedColor2, glossiness, glossiness2, uploadedFileName, uploadedFileName2], () => {
       if (selectedMaterial.value) {
         fetchPrices();
       }
     });
-    // 添加计算属性
+    
     const totalPrice = computed(() => {
       return pricePerUnit.value * quantity.value;
     })
 
-    // 监听参数变化触发价格计算
-    watch([selectedMaterial, surfaceTreatment, selectedTreatment, selectedTreatment2, quantity, tolerance, roughness, selectedColor, selectedColor2, glossiness, glossiness2, uploadedFileName, uploadedFileName2], () => {
-      if (selectedMaterial.value) {
-        fetchPrices()
-      }
-    })
-
-    // 组件挂载时初始化
     onMounted(() => {
       resetSelection()
-      // 初始化下拉框默认值
       if (toleranceOptions.value.length > 0) tolerance.value = toleranceOptions.value[0].value
       if (roughnessOptions.value.length > 0) roughness.value = roughnessOptions.value[0].value
     })
 
-    // 图纸上传1
     const uploadedFile = ref(null)
     const uploadedFileName = ref('')
     const fileInput = ref(null)
@@ -947,7 +912,6 @@ export default {
       fileInput.value.value = null
     }
 
-    // 图纸上传2
     const uploadedFile2 = ref(null)
     const uploadedFileName2 = ref('')
     const fileInput2 = ref(null)
@@ -968,6 +932,8 @@ export default {
     }
 
     return {
+      // ★★★★★ MODIFICATION 4: Return the loading state ref ★★★★★
+      isPriceLoading,
       dialogVisible,
       selectedParameterId,
       parametersList,

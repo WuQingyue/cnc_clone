@@ -20,7 +20,7 @@
     </div>
 
     <!-- 联系人列表 -->
-    <el-table :data="savedContacts" style="width: 100%">
+    <el-table :data="savedContacts" style="width: 100%" v-loading="loading">
       <el-table-column prop="orderName" label="下单联系人" />
       <el-table-column prop="orderPhone" label="联系电话" />
       <el-table-column prop="techName" label="技术联系人" />
@@ -49,8 +49,8 @@
             </el-button>
           </template>
 
-          <!-- 修改和删除按钮 -->
-          <el-button type="text" @click="editContact(scope.row)">修改</el-button>
+          <!-- 删除按钮 -->
+          <!-- <el-button type="text" @click="editContact(scope.row)">修改</el-button> -->
           <el-button type="text" @click="deleteContact(scope.row)">删除</el-button>
         </template>
       </el-table-column>
@@ -85,10 +85,12 @@
 </template>
 
 <script>
-import { ref, watch,onMounted } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 import { Plus } from '@element-plus/icons-vue'
-import { ElMessage } from 'element-plus'
+// ★★★ 修改点 1: 引入 ElMessageBox 用于确认弹窗 ★★★
+import { ElMessage, ElMessageBox } from 'element-plus'
 import service from '@/utils/request'
+
 export default {
   name: 'ContactEditDialog',
   components: {
@@ -103,21 +105,18 @@ export default {
   },
   emits: ['update:visible', 'save-contact', 'use-contact'],
   setup(props, { emit }) {
+    const loading = ref(false);
 
-    watch(() => props.selectedContact, (newVal) => {
-        console.log('收到selectedContact变化:', newVal)
-        if (newVal) {
-          // 更宽松的比较方式
-          const foundContacts = savedContacts.value.find(cont => cont.contact_id === newVal.contact_id )
-          
-          if (foundContacts) {
-            console.log('找到匹配联系人:', foundContacts)
-            useContact(foundContacts)
-          } else {
-            console.log('未找到匹配联系人')
-          }
-        }
-      }, { immediate: true, deep: true })  // 添加deep:true深度监听
+    // 修复首次进入时“已用”状态不显示的问题
+    watch(() => props.visible, (val) => {
+      dialogVisible.value = val
+      if (val) {
+        fetchContacts();
+      }
+    });
+    
+    // 逻辑迁移到 fetchContacts 内部，以避免竞态条件
+    // watch(() => props.selectedContact, (newVal) => { ... })
 
     const dialogVisible = ref(false)
     const showForm = ref(false)
@@ -137,10 +136,6 @@ export default {
       techName: [{ required: true, message: '请输入技术联系人姓名', trigger: 'blur' }],
       techPhone: [{ required: true, message: '请输入技术联系人电话', trigger: 'blur' }]
     }
-
-    watch(() => props.visible, (val) => {
-      dialogVisible.value = val
-    })
 
     watch(() => dialogVisible.value, (val) => {
       emit('update:visible', val)
@@ -168,32 +163,16 @@ export default {
     }
 
     const setDefaultContact = async (contact) => {
-      console.log('setDefaultContact',contact)
       savedContacts.value.forEach(item => {
         item.isDefault = item === contact
       })
-      const response = await service.post(
-      '/api/contact/set_default_contact',
-      {
-        contact_id: contact.contact_id
-      },
-      { withCredentials: true }
-    )
-    console.log('更新默认联系人response',response)
+      await service.post('/api/contact/set_default_contact', { contact_id: contact.contact_id }, { withCredentials: true })
     }
 
     const saveContact = async () => {
       if (!contactFormRef.value) return
-
       await contactFormRef.value.validate(async (valid) => {
         if (valid) {
-          // 保存到本地列表
-            const contact = { 
-              ...contactForm.value,
-              isDefault: savedContacts.value.length === 0,
-              isUsing: savedContacts.value.length === 0
-            }
-          // 构造后端需要的参数
           const payload = {
             order_contact: contactForm.value.orderName,
             order_contact_phone: contactForm.value.orderPhone,
@@ -204,13 +183,12 @@ export default {
             const response = await service.post('/api/contact/add_contact', payload, { withCredentials: true })
             if (response.status === 200) {
               ElMessage.success('联系人保存成功')
-              // 4. 本地保存（不影响后端）
-              savedContacts.value.push(contact)
-              showForm.value = false
-              emit('save-contact', contact)
-              if (contact.isUsing) {
-              emit('use-contact', contact)
-            }
+              await fetchContacts(); 
+              showForm.value = false;
+              const newContact = savedContacts.value.find(c => c.orderName === payload.order_contact && c.orderPhone === payload.order_contact_phone);
+              if (newContact) {
+                  useContact(newContact);
+              }
             } else {
               ElMessage.error('联系人保存失败')
             }
@@ -230,41 +208,81 @@ export default {
       showForm.value = true
     }
 
-    const deleteContact = (contact) => {
-      const index = savedContacts.value.indexOf(contact)
-      if (index > -1) {
-        savedContacts.value.splice(index, 1)
+    // ★★★ 修改点 2: 实现完整的删除联系人方法 ★★★
+    const deleteContact = async (contactToDelete) => {
+      try {
+        // 弹出确认框
+        await ElMessageBox.confirm(
+          '此操作将永久删除该联系人, 是否继续?',
+          '提示',
+          {
+            confirmButtonText: '确定',
+            cancelButtonText: '取消',
+            type: 'warning',
+          }
+        );
+
+        // 用户确认后，执行删除请求
+        const response = await service.delete(
+          `/api/contact/delete_contact/${contactToDelete.contact_id}`, 
+          { withCredentials: true }
+        );
+
+        if (response.data.success) {
+          ElMessage.success('删除成功');
+          // 从本地数组中移除该联系人，以更新UI
+          savedContacts.value = savedContacts.value.filter(
+            (contact) => contact.contact_id !== contactToDelete.contact_id
+          );
+        } else {
+          ElMessage.error(response.data.detail || '删除失败');
+        }
+      } catch (error) {
+        // 处理取消操作和请求错误
+        if (error === 'cancel') {
+          ElMessage.info('已取消删除');
+        } else {
+          console.error('删除联系人失败:', error);
+          ElMessage.error('删除联系人失败，请稍后重试');
+        }
       }
     }
+
     const fetchContacts = async () => {
+      loading.value = true;
       try {
         const response = await service.get('/api/contact/get_user_contacts', { withCredentials: true })
-        if (response.status === 200 && Array.isArray(response.data)) {
-          savedContacts.value = response.data.map(addr => ({
-            contact_id: addr.id,
-            orderName: addr.order_contact,
-            orderPhone: addr.order_contact_phone,
-            techName: addr.tech_contact,
-            techPhone: addr.tech_contact_phone,
-            isDefault: addr.is_default,
-            isUsing: addr.is_active,
-          }))
-          console.log('savedContacts',savedContacts.value)
-        } else if (response.status === 200 && Array.isArray(response.data.data)) {
-          // 如果后端返回 { data: [...] }
-          savedContacts.value = response.data.data
+        if (response.data.success === true) {
+          savedContacts.value = response.data.data.map(contact => ({
+            contact_id: contact.id,
+            orderName: contact.order_contact,
+            orderPhone: contact.order_contact_phone,
+            techName: contact.tech_contact,
+            techPhone: contact.tech_contact_phone,
+            isDefault: contact.is_default,
+            isUsing: false, // 先全部设为 false
+          }));
+
+          // 在数据加载后，根据 prop 设置“已用”状态
+          if (props.selectedContact) {
+            const currentlyUsedContact = savedContacts.value.find(
+              c => c.contact_id === props.selectedContact.contact_id
+            );
+            if (currentlyUsedContact) {
+              currentlyUsedContact.isUsing = true;
+            }
+          }
         }
       } catch (error) {
         ElMessage.error('获取联系人列表失败')
         console.error('获取联系人失败:', error)
+      } finally {
+        loading.value = false;
       }
     }
 
-    onMounted(() => {
-      fetchContacts()
-    })
-
     return {
+      loading,
       dialogVisible,
       showForm,
       contactForm,
@@ -275,7 +293,7 @@ export default {
       saveContact,
       cancelEdit,
       editContact,
-      deleteContact,
+      deleteContact, // 确保返回了新的 deleteContact 方法
       useContact,
       setDefaultContact
     }
@@ -284,6 +302,7 @@ export default {
 </script>
 
 <style scoped>
+/* 样式保持不变 */
 .dialog-header {
   font-size: 18px;
   font-weight: bold;

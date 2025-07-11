@@ -1,4 +1,3 @@
-
 <template>
   <div class="order-info">
     <el-card class="info-card">
@@ -10,11 +9,18 @@
           </el-icon>
         </div>
       </template>
-      
+
       <el-collapse-transition>
         <div v-show="!isCollapsed">
-          <el-table 
-            :data="orderItems" 
+          <!-- 加载状态 -->
+          <div v-if="loading" class="loading-container">
+            <el-skeleton :rows="5" animated />
+          </div>
+
+          <!-- 数据加载完成 -->
+          <el-table
+            v-else
+            :data="orderItems"
             :show-header="true"
             header-row-class-name="table-header"
           >
@@ -26,8 +32,8 @@
 
             <el-table-column label="文件预览" width="100" align="center">
               <template #default="scope">
-                <el-image 
-                  :src="scope.row.preview" 
+                <el-image
+                  :src="scope.row.preview"
                   fit="contain"
                   style="width: 60px; height: 60px"
                 />
@@ -38,7 +44,9 @@
               <template #default="scope">
                 <div class="file-info">
                   <div class="file-name">{{ scope.row.fileName }}</div>
-                  <div class="file-name">尺寸:{{ scope.row.sizeX }} * {{ scope.row.sizeY }} * {{ scope.row.sizeZ }} </div>
+                  <div class="file-name">
+                    尺寸:{{ scope.row.sizeX }} * {{ scope.row.sizeY }} * {{ scope.row.sizeZ }}
+                  </div>
                   <div class="file-name">体积:{{ scope.row.modelVolume }}</div>
                   <div class="file-name">表面积:{{ scope.row.modelSurfaceArea }}</div>
                 </div>
@@ -83,111 +91,118 @@
     </el-card>
   </div>
 </template>
-  
+
 <script setup>
-import { ref, watch, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ArrowDown } from '@element-plus/icons-vue'
-import { useSelectedDataStore } from '@/store/PriceInquiryDatas'
+import service from '@/utils/request'
 
 const isCollapsed = ref(false)
-
-// 获取 store 实例
-const selectedDataStore = useSelectedDataStore()
-
-// 使用计算属性获取数据
 const orderItems = ref([])
+const loading = ref(true) // 控制加载状态
 
 const toggleCollapse = () => {
   isCollapsed.value = !isCollapsed.value
 }
 
+const get_selected_datas = async () => {
+  loading.value = true
+  try {
+    const response = await service.get('/api/orders/get_selected_datas', { withCredentials: true })
+    orderItems.value = response.data
+    console.log('后端返回的数据:', orderItems.value)
+  } catch (error) {
+    console.error('获取订单数据失败:', error)
+    orderItems.value = [] // 清空数据以防显示旧数据
+  } finally {
+    loading.value = false
+  }
+}
+
 onMounted(() => {
-  console.log('OrderInfo 组件已加载',orderItems)
   get_selected_datas()
 })
-import service from '@/utils/request'
-const get_selected_datas = async () => {
-  const response =  await service.get('/api/orders/get_selected_datas', { withCredentials: true })
-  orderItems.value = response.data
-  console.log('后端返回的数据:', orderItems.value)
-}
 </script>
-  
-  <style scoped>
-  .info-card {
-    margin-bottom: 20px;
-  }
-  
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-weight: bold;
-    cursor: pointer;
-    user-select: none;
-    padding: 10px 0;
-  }
-  
-  .collapse-icon {
-    transition: transform 0.3s;
-  }
-  
-  .collapse-icon.is-collapsed {
-    transform: rotate(-180deg);
-  }
-  
-  :deep(.table-header) {
-    background-color: #f5f7fa !important;
-  }
-  
-  :deep(.el-table th) {
-    background-color: #f5f7fa !important;
-    font-weight: bold;
-    color: #303133;
-    padding: 12px 0;
-  }
-  
-  :deep(.el-table__row) {
-    background-color: #ffffff;
-  }
-  
-  .file-info {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-  }
-  
-  .file-name {
-    word-break: break-all;
-    line-height: 1.4;
-  }
-  
-  .file-details {
-    color: #909399;
-    font-size: 12px;
-    line-height: 1.4;
-  }
-  
-  .process-params {
-    word-break: break-all;
-    line-height: 1.4;
-  }
-  
-  .price {
-    color: #ff4d4f;
-    font-weight: bold;
-  }
-  
-  :deep(.el-input-number) {
-    width: 80px;
-  }
-  
-  :deep(.el-table) {
-    width: 100% !important;
-  }
-  
-  :deep(.el-table__cell) {
-    padding: 8px 0 !important;
-    color: #000000; /* 修改表格单元格文字颜色为黑色 */
-  }
-  </style>
+
+<style scoped>
+.info-card {
+  margin-bottom: 20px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-weight: bold;
+  cursor: pointer;
+  user-select: none;
+  padding: 10px 0;
+}
+
+.collapse-icon {
+  transition: transform 0.3s;
+}
+
+.collapse-icon.is-collapsed {
+  transform: rotate(-180deg);
+}
+
+:deep(.table-header) {
+  background-color: #f5f7fa !important;
+}
+
+:deep(.el-table th) {
+  background-color: #f5f7fa !important;
+  font-weight: bold;
+  color: #303133;
+  padding: 12px 0;
+}
+
+:deep(.el-table__row) {
+  background-color: #ffffff;
+}
+
+.file-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.file-name {
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+.file-details {
+  color: #909399;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
+.process-params {
+  word-break: break-all;
+  line-height: 1.4;
+}
+
+.price {
+  color: #ff4d4f;
+  font-weight: bold;
+}
+
+:deep(.el-input-number) {
+  width: 80px;
+}
+
+:deep(.el-table) {
+  width: 100% !important;
+}
+
+:deep(.el-table__cell) {
+  padding: 8px 0 !important;
+  color: #000000; /* 修改表格单元格文字颜色为黑色 */
+}
+
+.loading-container {
+  padding: 20px;
+}
+</style>

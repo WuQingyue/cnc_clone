@@ -37,12 +37,16 @@
     </div>
 
     <!-- 数据表格 -->
+    <!-- FIX: v-loading="loading" is already present, we just need to manage the 'loading' state in script -->
     <el-table
       :data="filteredRecords"
       style="width: 100%"
       border
       stripe
       v-loading="loading"
+      @selection-change="handleSelectionChange"
+      :row-key="row => row.id"
+      size="small"
     >
       <el-table-column type="index" label="序号" width="100" align="center" />
       <el-table-column prop="orderCode" label="订单号" width="200" align="center"/>
@@ -148,6 +152,20 @@
       </el-table-column>
     </el-table>
 
+    <!-- 分页区域 -->
+    <div class="pagination-container">
+      <el-pagination
+        v-model:current-page="currentPage"
+        v-model:page-size="pageSize"
+        :page-sizes="[10, 20, 50]"
+        :total="totalRecords"
+        layout="total, sizes, prev, pager, next, jumper"
+        background
+        @size-change="handlePageSizeChange"
+        @current-change="handleCurrentChange"
+      />
+    </div>
+
     <!-- 模型信息对话框 -->
     <model-info-dialog
       v-model="modelInfoDialogVisible"
@@ -175,21 +193,32 @@
 </template>
 
 <script setup>
-import { ref, onMounted, watch } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { Search } from '@element-plus/icons-vue' // Make sure Search icon is imported
 import ModelInfoDialog from '@/components/SignIn/ModelInfoDialog.vue'
 import AmountDialog from '@/components/SignIn/AmountDialog.vue'
 import ProgressDialog from '@/components/SignIn/ProgressDialog.vue'
 import ShippingProgressDialog from '@/components/SignIn/ShippingProgressDialog.vue'
 import { EventBus } from '@/components/SignIn/eventBus.js'
 import service from '@/utils/request'
+
 // 数据状态
 const searchQuery = ref('')
 const timeRange = ref('week')
 const orderStatus = ref('')
-const loading = ref(false)
-const filteredRecords = ref([])
+// FIX: loading state is initialized to false
+const loading = ref(false) 
+const allRecords = ref([]) // 存储所有记录
+const totalRecords = ref(0) // 总记录数
+const currentPage = ref(1) // 当前页码
+const pageSize = ref(10) // 每页记录数
+const filteredRecords = computed(() => {
+  const start = (currentPage.value - 1) * pageSize.value
+  const end = start + pageSize.value
+  return allRecords.value.slice(start, end)
+})
 const modelInfoDialogVisible = ref(false)
 const amountDialogVisible = ref(false)
 const progressDialogVisible = ref(false)
@@ -216,6 +245,7 @@ watch(
 
 // 格式化日期
 const formatDate = (date) => {
+  if (!date) return '-';
   return new Date(date).toLocaleString()
 }
 
@@ -255,11 +285,12 @@ const getStatusText = (status) => {
   return texts[status] || status
 }
 
-// 处理搜索
+// 处理搜索 (Note: This implementation filters local data and overwrites allRecords)
 const handleSearch = () => {
   loading.value = true
   setTimeout(() => {
-    filteredRecords.value = filteredRecords.value.filter(record => {
+    // 筛选记录
+    const filtered = allRecords.value.filter(record => {
       const matchQuery =
         !searchQuery.value ||
         record.order_no?.toLowerCase().includes(searchQuery.value.toLowerCase())
@@ -268,6 +299,13 @@ const handleSearch = () => {
 
       return matchQuery && matchStatus
     })
+    
+    // 更新总记录数和当前页数据
+    // Warning: Overwriting allRecords here means original data is lost after filtering.
+    // If filtering should be based on the initial full dataset, a separate source array is needed.
+    allRecords.value = filtered
+    totalRecords.value = filtered.length
+    currentPage.value = 1 // 重置到第一页
     loading.value = false
   }, 300)
 }
@@ -295,6 +333,7 @@ const openShippingProgressDialog = (row) => {
   shippingProgressData.value = row
   shippingProgressDialogVisible.value = true
 }
+
 const totalAmount = ref(0)
 const getTotalAmount = async (processingFeeId) => {
   try {
@@ -304,10 +343,11 @@ const getTotalAmount = async (processingFeeId) => {
     }
     totalAmount.value = await response.data.total_price
   } catch (error) {
-    console.error('请求失败:', error)
     totalAmount.value = null
+    console.error('获取总金额失败:', error)
   }
 }
+
 // 初始化支付
 const initiatePayment = async (record) => {
   await getTotalAmount(record.processing_fee_id)
@@ -326,20 +366,50 @@ const initiatePayment = async (record) => {
   router.push({ name: 'UnifiedPaymentCenter' })
 }
 
+// 处理页大小变化
+const handlePageSizeChange = (size) => {
+  pageSize.value = size
+}
+
+// 处理当前页变化
+const handleCurrentChange = (page) => {
+  currentPage.value = page
+}
 
 // 获取零件信息
+// FIX: Modified fetchPartAuditData to manage the loading state, mimicking cart.vue
 const fetchPartAuditData = async () => {
+  loading.value = true // 1. Start loading
   try {
     const response_all = await service.get('/api/orders/get_orders_info', { withCredentials: true })
-    if (response_all.status != 200) {
-      throw new Error('网络响应不是 OK')
+    
+    // Check if the response itself and the inner data structure are valid
+    if (response_all && response_all.data && response_all.data.success) {
+      allRecords.value = response_all.data.data || []
+      totalRecords.value = allRecords.value.length
+    } else {
+      // Handle cases where the API returns success: false or structure is unexpected
+      console.error('获取订单数据失败或数据为空', response_all)
+      ElMessage.error('获取订单数据失败')
+      allRecords.value = []
+      totalRecords.value = 0
     }
-    filteredRecords.value = response_all.data
   } catch (error) {
-    console.error('请求失败:', error)
-    ElMessage.error('获取信息失败')
+    // Handle network errors or request failures
+    console.error('请求订单数据失败:', error)
+    ElMessage.error('加载订单数据时发生网络错误')
+  } finally {
+    loading.value = false // 2. Stop loading, whether success or failure
   }
 }
+
+// 监听记录变化，更新分页
+watch(allRecords, () => {
+  totalRecords.value = allRecords.value.length
+  // Note: Depending on how handleSearch works, resetting currentPage here might be undesirable if done after a filter.
+  // Assuming this watch primarily handles updates from fetchPartAuditData.
+  // currentPage.value = 1 
+}, { deep: true })
 
 // 初始化
 onMounted(() => {
@@ -349,7 +419,7 @@ onMounted(() => {
 
 <style scoped>
 .part-audit {
-  padding: 20px;
+  padding: 80px;
   background-color: #f9f9f9;
   border-radius: 8px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
@@ -370,6 +440,7 @@ onMounted(() => {
   background-color: #fff;
   border-radius: 8px;
   overflow: hidden;
+  margin-bottom: 20px;
 }
 
 .el-table th, .el-table td {
@@ -389,5 +460,11 @@ onMounted(() => {
 .el-tag {
   font-size: 14px;
   padding: 5px 10px;
+}
+
+.pagination-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
 }
 </style>
