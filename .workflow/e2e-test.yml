@@ -1,0 +1,24 @@
+# 工作流名称
+name: E2E Tests with Cypress
+
+on:
+  workflow_dispatch:
+  push:
+    branches:
+      - main
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+    steps:
+      # 1. 检出你的代码
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      # 2. 使用官方的 Cypress GitHub Action
+      # 这个 Action 会自动处理安装依赖、缓存、运行测试等所有事情
+      - name: Cypress run
+        uses: cypress-io/github-action@v6
+        with:
+          # 指定要运行的测试文件
+          spec: cypress/e2e/routing.cy.js
