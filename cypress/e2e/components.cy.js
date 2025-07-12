@@ -167,13 +167,13 @@ describe.skip('Login Component', () => {
 
 // 导入注册组件
 import Register from '@/components/SignUp/Register.vue';
-describe('SignUp Component', () => {
+describe('Register Component', () => {
 
   // --- 1. 外观测试 (Appearance Tests) ---
   context('Appearance (Rendering)', () => {
     it('应该正确显示所有必需的元素', () => {
       // 挂载组件
-      cy.mount(SignUp);
+      cy.mount(Register);
 
       // 使用 data-cy 属性是更健壮的选择，这里我用类名或标签来演示
       // 检查 Logo
@@ -207,7 +207,7 @@ describe('SignUp Component', () => {
   context('Behavior (Interaction & Validation)', () => {
     beforeEach(() => {
       // 在每个测试前挂载组件
-      cy.mount(SignUp);
+      cy.mount(Register);
     });
 
     it('应该允许在所有输入框中输入内容', () => {
@@ -317,7 +317,7 @@ describe('SignUp Component', () => {
   context('Accessibility (A11y)', () => {
     it('应该通过自动化的可访问性检查', () => {
       // 挂载组件
-      cy.mount(SignUp);
+      cy.mount(Register);
       // 注入 axe-core 库
       cy.injectAxe();
       // 在整个组件上运行可访问性检查
