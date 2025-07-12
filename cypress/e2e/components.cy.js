@@ -1,5 +1,5 @@
 // cypress/e2e/components/Login.cy.js
-import Login from '@/components/SignIn/Login.vue';
+
 // import cart from '@/components/Cart/cart.vue';
 // import CompanyNews from '@/components/Home/CompanyNews.vue';
 // import CustomerReviews from '@/components/Home/CustomerReviews.vue';
@@ -34,14 +34,14 @@ import Login from '@/components/SignIn/Login.vue';
 // import ShippingDialog from '@/components/SignIn/ShippingDialog.vue';
 // import ShippingProgressDialog from '@/components/SignIn/ShippingProgressDialog.vue';
 // import UserInfo from '@/components/SignIn/UserInfo.vue';
-// import Register from '@/components/SignUp/Register.vue';
 // import Footer from '@/components/Footer.vue';
 // import Header from '@/components/Header.vue';
 // import SubmitOrder from '@/views/Order/SubmitOrder.vue';
 // import NotFound from '@/views/NotFound.vue';
 // import App from '@/App.vue';
 
-
+// 导入登录组件
+import Login from '@/components/SignIn/Login.vue';
 describe.skip('Login Component', () => {
   // --- 1. Appearance Tests --- 
   context('Appearance (Rendering)', () => {
@@ -161,6 +161,167 @@ describe.skip('Login Component', () => {
       cy.mount(Login);
       cy.injectAxe(); // From the cypress-axe plugin
       cy.checkA11y(); // Checks the entire component for a11y violations
+    });
+  });
+});
+
+// 导入注册组件
+import Register from '@/components/SignUp/Register.vue';
+describe('SignUp Component', () => {
+
+  // --- 1. 外观测试 (Appearance Tests) ---
+  context('Appearance (Rendering)', () => {
+    it('应该正确显示所有必需的元素', () => {
+      // 挂载组件
+      cy.mount(SignUp);
+
+      // 使用 data-cy 属性是更健壮的选择，这里我用类名或标签来演示
+      // 检查 Logo
+      cy.get('.logo').should('be.visible');
+
+      // 检查标题
+      cy.contains('h1', 'Sign Up').should('be.visible');
+
+      // 检查表单字段
+      cy.get('label').contains('First name').should('be.visible');
+      cy.get('input[type="text"]').eq(0).should('be.visible'); // 第一个文本输入框为 First name
+
+      cy.get('label').contains('Last name').should('be.visible');
+      cy.get('input[type="text"]').eq(1).should('be.visible'); // 第二个文本输入框为 Last name
+
+      cy.get('label').contains('Email').should('be.visible');
+      cy.get('input[type="email"]').should('be.visible');
+
+      cy.get('label').contains('Password').should('be.visible');
+      cy.get('input[type="password"]').should('be.visible');
+
+      // 检查按钮和链接
+      cy.get('.continue-btn').contains('Continue').should('be.visible');
+      cy.get('.google-btn').contains('Continue with Google').should('be.visible');
+      cy.get('.signin-link').contains('Sign in').should('be.visible');
+    });
+  });
+
+
+  // --- 2. 行为测试 (Behavior Tests) ---
+  context('Behavior (Interaction & Validation)', () => {
+    beforeEach(() => {
+      // 在每个测试前挂载组件
+      cy.mount(SignUp);
+    });
+
+    it('应该允许在所有输入框中输入内容', () => {
+      cy.get('label:contains("First name") + .el-form-item__content input').type('John').should('have.value', 'John');
+      cy.get('label:contains("Last name") + .el-form-item__content input').type('Doe').should('have.value', 'Doe');
+      cy.get('input[type="email"]').type('john.doe@example.com').should('have.value', 'john.doe@example.com');
+      cy.get('input[type="password"]').type('password123').should('have.value', 'password123');
+    });
+
+    it('应该对空字段显示验证错误', () => {
+      cy.get('.continue-btn').click();
+      cy.contains('Please enter your first name').should('be.visible');
+      cy.contains('Please enter your last name').should('be.visible');
+      cy.contains('Please enter your email').should('be.visible');
+      cy.contains('Please enter your password').should('be.visible');
+    });
+
+    it('应该对无效的电子邮件显示验证错误', () => {
+      cy.get('label:contains("First name") + .el-form-item__content input').type('John');
+      cy.get('label:contains("Last name") + .el-form-item__content input').type('Doe');
+      cy.get('input[type="email"]').type('not-a-valid-email');
+      cy.get('input[type="password"]').type('password123');
+      cy.get('.continue-btn').click();
+      cy.contains('Please enter a valid email').should('be.visible');
+    });
+
+    it('应该对过短的密码显示验证错误', () => {
+      cy.get('label:contains("First name") + .el-form-item__content input').type('John');
+      cy.get('label:contains("Last name") + .el-form-item__content input').type('Doe');
+      cy.get('input[type="email"]').type('john.doe@example.com');
+      cy.get('input[type="password"]').type('123');
+      cy.get('.continue-btn').click();
+      cy.contains('Password must be 8-32 characters').should('be.visible');
+    });
+
+    it('应该成功处理注册并跳转', () => {
+      // 拦截注册 API 请求
+      cy.intercept('POST', '/api/login/register', {
+        statusCode: 200,
+        body: { data: { success: true } }
+      }).as('registerRequest');
+
+      // 填充表单
+      cy.get('label:contains("First name") + .el-form-item__content input').type('Test');
+      cy.get('label:contains("Last name") + .el-form-item__content input').type('User');
+      cy.get('input[type="email"]').type('test.user@example.com');
+      cy.get('input[type="password"]').type('a-secure-password');
+
+      // 点击继续按钮
+      cy.get('.continue-btn').click();
+
+      // 等待 API 请求完成
+      cy.wait('@registerRequest').then((interception) => {
+        // 断言请求体是否正确
+        expect(interception.request.body.email).to.equal('test.user@example.com');
+        expect(interception.request.body.firstname).to.equal('Test');
+      });
+
+      // 断言成功消息
+      cy.get('.el-message--success').should('contain', '注册成功！');
+
+      // 注意：由于组件内部使用了 vue-router 的 router.push，
+      // Cypress 组件测试默认不会执行真正的页面跳转，
+      // 但我们可以断言成功消息来确认注册逻辑已成功触发。
+    });
+    
+    it('应该在注册失败时处理错误', () => {
+       // 拦截一个失败的注册请求 (例如，邮箱已存在)
+      cy.intercept('POST', '/api/login/register', {
+        statusCode: 409, // 409 Conflict 是一个合适的代码
+        body: { detail: 'Email already exists' }
+      }).as('registerFail');
+
+      // 填充表单
+      cy.get('label:contains("First name") + .el-form-item__content input').type('Existing');
+      cy.get('label:contains("Last name") + .el-form-item__content input').type('User');
+      cy.get('input[type="email"]').type('existing@example.com');
+      cy.get('input[type="password"]').type('any-password-will-do');
+
+      // 点击继续
+      cy.get('.continue-btn').click();
+      
+      cy.wait('@registerFail');
+
+      // 在当前组件实现中，错误只打印到控制台，没有UI提示。
+      // 所以我们断言没有出现成功消息，且页面没有跳转。
+      cy.get('.el-message--success').should('not.exist');
+      cy.get('h1').contains('Sign Up').should('be.visible'); // 确认仍在注册页
+    });
+
+    it('点击谷歌注册时应该尝试页面跳转', () => {
+      // 监视 window.location.href 的变化
+      cy.window().then((win) => {
+        cy.stub(win.location, 'href').as('windowRedirect');
+      });
+
+      // 点击谷歌按钮
+      cy.get('.google-btn').click();
+
+      // 断言 window.location.href 是否被以正确的URL调用
+      cy.get('@windowRedirect').should('be.calledWith', '/api/login/login');
+    });
+  });
+
+
+  // --- 3. 可访问性测试 (Accessibility Tests) ---
+  context('Accessibility (A11y)', () => {
+    it('应该通过自动化的可访问性检查', () => {
+      // 挂载组件
+      cy.mount(SignUp);
+      // 注入 axe-core 库
+      cy.injectAxe();
+      // 在整个组件上运行可访问性检查
+      cy.checkA11y();
     });
   });
 });
