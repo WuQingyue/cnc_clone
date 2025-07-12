@@ -31,11 +31,13 @@
   "devDependencies": {
     "@babel/core": "^7.12.16",
     "@babel/eslint-parser": "^7.12.16",
+    "@cypress/vue": "^6.0.2",
     "@cypress/webpack-preprocessor": "^6.0.4",
     "@vue/cli-plugin-babel": "~5.0.0",
     "@vue/cli-plugin-eslint": "~5.0.0",
     "@vue/cli-service": "~5.0.0",
     "cypress": "^14.5.1",
+    "cypress-axe": "^1.6.0",
     "eslint": "^7.32.0",
     "eslint-plugin-vue": "^8.0.3",
     "vue-loader": "^17.4.2"
