@@ -30,7 +30,7 @@ import DataDashboard from '@/components/SignIn/DataDashboard.vue';
 import Login from '@/components/SignIn/Login.vue';
 import LogisticsInfo from '@/components/SignIn/LogisticsInfo.vue';
 import ModelInfoDialog from '@/components/SignIn/ModelInfoDialog.vue';
-import OrderInfo from '@/components/SignIn/OrderInfo.vue';
+import SignInOrderInfo from '@/components/SignIn/OrderInfo.vue';
 import ProgressDialog from '@/components/SignIn/ProgressDialog.vue';
 import ShippingDialog from '@/components/SignIn/ShippingDialog.vue';
 import ShippingProgressDialog from '@/components/SignIn/ShippingProgressDialog.vue';
