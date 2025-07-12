@@ -40,6 +40,9 @@
 // import NotFound from '@/views/NotFound.vue';
 // import App from '@/App.vue';
 
+import { mount } from 'cypress/vue';
+import 'cypress-axe';
+Cypress.Commands.add('mount', mount, { overwrite: true });
 // 导入登录组件
 import Login from '@/components/SignIn/Login.vue';
 
@@ -47,43 +50,26 @@ import Login from '@/components/SignIn/Login.vue';
 describe('登录组件 (Login Component)', () => {
 
   // --- 1. 外观测试 ---
-  // context 用于将相关测试分组
   context('外观 (渲染)', () => {
     it('应正确显示所有必要的元素', () => {
-      // 在测试开始前挂载组件
+      // 现在 cy.mount() 应该可以正常工作了
       cy.mount(Login);
 
-      // 推荐使用 data-cy 属性来创建更健壮的选择器，这里用注释标出建议的属性
-      // <img ... data-cy="login-logo">
       cy.get('.logo').should('be.visible');
-
-      // <h1 ... data-cy="login-title">
       cy.contains('h1', 'Sign In').should('be.visible');
-
-      // <el-form-item ... data-cy="login-email-field">
       cy.get('label').contains('Email').should('be.visible');
       cy.get('input[type="email"]').should('be.visible');
-
-      // <el-form-item ... data-cy="login-password-field">
       cy.get('label').contains('Password').should('be.visible');
       cy.get('input[type="password"]').should('be.visible');
-
-      // <el-button ... data-cy="login-submit-btn">
       cy.get('.login-btn').contains('Sign In').should('be.visible');
-
-      // <el-button ... data-cy="login-google-btn">
       cy.get('.google-btn').contains('Continue with Google').should('be.visible');
-
-      // <div ... data-cy="login-signup-link">
       cy.get('.signup-link').contains('Sign up').should('be.visible');
     });
   });
 
   // --- 2. 行为测试 ---
   context('行为 (交互与验证)', () => {
-    // beforeEach 会在当前 context 下的每个 it 测试运行前执行一次
     beforeEach(() => {
-      // 挂载组件
       cy.mount(Login);
     });
 
@@ -113,26 +99,19 @@ describe('登录组件 (Login Component)', () => {
     });
 
     it('应能处理邮箱登录成功的情况', () => {
-      // 使用 cy.intercept() 拦截网络请求，模拟后端成功响应
       cy.intercept('POST', '/api/login/email/login', { statusCode: 200, body: { message: 'Login successful' } }).as('emailLogin');
       cy.intercept('GET', '/api/login/check_login', { statusCode: 200, body: { id: 1, name: 'Test User', email: 'test@example.com' } }).as('checkLogin');
-
-      // 填写表单
+      
       cy.get('input[type="email"]').type('test@example.com');
       cy.get('input[type="password"]').type('a-valid-password');
-
-      // 点击登录按钮
       cy.get('.login-btn').click();
 
-      // 断言
-      cy.wait('@emailLogin'); // 等待登录请求完成
-      cy.wait('@checkLogin'); // 等待用户信息请求完成
+      cy.wait('@emailLogin');
+      cy.wait('@checkLogin');
       cy.get('.el-message--success').should('contain', '登录成功！');
-      // 这里也可以断言路由被调用，以跳转到新页面
     });
 
     it('应能处理邮箱登录失败的情况', () => {
-      // 拦截并模拟一个失败的响应 (例如: 401 未授权)
       cy.intercept('POST', '/api/login/email/login', { statusCode: 401, body: { detail: 'Invalid credentials' } }).as('emailLogin');
 
       cy.get('input[type="email"]').type('wrong@example.com');
@@ -141,14 +120,13 @@ describe('登录组件 (Login Component)', () => {
 
       cy.wait('@emailLogin');
       cy.get('.el-message--error').should('contain', 'Invalid credentials');
-      cy.get('.login-btn').should('not.have.class', 'is-loading'); // 检查加载状态是否已重置
+      cy.get('.login-btn').should('not.have.class', 'is-loading');
     });
 
     it('点击 Google 登录按钮时应重定向到 Google 授权 URL', () => {
       const googleAuthUrl = 'https://accounts.google.com/o/oauth2/v2/auth?client_id=...';
       cy.intercept('GET', '/api/login/login', { success: true, auth_url: googleAuthUrl }).as('getGoogleUrl');
 
-      // 需要存根 window.location.href 来检查重定向行为
       cy.window().then((win) => {
         cy.stub(win.location, 'href').as('windowRedirect');
       });
@@ -159,13 +137,9 @@ describe('登录组件 (Login Component)', () => {
       cy.get('@windowRedirect').should('be.calledWith', googleAuthUrl);
     });
 
-    // --- 新增的测试用例 ---
     it('点击 “注册” 链接应导航至注册页面', () => {
-      // 创建一个 spy 来监视路由的 push 方法
-      // 我们假设组件内部通过 this.$router.push() 或 useRouter().push() 来导航
       const pushSpy = cy.spy().as('routerPush');
       
-      // 重新挂载组件，并提供一个模拟的 $router 对象
       cy.mount(Login, {
         global: {
           mocks: {
@@ -176,11 +150,8 @@ describe('登录组件 (Login Component)', () => {
         },
       });
 
-      // 找到并点击 "Sign up" 链接
       cy.get('.signup-link').contains('Sign up').click();
-
-      // 断言 push 方法被以正确的参数调用
-      cy.get('@routerPush').should('have.been.calledWith', '/register'); // 假设注册页的路由是 '/register'
+      cy.get('@routerPush').should('have.been.calledWith', '/signup');
     });
   });
 
@@ -188,8 +159,9 @@ describe('登录组件 (Login Component)', () => {
   context('可访问性 (A11y)', () => {
     it('应通过自动化的可访问性检查', () => {
       cy.mount(Login);
-      cy.injectAxe(); // 注入 cypress-axe 插件
-      cy.checkA11y(); // 对整个组件进行 a11y 违规检查
+      // 现在 cy.injectAxe() 和 cy.checkA11y() 应该也可以正常工作了
+      cy.injectAxe();
+      cy.checkA11y();
     });
   });
 });
