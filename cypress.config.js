@@ -1,5 +1,6 @@
 const { defineConfig } = require('cypress');
 const webpack = require('@cypress/webpack-preprocessor');
+const path = require('path'); // 引入 Node.js 的 'path' 模块
 
 module.exports = defineConfig({
   e2e: {
@@ -11,7 +12,12 @@ module.exports = defineConfig({
         // 在这里可以自定义webpack配置
         webpackOptions: {
           resolve: {
-            extensions: ['.ts', '.js', '.vue'],
+            extensions: ['.ts', '.js', '.vue', '.json'], // 建议加上.json以防万一
+            alias: {
+              // 【这是本次的核心修改】
+              // 添加路径别名配置，让 '@' 指向你项目的 'src' 目录
+              '@': path.resolve(__dirname, './src'),
+            }
           },
           module: {
             rules: [
@@ -22,6 +28,12 @@ module.exports = defineConfig({
               {
                 test: /\.css$/,
                 use: ['vue-style-loader', 'css-loader'],
+              },
+              // 如果你的Vue组件中使用了SCSS，你还需要添加SASS的加载器
+              // 从你的package.json看，你安装了sass-loader，所以最好加上
+              {
+                test: /\.scss$/,
+                use: ['vue-style-loader', 'css-loader', 'sass-loader'],
               }
             ],
           },
@@ -30,6 +42,7 @@ module.exports = defineConfig({
 
       on('file:preprocessor', webpack(options));
 
+      // 总是返回 config 对象是个好习惯
       return config;
     },
     baseUrl: 'https://cnc.tongtron.com', // 如果你在这里设置了baseUrl，routing.cy.js中的cy.visit可以简化
