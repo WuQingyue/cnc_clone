@@ -11,14 +11,15 @@ jobs:
   cypress-run:
     runs-on: ubuntu-latest
     steps:
-      # 1. 检出你的代码
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      # 2. 使用官方的 Cypress GitHub Action
-      # 这个 Action 会自动处理安装依赖、缓存、运行测试等所有事情
+      - name: Set npm registry to Taobao mirror
+        run: npm config set registry https://registry.npmmirror.com/
+
       - name: Cypress run
         uses: cypress-io/github-action@v6
         with:
-          # 指定要运行的测试文件
           spec: cypress/e2e/routing.cy.js
+          # 如果你的项目需要安装依赖，确保在 Cypress run 之前运行 npm install
+          # install-command: npm ci # 或者 npm install
