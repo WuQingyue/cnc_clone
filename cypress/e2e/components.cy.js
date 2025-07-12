@@ -1,6 +1,5 @@
 // cypress/e2e/components/Login.cy.js
 
-import Login from '@/components/SignIn/Login.vue';
 import cart from '@/components/Cart/cart.vue';
 import CompanyNews from '@/components/Home/CompanyNews.vue';
 import CustomerReviews from '@/components/Home/CustomerReviews.vue';
