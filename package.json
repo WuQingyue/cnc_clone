@@ -49,5 +49,29 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "vue-loader": "^17.4.2"
+  },
+  "jest": {
+    "testEnvironment": "jsdom",
+    "testEnvironmentOptions": {
+      "customExportConditions": [
+        "node",
+        "node-addons"
+      ]
+    },
+    "transform": {
+      "^.+\\.vue$": "@vue/vue3-jest",
+      "^.+\\.(js|jsx)$": "babel-jest"
+    },
+    "moduleFileExtensions": [
+      "vue",
+      "js",
+      "json",
+      "jsx"
+    ],
+    "moduleNameMapper": {
+      "^@/(.*)$": "<rootDir>/src/$1",
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/jest/fileMock.js",
+      "\\.(css|scss|sass|less)$": "<rootDir>/jest/fileMock.js"
+    }
   }
 }
