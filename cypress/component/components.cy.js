@@ -54,6 +54,17 @@ Cypress.Commands.add('mount', mount, { overwrite: true });
 // describe 描述一个测试套件
 describe('登录组件 (Login Component)', () => {
 
+  // --- 全局设置：拦截初始登录状态检查 ---
+  // 这个 beforeEach 会在当前文件所有的 "it" 测试用例运行前执行
+  beforeEach(() => {
+    // 拦截组件挂载时可能发出的 “检查登录状态” 的 API 请求。
+    // 在组件测试中，我们希望绕过真实的网络环境，直接测试组件的渲染和交互。
+    // 我们返回一个 401 Unauthorized 状态，这会告诉组件 “用户未登录”，
+    // 从而确保登录表单能够被稳定地渲染出来，让后续的测试可以进行。
+    // 这个统一的拦截避免了因等待真实网络响应而导致的超时失败。
+    cy.intercept('GET', '/api/login/check_login', { statusCode: 401 }).as('checkLoginMock');
+  });
+
   // --- 1. 外观测试 ---
   context('外观 (渲染)', () => {
     it('应正确显示所有必要的元素', () => {
@@ -116,6 +127,7 @@ describe('登录组件 (Login Component)', () => {
     });
 
     it('应能处理邮箱登录成功的情况', () => {
+      // 注意：这个测试用例中对 check_login 的拦截会覆盖全局的 beforeEach 拦截，这是符合预期的
       cy.intercept('POST', '/api/login/email/login', { statusCode: 200, body: { message: 'Login successful' } }).as('emailLogin');
       cy.intercept('GET', '/api/login/check_login', { statusCode: 200, body: { id: 1, name: 'Test User', email: 'test@example.com' } }).as('checkLogin');
 
@@ -187,6 +199,8 @@ describe('登录组件 (Login Component)', () => {
       });
 
       cy.injectAxe();
+      // 增加一个短暂的等待，确保在检查可访问性之前，所有元素都已稳定渲染
+      // cy.wait(100); 
       cy.checkA11y();
     });
   });
