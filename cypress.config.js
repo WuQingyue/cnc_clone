@@ -46,5 +46,6 @@ module.exports = defineConfig({
     indexHtmlFile: 'cypress/support/component-index.html',
     // 指定组件测试文件的存放位置
     specPattern: 'cypress/component/**/*.cy.{js,jsx,ts,tsx}',
+    supportFile: false, 
   },
 });
