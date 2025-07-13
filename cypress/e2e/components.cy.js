@@ -40,10 +40,12 @@
 // import NotFound from '@/views/NotFound.vue';
 // import App from '@/App.vue';
 
+// --- 配置部分 (保持不变) ---
 import { mount } from 'cypress/vue';
 import 'cypress-axe';
 Cypress.Commands.add('mount', mount, { overwrite: true });
-// 导入登录组件
+
+// --- 测试组件 ---
 import Login from '@/components/SignIn/Login.vue';
 
 // describe 描述一个测试套件，这里是针对“登录组件”的测试
@@ -52,9 +54,7 @@ describe('登录组件 (Login Component)', () => {
   // --- 1. 外观测试 ---
   context('外观 (渲染)', () => {
     it('应正确显示所有必要的元素', () => {
-      // 现在 cy.mount() 应该可以正常工作了
       cy.mount(Login);
-
       cy.get('.logo').should('be.visible');
       cy.contains('h1', 'Sign In').should('be.visible');
       cy.get('label').contains('Email').should('be.visible');
@@ -159,7 +159,6 @@ describe('登录组件 (Login Component)', () => {
   context('可访问性 (A11y)', () => {
     it('应通过自动化的可访问性检查', () => {
       cy.mount(Login);
-      // 现在 cy.injectAxe() 和 cy.checkA11y() 应该也可以正常工作了
       cy.injectAxe();
       cy.checkA11y();
     });
