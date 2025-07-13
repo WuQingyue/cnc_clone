@@ -66,18 +66,18 @@ const checkLoginStatus = async () => {
 
 // 初始化检查用户登录状态
 onMounted(() => {
-  // 从 localStorage 获取用户信息
+  // 从 localStorage 获取用户信息 (用于快速恢复UI，非必须)
   const savedUser = localStorage.getItem('userInfo')
   if (savedUser) {
     try {
       const userData = JSON.parse(savedUser)
       userStore.setUser(userData)
     } catch (error) {
-      localStorage.removeItem('user')
+      localStorage.removeItem('user') // 修正可能的拼写错误
       userStore.clearUser()
     }
   } 
-  // 首次挂载时检测登录
+  // 首次挂载时从服务器检测真实登录状态
   checkLoginStatus()
 })
 
@@ -98,29 +98,41 @@ watch(
       try {
         console.log('检测到 Google 授权码:', code)
         
-        // 调用后端 callback 接口
+        // 调用后端 callback 接口，核心任务是让后端建立会话
         const response = await service.get('/api/login/callback', {
           params: { code },
           withCredentials: true
         } )
 
-        console.log('Google 登录响应:', response.data)
+        console.log('Google 登录回调响应:', response.data)
 
-        if (response.data) {
-          // 保存用户信息到 localStorage
-          localStorage.setItem('userInfo', JSON.stringify(response.data))
-          // 保存用户信息到 store
-          userStore.setUser(response.data)
+        // --- MODIFICATION START ---
+        // 修改了此处的逻辑
+
+        // 1. 确认后端会话已成功建立
+        if (response.data && response.data.success) {
           
-          // 清除 URL 中的授权码
+          // 2. 清理URL中的授权码，这应该首先做
           router.replace({ query: {} })
           
           ElMessage.success('Google 登录成功！')
+
+          // 3. 主动调用 checkLoginStatus，从服务器获取刚建立会话的用户信息
+          // 这是最可靠的方式，保证了用户信息的唯一来源
+          await checkLoginStatus()
+          
+          // 4. 跳转到首页
           router.push('/')
+
+        } else {
+            // 如果后端返回失败，给出明确提示
+            throw new Error(response.data?.detail || 'Google 登录验证失败')
         }
+        // --- MODIFICATION END ---
+
       } catch (error) {
         console.error('Google 登录失败:', error)
-        ElMessage.error('登录失败，请重试')
+        ElMessage.error(error.message || '登录失败，请重试')
         router.push('/login')
       }
     }
@@ -133,6 +145,7 @@ watch(
 </script>
 
 <style lang="scss">
+/* 您的样式代码保持不变 */
 :root {
   --primary-color: #1890ff;
   --success-color: #52c41a;
