@@ -1,0 +1,93 @@
+# 工作流名称
+name: Component Check
+
+on:
+  # 允许手动触发
+  workflow_dispatch:
+  # 每小时定时触发
+  schedule:
+    - cron: '0 * * * *'
+
+jobs:
+  # 作业 1: 运行 Jest 单元测试
+  unit-tests:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Jest tests
+        # 这个命令现在可以正常工作了，因为它会执行 "test": "jest"
+        run: npm test 
+
+  # 作业 2: 运行 Cypress E2E 测试
+  e2e-tests:
+    runs-on: ubuntu-latest
+    needs: unit-tests
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Cypress E2E tests
+        uses: cypress-io/github-action@v6
+        with:
+          # 构建命令保持不变，因为你的 "build" 脚本是正确的
+          build: npm run build
+          # ❗️【重要】将启动命令从 dev 改为 serve
+          start: npm run serve
+          # ❗️【重要】Vue CLI 默认端口是 8080，而不是 Vite 的 5173
+          wait-on: 'http://localhost:8080'
+          browser: chrome
+    runs-on: ubuntu-latest
+    # E2E 测试依赖于单元测试的成功
+    needs: unit-tests
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18.x
+          cache: 'npm'
+          
+      - name: Install dependencies
+        run: npm ci
+
+      # 使用官方的 Cypress GitHub Action
+      # 它会自动安装 Cypress、安装依赖、构建项目、启动服务器并运行测试
+      - name: Run Cypress E2E tests
+        uses: cypress-io/github-action@v6
+        with:
+          # 指定构建命令 (如果你的项目需要)
+          build: npm run build
+          # 指定启动开发服务器的命令
+          start: npm run dev
+          # 等待服务器启动的 URL
+          wait-on: 'http://localhost:5173' # 根据你的项目修改端口
+          # 可以设置浏览器，默认为 electron
+          browser: chrome
