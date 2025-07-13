@@ -1,7 +1,7 @@
 // jest/Login.spec.js
 
 import { shallowMount } from '@vue/test-utils'
-import Login from '@/views/Login.vue' // 确保路径正确
+import Login from '@/components/SignIn/Login.vue';
 import { createPinia } from 'pinia' // ❗️【修复】从 'pinia' 导入 createPinia，而不是 createStore
 import { useUserStore } from '@/store/user'
 
