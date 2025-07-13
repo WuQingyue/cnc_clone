@@ -58,16 +58,9 @@ const checkLoginStatus = async () => {
       userStore.setUser(user_Info.data)
     } else {
       userStore.clearUser()
-      // 如果未登录，并且当前不在登录页，则跳转
-      if (route.path !== '/login') {
-        router.push('/login')
-      }
     }
   } catch (error) {
     userStore.clearUser()
-    if (route.path !== '/login') {
-      router.push('/login')
-    }
   }
 }
 
@@ -87,28 +80,6 @@ onMounted(() => {
   // 首次挂载时检测登录
   checkLoginStatus()
 })
-
-// 监听路由变化，每次路由变化都检测登录
-watch(
-  () => route.fullPath,
-  () => {
-    checkLoginStatus()
-  }
-)
-
-watch(
-  () => route.fullPath,
-  (newPath, oldPath) => {
-    // 避免从登录回调页跳转时重复检查
-    if (newPath.startsWith('/login') || oldPath.startsWith('/login')) {
-      return
-    }
-    // 仅在非登录页和非管理员页面时检查
-    if (!newPath.startsWith('/login') && !newPath.startsWith('/admin')) {
-      checkLoginStatus()
-    }
-  }
-)
 
 // 监听路由变化
 watch(

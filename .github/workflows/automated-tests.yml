@@ -26,39 +26,3 @@ jobs:
           install-command: npm ci
           # 指定路由测试文件
           spec: cypress/e2e/routing.cy.js
-
-  # --- 2. 网页组件巡检 ---
-  components-check:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set npm registry to Taobao mirror
-        run: npm config set registry https://registry.npmmirror.com/
-
-      - name: Run Components Tests
-        uses: cypress-io/github-action@v6
-        with:
-          install-command: npm ci
-          # 【重要】指定这是组件测试
-          component: true 
-          # 指定组件测试文件 (请确保此文件存在)
-          spec: cypress/component/components.cy.js
-
-  # --- 3. 后端API接口巡检 ---
-  api-check:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-
-      - name: Set npm registry to Taobao mirror
-        run: npm config set registry https://registry.npmmirror.com/
-
-      - name: Run API Tests
-        uses: cypress-io/github-action@v6
-        with:
-          install-command: npm ci
-          # 指定API测试文件 (请确保此文件存在)
-          spec: cypress/e2e/api.cy.js

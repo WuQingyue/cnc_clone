@@ -1,6 +1,6 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import ServiceGuidance from '@/components/NavHeader/ServiceGuidance/ServiceGuidance.vue'
-import { useAuthStore } from '@/store/modules/auth'
+import { useUserStore } from '@/store/user'
 
 const routes = [
   {
@@ -33,15 +33,6 @@ const routes = [
     component: () => import('@/views/NavHeader/Contact/Contact.vue'),
     meta: {
       title: '联系我们 - SmartCNC'
-    }
-  },
-  {
-    // 404页面
-    path: '/:pathMatch(.*)*',
-    name: 'NotFound',
-    component: () => import('@/views/NotFound.vue'),
-    meta: {
-      title: '页面未找到 - SmartCNC'
     }
   },
   {
@@ -165,6 +156,15 @@ const routes = [
     path: '/unified-payment',
     name: 'UnifiedPaymentCenter',
     component: () => import('@/components/Order/UnifiedPaymentCenter.vue')
+  },
+  {
+    // 404页面
+    path: '/:pathMatch(.*)*',
+    name: 'NotFound',
+    component: () => import('@/views/NotFound.vue'),
+    meta: {
+      title: '页面未找到 - SmartCNC'
+    }
   }
 ]
 
@@ -181,42 +181,30 @@ const router = createRouter({
   }
 })
 
+
 // 路由守卫
 router.beforeEach((to, from, next) => {
-  const auth = useAuthStore()
-  
   // 设置页面标题
   document.title = to.meta.title ? `${to.meta.title} - SmartCNC` : 'SmartCNC'
-  
-  // // 处理需要登录的页面
-  // if (to.meta.requiresAuth && !auth.isAuthenticated) {
-  //   next({ name: 'Login', query: { redirect: to.fullPath } })
-  //   return
-  // }
-  
-  // // 处理游客页面
-  // if (to.meta.guest && auth.isAuthenticated) {
-  //   next({ name: 'Home' })
-  //   return
-  // }
-  
-  if (to.meta.requiresAuth && !auth.isAuthenticated) {
-    next({ path: '/register' }) // 改为重定向到注册页
-    return
-  }
-  
-  if (to.meta.guest && auth.isAuthenticated) {
-    next({ path: '/' })
-    return
-  }
 
-  // console.log('路由变化:', {
-  //   to: to.fullPath,
-  //   query: to.query,
-  //   params: to.params
-  // })
+  const userStore = useUserStore()
+  const isLoggedIn = !!userStore.user // 检查用户是否存在来判断登录状态
 
-  next()
+  const requiresAuth = to.meta.requiresAuth;
+  const isGuestPage = to.meta.guest;
+
+  if (requiresAuth && !isLoggedIn) {
+    // 如果页面需要登录，但用户未登录，则重定向到登录页
+    // 将用户尝试访问的页面路径作为查询参数，以便登录后可以跳回
+    next({ name: 'Login', query: { redirect: to.fullPath } })
+  } else if (isGuestPage && isLoggedIn) {
+    // 如果用户已登录，但尝试访问访客页面（如登录、注册页），则重定向到首页
+    next({ name: 'Home' })
+  } else {
+    // 其他情况，直接放行
+    next()
+  }
 })
+
 
 export default router
