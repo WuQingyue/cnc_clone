@@ -40,21 +40,31 @@
 // import NotFound from '@/views/NotFound.vue';
 // import App from '@/App.vue';
 
-// --- 配置部分 (保持不变) ---
+// components.cy.js
+
+// 导入需要的模块
+import { createPinia } from 'pinia';
 import { mount } from 'cypress/vue';
 import 'cypress-axe';
-Cypress.Commands.add('mount', mount, { overwrite: true });
-
-// --- 测试组件 ---
 import Login from '@/components/SignIn/Login.vue';
 
-// describe 描述一个测试套件，这里是针对“登录组件”的测试
+// 注册 mount 命令 (保持不变)
+Cypress.Commands.add('mount', mount, { overwrite: true });
+
+// describe 描述一个测试套件
 describe('登录组件 (Login Component)', () => {
 
   // --- 1. 外观测试 ---
   context('外观 (渲染)', () => {
     it('应正确显示所有必要的元素', () => {
-      cy.mount(Login);
+      // 在这里挂载组件，因为它需要 Pinia，我们在这里提供它
+      cy.mount(Login, {
+        global: {
+          plugins: [createPinia()],
+        },
+      });
+
+      // 断言部分保持不变
       cy.get('.logo').should('be.visible');
       cy.contains('h1', 'Sign In').should('be.visible');
       cy.get('label').contains('Email').should('be.visible');
@@ -69,10 +79,17 @@ describe('登录组件 (Login Component)', () => {
 
   // --- 2. 行为测试 ---
   context('行为 (交互与验证)', () => {
+    // 这个 beforeEach 会在下面的每一个 "it" 测试前运行
     beforeEach(() => {
-      cy.mount(Login);
+      // 因为本组的所有测试都需要一个已挂载的组件，所以我们在这里统一挂载并提供 Pinia
+      cy.mount(Login, {
+        global: {
+          plugins: [createPinia()],
+        },
+      });
     });
 
+    // 以下所有测试用例都无需再关心挂载问题，直接进行交互和断言
     it('应允许在邮箱和密码输入框中输入内容', () => {
       cy.get('input[type="email"]').type('test@example.com').should('have.value', 'test@example.com');
       cy.get('input[type="password"]').type('password123').should('have.value', 'password123');
@@ -101,7 +118,7 @@ describe('登录组件 (Login Component)', () => {
     it('应能处理邮箱登录成功的情况', () => {
       cy.intercept('POST', '/api/login/email/login', { statusCode: 200, body: { message: 'Login successful' } }).as('emailLogin');
       cy.intercept('GET', '/api/login/check_login', { statusCode: 200, body: { id: 1, name: 'Test User', email: 'test@example.com' } }).as('checkLogin');
-      
+
       cy.get('input[type="email"]').type('test@example.com');
       cy.get('input[type="password"]').type('a-valid-password');
       cy.get('.login-btn').click();
@@ -113,7 +130,6 @@ describe('登录组件 (Login Component)', () => {
 
     it('应能处理邮箱登录失败的情况', () => {
       cy.intercept('POST', '/api/login/email/login', { statusCode: 401, body: { detail: 'Invalid credentials' } }).as('emailLogin');
-
       cy.get('input[type="email"]').type('wrong@example.com');
       cy.get('input[type="password"]').type('wrong-password');
       cy.get('.login-btn').click();
@@ -132,18 +148,22 @@ describe('登录组件 (Login Component)', () => {
       });
 
       cy.get('.google-btn').click();
-
       cy.wait('@getGoogleUrl');
       cy.get('@windowRedirect').should('be.calledWith', googleAuthUrl);
     });
+  });
 
+  context('导航测试', () => {
     it('点击 “注册” 链接应导航至注册页面', () => {
       const pushSpy = cy.spy().as('routerPush');
-      
+
+      // 这个测试除了 Pinia，还需要一个特殊的路由模拟 ($router)
+      // 所以我们在这里单独挂载，并提供所有需要的依赖
       cy.mount(Login, {
         global: {
+          plugins: [createPinia()], // 提供 Pinia
           mocks: {
-            $router: {
+            $router: { // 提供路由模拟
               push: pushSpy,
             },
           },
@@ -155,10 +175,17 @@ describe('登录组件 (Login Component)', () => {
     });
   });
 
+
   // --- 3. 可访问性测试 ---
   context('可访问性 (A11y)', () => {
     it('应通过自动化的可访问性检查', () => {
-      cy.mount(Login);
+      // 这个测试也需要一个能正常渲染的组件，所以也要提供 Pinia
+      cy.mount(Login, {
+        global: {
+          plugins: [createPinia()],
+        },
+      });
+
       cy.injectAxe();
       cy.checkA11y();
     });
