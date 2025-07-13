@@ -54,28 +54,34 @@ Cypress.Commands.add('mount', mount, { overwrite: true });
 // describe 描述一个测试套件
 describe('登录组件 (Login Component)', () => {
 
-  // --- 全局设置：拦截初始登录状态检查 ---
-  // 这个 beforeEach 会在当前文件所有的 "it" 测试用例运行前执行
-  beforeEach(() => {
-    // 拦截组件挂载时可能发出的 “检查登录状态” 的 API 请求。
-    // 在组件测试中，我们希望绕过真实的网络环境，直接测试组件的渲染和交互。
-    // 我们返回一个 401 Unauthorized 状态，这会告诉组件 “用户未登录”，
-    // 从而确保登录表单能够被稳定地渲染出来，让后续的测试可以进行。
-    // 这个统一的拦截避免了因等待真实网络响应而导致的超时失败。
-    cy.intercept('GET', '/api/login/check_login', { statusCode: 401 }).as('checkLoginMock');
-  });
+  // --- 主要测试组：用于外观、标准交互和大部分行为测试 ---
+  // 这个 context 包含了所有共享相同标准设置的测试用例
+  context('标准渲染与交互', () => {
 
-  // --- 1. 外观测试 ---
-  context('外观 (渲染)', () => {
-    it('应正确显示所有必要的元素', () => {
-      // 在这里挂载组件，因为它需要 Pinia，我们在这里提供它
+    // 这个 beforeEach 会在该 context 内的每一个 "it" 测试前运行
+    // 它负责创建一个干净、可预测的测试环境
+    beforeEach(() => {
+      // --- 关键：全面拦截所有可能的 API 请求 ---
+
+      // 1. 拦截初始登录状态检查，返回 "未登录"，以确保登录表单总是显示
+      cy.intercept('GET', '/api/login/check_login', { statusCode: 401 }).as('checkLoginMock');
+
+      // 2. 防御性拦截：为其他 API 提供默认的成功响应，防止它们意外阻塞渲染
+      // 即便某些测试不直接与这些 API 交互，提前拦截也能增加测试的稳定性
+      cy.intercept('POST', '/api/login/email/login', { statusCode: 401, body: { detail: 'Default mock response' } }).as('emailLoginMock');
+      cy.intercept('GET', '/api/login/login', { success: true, auth_url: 'https://default.google.mock/auth' }).as('getGoogleUrlMock');
+
+      // --- 挂载组件 ---
+      // 在所有拦截规则都定义好之后，再挂载组件
       cy.mount(Login, {
         global: {
           plugins: [createPinia()],
         },
       });
+    });
 
-      // 断言部分保持不变
+    // --- 1. 外观测试 ---
+    it('应正确显示所有必要的元素', () => {
       cy.get('.logo').should('be.visible');
       cy.contains('h1', 'Sign In').should('be.visible');
       cy.get('label').contains('Email').should('be.visible');
@@ -86,21 +92,8 @@ describe('登录组件 (Login Component)', () => {
       cy.get('.google-btn').contains('Continue with Google').should('be.visible');
       cy.get('.signup-link').contains('Sign up').should('be.visible');
     });
-  });
 
-  // --- 2. 行为测试 ---
-  context('行为 (交互与验证)', () => {
-    // 这个 beforeEach 会在下面的每一个 "it" 测试前运行
-    beforeEach(() => {
-      // 因为本组的所有测试都需要一个已挂载的组件，所以我们在这里统一挂载并提供 Pinia
-      cy.mount(Login, {
-        global: {
-          plugins: [createPinia()],
-        },
-      });
-    });
-
-    // 以下所有测试用例都无需再关心挂载问题，直接进行交互和断言
+    // --- 2. 行为测试 ---
     it('应允许在邮箱和密码输入框中输入内容', () => {
       cy.get('input[type="email"]').type('test@example.com').should('have.value', 'test@example.com');
       cy.get('input[type="password"]').type('password123').should('have.value', 'password123');
@@ -127,7 +120,7 @@ describe('登录组件 (Login Component)', () => {
     });
 
     it('应能处理邮箱登录成功的情况', () => {
-      // 注意：这个测试用例中对 check_login 的拦截会覆盖全局的 beforeEach 拦截，这是符合预期的
+      // 在这个特定的测试用例中，覆盖 beforeEach 中定义的默认 mock
       cy.intercept('POST', '/api/login/email/login', { statusCode: 200, body: { message: 'Login successful' } }).as('emailLogin');
       cy.intercept('GET', '/api/login/check_login', { statusCode: 200, body: { id: 1, name: 'Test User', email: 'test@example.com' } }).as('checkLogin');
 
@@ -141,7 +134,9 @@ describe('登录组件 (Login Component)', () => {
     });
 
     it('应能处理邮箱登录失败的情况', () => {
+      // 覆盖默认 mock 以测试具体的失败消息
       cy.intercept('POST', '/api/login/email/login', { statusCode: 401, body: { detail: 'Invalid credentials' } }).as('emailLogin');
+      
       cy.get('input[type="email"]').type('wrong@example.com');
       cy.get('input[type="password"]').type('wrong-password');
       cy.get('.login-btn').click();
@@ -153,6 +148,7 @@ describe('登录组件 (Login Component)', () => {
 
     it('点击 Google 登录按钮时应重定向到 Google 授权 URL', () => {
       const googleAuthUrl = 'https://accounts.google.com/o/oauth2/v2/auth?client_id=...';
+      // 覆盖默认 mock 以测试具体的 URL
       cy.intercept('GET', '/api/login/login', { success: true, auth_url: googleAuthUrl }).as('getGoogleUrl');
 
       cy.window().then((win) => {
@@ -165,17 +161,21 @@ describe('登录组件 (Login Component)', () => {
     });
   });
 
-  context('导航测试', () => {
+  // --- 特殊测试组：用于需要特殊依赖（如 $router mock）的测试 ---
+  context('特殊用例：导航与可访问性', () => {
+
     it('点击 “注册” 链接应导航至注册页面', () => {
+      // 这个测试需要模拟 $router，所以它有自己独立的设置
       const pushSpy = cy.spy().as('routerPush');
 
-      // 这个测试除了 Pinia，还需要一个特殊的路由模拟 ($router)
-      // 所以我们在这里单独挂载，并提供所有需要的依赖
+      // 同样先拦截，再挂载
+      cy.intercept('GET', '/api/login/check_login', { statusCode: 401 }).as('checkLoginMock');
+
       cy.mount(Login, {
         global: {
-          plugins: [createPinia()], // 提供 Pinia
+          plugins: [createPinia()],
           mocks: {
-            $router: { // 提供路由模拟
+            $router: {
               push: pushSpy,
             },
           },
@@ -185,13 +185,11 @@ describe('登录组件 (Login Component)', () => {
       cy.get('.signup-link').contains('Sign up').click();
       cy.get('@routerPush').should('have.been.calledWith', '/signup');
     });
-  });
 
-
-  // --- 3. 可访问性测试 ---
-  context('可访问性 (A11y)', () => {
     it('应通过自动化的可访问性检查', () => {
-      // 这个测试也需要一个能正常渲染的组件，所以也要提供 Pinia
+      // 为确保隔离，该测试也进行独立设置
+      cy.intercept('GET', '/api/login/check_login', { statusCode: 401 }).as('checkLoginMock');
+
       cy.mount(Login, {
         global: {
           plugins: [createPinia()],
@@ -199,8 +197,6 @@ describe('登录组件 (Login Component)', () => {
       });
 
       cy.injectAxe();
-      // 增加一个短暂的等待，确保在检查可访问性之前，所有元素都已稳定渲染
-      // cy.wait(100); 
       cy.checkA11y();
     });
   });
