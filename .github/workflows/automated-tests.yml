@@ -44,7 +44,7 @@ jobs:
           # 【重要】指定这是组件测试
           component: true 
           # 指定组件测试文件 (请确保此文件存在)
-          spec: cypress/e2e/components.cy.js
+          spec: cypress/component/components.cy.js
 
   # --- 3. 后端API接口巡检 ---
   api-check:
