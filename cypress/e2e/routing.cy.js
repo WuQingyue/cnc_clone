@@ -52,7 +52,7 @@ describe('Frontend Routing Test for cnc.tongtron.com', () => {
       cy.visit(`${baseUrl}/this-page-does-not-exist-for-sure`, { failOnStatusCode: false });
       
       // 断言页面上包含 "页面未找到" 的文本，或者检查404页面的特定组件/元素
-      cy.contains('页面未找到').should('be.visible');
+      cy.contains('404').should('be.visible');
   });
 
 });
