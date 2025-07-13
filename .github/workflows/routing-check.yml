@@ -1,5 +1,5 @@
 # 工作流名称
-name: Automated Tests
+name: Routing Check
 
 on:
   # 允许手动触发
