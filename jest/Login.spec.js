@@ -7,7 +7,8 @@ import { mount } from '@vue/test-utils';
 import Login from '@/components/SignIn/Login.vue'; // 确保这个路径和您的项目结构一致
 import { createPinia } from 'pinia';
 import { useUserStore } from '@/store/user';
-import ElementPlus from 'element-plus'; // ❗️ 关键修复 1: 导入 Element-Plus
+import ElementPlus from 'element-plus';
+import flushPromises from 'flush-promises'; // ❗️ 关键修复 1: 导入 flushPromises
 
 // Mock 依赖项 (保持不变)
 jest.mock('vue-router', () => ({
@@ -41,7 +42,6 @@ describe('Login.vue', () => {
 
     wrapper = mount(Login, {
       global: {
-        // ❗️ 关键修复 2: 在插件数组中注册 ElementPlus
         plugins: [pinia, ElementPlus],
         stubs: {
           'router-link': true, // 只 stub router-link 即可
@@ -84,21 +84,18 @@ describe('Login.vue', () => {
   it('handles email login successfully and navigates to home', async () => {
     const service = require('@/utils/request');
     const router = require('vue-router').useRouter();
-    const { ElMessage } = require('element-plus'); // 获取 mock 后的 ElMessage
+    const { ElMessage } = require('element-plus');
 
-    // 模拟成功的 API 响应
     service.post.mockResolvedValue({ status: 200 });
     service.get.mockResolvedValue({ status: 200, data: { name: 'Test User', email: 'test@example.com' } });
     
-    // 填充表单
     await wrapper.find('input[type="email"]').setValue('test@example.com');
     await wrapper.find('input[type="password"]').setValue('password123');
 
-    // 触发登录
     await wrapper.find('.login-btn').trigger('click');
     
-    // 等待所有异步操作完成
-    await new Promise(resolve => setTimeout(resolve,0));
+    // ❗️ 关键修复 2: 使用 flushPromises 来等待所有 promise 完成
+    await flushPromises();
 
     // 检查是否调用了登录 API
     expect(service.post).toHaveBeenCalledWith(
