@@ -115,7 +115,7 @@ watch(
           // 2. 清理URL中的授权码，这应该首先做
           router.replace({ query: {} })
           
-          ElMessage.success('Google 登录成功！')
+          ElMessage.success('登录成功！')
 
           // 3. 主动调用 checkLoginStatus，从服务器获取刚建立会话的用户信息
           // 这是最可靠的方式，保证了用户信息的唯一来源
