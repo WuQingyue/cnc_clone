@@ -16,11 +16,9 @@ jest.mock('vue-router', () => ({
     // 如果组件内部还使用了 useRouter 返回的其他属性或方法 (如 replace, currentRoute 等)，也需要在这里模拟
   })),
   // 确保 RouterLink 可以被 stub
-  RouterLink: {
-    name: 'RouterLinkStub',
-    props: ['to'],
-    template: '<a><slot /></a>', // 简单的模板用于渲染内容
-  },
+  // 这里的 RouterLink 定义不再需要一个明确的 name: 'RouterLinkStub'
+  // 我们将通过 stubs 选项中的字符串名称来引用它
+  RouterLink: {}, // 只是一个空的模拟对象，以便 Vue Test Utils 能够识别它
 }));
 
 // 关键修复 2: 模拟 axios 包本身
@@ -100,8 +98,13 @@ describe('Login.vue', () => {
         // 在插件数组中注册 Pinia 和 ElementPlus
         plugins: [pinia, ElementPlus],
         // 关键修复 5: 确保 router-link 被正确 stub
+        // 使用字符串名称 'router-link' 作为 stub 的键
         stubs: {
-          RouterLink: true, // 使用导入的 RouterLink 名称进行 stub
+          'router-link': {
+            name: 'RouterLinkStub', // 仍然给它一个明确的名称，以便 findComponent 可以使用
+            props: ['to'],
+            template: '<a><slot /></a>', // 提供一个简单的模板
+          },
         },
       },
     });
@@ -217,11 +220,8 @@ describe('Login.vue', () => {
       { withCredentials: true }
     );
 
-    // 关键修复 6: 断言 window.location.href 的值是否被设置
-    // 因为组件代码中使用了 window.location.href = ... 进行跳转
+    // 断言 window.location.href 的值是否被设置
     expect(window.location.href).toBe('http://mock-google-auth-url.com');
-    // 注意：由于您的组件代码是直接赋值给 href，而不是调用 assign，所以 assign 应该不会被调用。
-    // 如果您希望测试 assign，您需要修改组件代码以使用 assign。
     expect(window.location.assign).not.toHaveBeenCalled(); // 确保 assign 没有被调用
   });
 
