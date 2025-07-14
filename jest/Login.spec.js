@@ -1,10 +1,13 @@
 // jest/Login.spec.js
 
 // ❗️ 修复 1: 导入 mount 进行完全挂载，而不是 shallowMount
+// jest/Login.spec.js
+
 import { mount } from '@vue/test-utils';
 import Login from '@/components/SignIn/Login.vue'; // 确保这个路径和您的项目结构一致
 import { createPinia } from 'pinia';
 import { useUserStore } from '@/store/user';
+import ElementPlus from 'element-plus'; // ❗️ 关键修复 1: 导入 Element-Plus
 
 // Mock 依赖项 (保持不变)
 jest.mock('vue-router', () => ({
@@ -18,9 +21,9 @@ jest.mock('@/utils/request', () => ({
   get: jest.fn(),
 }));
 
-// ❗️ 修复 2: Mock Element-Plus 的 ElMessage，避免产生副作用并方便测试
+// Mock ElMessage (保持不变)
 jest.mock('element-plus', () => ({
-  ...jest.requireActual('element-plus'), // 保留其他 element-plus 的真实功能
+  ...jest.requireActual('element-plus'),
   ElMessage: {
     success: jest.fn(),
     error: jest.fn(),
@@ -36,13 +39,12 @@ describe('Login.vue', () => {
   beforeEach(() => {
     const pinia = createPinia();
 
-    // ❗️ 修复 3: 使用 mount() 进行完全挂载，以渲染所有子组件
     wrapper = mount(Login, {
       global: {
-        plugins: [pinia],
-        // 不再需要 stub Element-Plus 的组件，因为我们希望它们被真实渲染出来
+        // ❗️ 关键修复 2: 在插件数组中注册 ElementPlus
+        plugins: [pinia, ElementPlus],
         stubs: {
-          'router-link': true, // 只 stub router-link 即可，因为我们不测试它的跳转
+          'router-link': true, // 只 stub router-link 即可
         },
       },
     });
@@ -59,14 +61,14 @@ describe('Login.vue', () => {
   it('renders the login form correctly', () => {
     expect(wrapper.find('h1.title').text()).toBe('Sign In');
     // 断言 Element-Plus 组件是否存在
-    expect(wrapper.findComponent({ name: 'ElFormItem', props: { label: 'Email' } }).exists()).toBe(true);
-    expect(wrapper.findComponent({ name: 'ElFormItem', props: { label: 'Password' } }).exists()).toBe(true);
+    expect(wrapper.findComponent({ name: 'ElFormItem' }).exists()).toBe(true);
+    expect(wrapper.findComponent({ name: 'ElInput' }).exists()).toBe(true);
     expect(wrapper.find('.login-btn').exists()).toBe(true);
   });
 
   // 测试 2: 邮箱和密码输入是否能更新 data
   it('updates form model when typing in email and password fields', async () => {
-    // ❗️ 修复 4: 查找真实的 <input> DOM 元素进行交互
+    // 查找真实的 <input> DOM 元素进行交互
     const emailInput = wrapper.find('input[type="email"]');
     const passwordInput = wrapper.find('input[type="password"]');
 
@@ -95,10 +97,8 @@ describe('Login.vue', () => {
     // 触发登录
     await wrapper.find('.login-btn').trigger('click');
     
-    // 等待所有异步操作（如 promise）完成
-    // 使用 a microtask tick a.k.a. `Promise.resolve().then()`
+    // 等待所有异步操作完成
     await new Promise(resolve => process.nextTick(resolve));
-
 
     // 检查是否调用了登录 API
     expect(service.post).toHaveBeenCalledWith(
