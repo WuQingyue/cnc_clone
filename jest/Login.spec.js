@@ -1,5 +1,3 @@
-// jest/Login.spec.js
-
 // ❗️ 修复 1: 导入 mount 进行完全挂载，而不是 shallowMount
 // jest/Login.spec.js
 
@@ -8,7 +6,7 @@ import Login from '@/components/SignIn/Login.vue'; // 确保这个路径和您�
 import { createPinia } from 'pinia';
 import { useUserStore } from '@/store/user';
 import ElementPlus from 'element-plus';
-import flushPromises from 'flush-promises'; // ❗️ 关键修复 1: 导入 flushPromises
+import flushPromises from 'flush-promises'; // 导入 flushPromises
 
 // Mock 依赖项 (保持不变)
 jest.mock('vue-router', () => ({
@@ -94,8 +92,10 @@ describe('Login.vue', () => {
 
     await wrapper.find('.login-btn').trigger('click');
     
-    // ❗️ 关键修复 2: 使用 flushPromises 来等待所有 promise 完成
+    // ❗️ 关键修复：同时等待 Promise 完成和 Vue 更新周期
     await flushPromises();
+    await wrapper.vm.$nextTick();
+
 
     // 检查是否调用了登录 API
     expect(service.post).toHaveBeenCalledWith(
