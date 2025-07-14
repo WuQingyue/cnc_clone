@@ -1,12 +1,12 @@
 // jest/Login.spec.js
 
-import { mount } from '@vue/test-utils';
+import { mount } from '@vue/test-utils'; // ❗️ 使用 mount
 import Login from '@/components/SignIn/Login.vue'; // 确保这个路径和您的项目结构一致
 import { createPinia } from 'pinia';
 import { useUserStore } from '@/store/user';
-import ElementPlus from 'element-plus';
-import flushPromises from 'flush-promises';
-import axios from 'axios'; // ❗️ 导入 axios，即使是模拟的
+import ElementPlus from 'element-plus'; // 导入 Element-Plus
+import flushPromises from 'flush-promises'; // 导入 flushPromises
+import axios from 'axios'; // ❗️ 导入 axios，会被 Jest 模拟
 
 // ❗️ 关键修复 1: 更显式地模拟 useRouter 和 push 方法
 const mockRouterPush = jest.fn();
@@ -18,20 +18,24 @@ jest.mock('vue-router', () => ({
 }));
 
 // ❗️ 关键修复 2: 模拟 axios 包本身
-jest.mock('axios');
+jest.mock('axios'); // 模拟整个 axios 包
 
 // Mock service (如果 service 内部就是简单地使用 axios，可以考虑移除这个 mock，直接 mock axios 就行。如果 service 内部有复杂逻辑，保留并 mock 它)
+// 如果保留这个 mock，请确保它的实现是正确的，例如可以这样基于模拟的 axios 来实现：
+// jest.mock('@/utils/request', () => ({
+//   post: jest.fn((url, data, config) => axios.post(url, data, config)), // 示例：service.post 调用模拟的 axios.post
+//   get: jest.fn((url, config) => axios.get(url, config)), // 示例：service.get 调用模拟的 axios.get
+// }));
+// 为了简化和避免冲突，如果 service 只是 axios 的简单封装，我们这里暂时保留对 service 的独立 mock
 jest.mock('@/utils/request', () => ({
   post: jest.fn(),
   get: jest.fn(),
-  // 如果 service 对象还有其他方法（如 put, delete 等），也需要在这里模拟
 }));
 
 
-// ❗️ 关键修复 3: 模拟 Element-Plus 的 ElMessage，避免产生副作用并方便测试
-// 这里的 mock 定义保持不变
+// ❗️ 关键修复 3: 模拟 Element-Plus 的 ElMessage
 jest.mock('element-plus', () => ({
-  ...jest.requireActual('element-plus'), // 保留其他 element-plus 的真实功能
+  ...jest.requireActual('element-plus'),
   ElMessage: {
     success: jest.fn(),
     error: jest.fn(),
@@ -40,18 +44,25 @@ jest.mock('element-plus', () => ({
 
 // 在 describe 作用域内引用我们显式创建的模拟函数和从 mock 中获取的引用
 const routerPushSpy = mockRouterPush;
-// ❗️ 关键修复 4: 在 describe 作用域内获取 ElMessage 的模拟引用
-const ElMessageSpy = jest.requireMock('element-plus').ElMessage;
+const ElMessageSpy = jest.requireMock('element-plus').ElMessage; // 获取 ElMessage 的模拟引用
 
+// ❗️ 关键修复 4: 准备模拟 window.location.href 的 setter
+let originalWindowLocationHrefSetter; // 用于存储原始的 setter
 
 describe('Login.vue', () => {
   let wrapper;
   let userStore;
 
-  // 在每个测试前重新挂载组件并设置 store
   beforeEach(() => {
     // 在每个测试前重置 Jest 模拟函数的状态
     jest.clearAllMocks(); // 清理所有模拟函数的调用记录和返回值
+
+    // ❗️ 关键修复 4 (续): 模拟 window.location.href 的 setter
+    // 使用 Object.getOwnPropertyDescriptor 获取原始属性描述符
+    originalWindowLocationHrefSetter = Object.getOwnPropertyDescriptor(window.location, 'href').set;
+    // 使用 spyOn 模拟 setter
+    jest.spyOn(window.location, 'href', 'set');
+
 
     const pinia = createPinia();
 
@@ -70,6 +81,16 @@ describe('Login.vue', () => {
     userStore = useUserStore();
   });
 
+  afterEach(() => {
+     // ❗️ 关键修复 4 (续): 在每个测试后恢复原始的 setter
+     // 使用 Object.defineProperty 恢复属性
+     Object.defineProperty(window.location, 'href', {
+       set: originalWindowLocationHrefSetter,
+     });
+
+     jest.clearAllMocks(); // 清理所有模拟函数的调用记录
+  });
+
   // 测试 1: 组件是否成功渲染了标题和表单
   it('renders the login form correctly', () => {
     expect(wrapper.find('h1.title').text()).toBe('Sign In');
@@ -84,8 +105,10 @@ describe('Login.vue', () => {
     expect(wrapper.find('.google-icon').exists()).toBe(true);
     // ❗️ 关键修复 5: 检查 router-link-stub 的 to 属性，而不是查找内部的 a 标签
     const signupLink = wrapper.findComponent({ name: 'RouterLinkStub' });
-    expect(signupLink.exists()).toBe(true);
-    expect(signupLink.props().to).toBe('/register');
+    expect(signupLink.exists()).toBe(true); // 现在这个应该会通过
+    expect(signupLink.props().to).toBe('/register'); // 断言 props 是否正确
+    // 还可以进一步检查文本内容
+    expect(signupLink.text()).toBe('Sign up');
   });
 
   // 测试 2: 邮箱和密码输入是否能更新 data
@@ -163,13 +186,6 @@ describe('Login.vue', () => {
           }
       });
 
-      // 模拟 window.location
-      const mockWindow = { location: { href: '' } };
-      // 保存原始的 window.location，以便在 afterEach 中恢复
-      const originalWindowLocation = global.window.location;
-      global.window = mockWindow; // 将模拟的 window 赋值给全局对象
-
-
       // 触发 Google 登录按钮点击事件
       await wrapper.find('.google-btn').trigger('click');
 
@@ -183,11 +199,10 @@ describe('Login.vue', () => {
           { withCredentials: true }
       );
 
-      // 检查是否进行了页面重定向
-      expect(mockWindow.location.href).toBe('http://mock-google-auth-url.com');
-
-      // 恢复原始的 window.location
-      global.window.location = originalWindowLocation;
+      // ❗️ 关键修复 6: 断言 window.location.href 的 setter 是否被调用
+      expect(window.location.href).toBe('http://mock-google-auth-url.com'); // 确保赋值操作发生
+      expect(Object.getOwnPropertyDescriptor(window.location, 'href').set).toHaveBeenCalledTimes(1); // 检查 setter 被调用次数
+      expect(Object.getOwnPropertyDescriptor(window.location, 'href').set).toHaveBeenCalledWith('http://mock-google-auth-url.com'); // 检查 setter 调用值
   });
 
   // 测试 5: 邮件登录失败流程
