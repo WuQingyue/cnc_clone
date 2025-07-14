@@ -98,7 +98,7 @@ describe('Login.vue', () => {
     await wrapper.find('.login-btn').trigger('click');
     
     // 等待所有异步操作完成
-    await new Promise(resolve => process.nextTick(resolve));
+    await new Promise(resolve => setTimeout(resolve,0));
 
     // 检查是否调用了登录 API
     expect(service.post).toHaveBeenCalledWith(
