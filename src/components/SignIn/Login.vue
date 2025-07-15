@@ -129,7 +129,7 @@ const handleEmailLogin = async () => {
       '/api/login/check_login',
       { withCredentials: true }
     )
-      console.log('uesr_Info',uesr_Info)
+      // console.log('uesr_Info',uesr_Info)
       if(uesr_Info.status == 200){
         // 保存用户信息到 store
         userStore.setUser(uesr_Info.data)
@@ -137,7 +137,7 @@ const handleEmailLogin = async () => {
       }
     }
   } catch (error) {
-    console.error('登录失败:', error)
+    // console.error('登录失败:', error)
     ElMessage.error(error.response?.data?.detail || '登录失败，请重试')
   } finally {
     loading.value = false
@@ -159,7 +159,7 @@ const handleGoogleLogin = async () => {
       ElMessage.error('获取 Google 登录链接失败')
     }
   } catch (error) {
-    console.error('Google 登录失败:', error)
+    // console.error('Google 登录失败:', error)
     ElMessage.error('Google 登录失败，请重试')
   }
 }

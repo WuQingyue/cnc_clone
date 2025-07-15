@@ -135,7 +135,7 @@ const handleSubmit = async () => {
       router.push('/login')
     }
   } catch (error) {
-    console.error('表单验证失败:', error)
+    ElMessage.error('注册失败！')
   }
 }
 
