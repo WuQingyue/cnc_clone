@@ -11,7 +11,6 @@
           @listEmpty="handleListEmpty"
         />
       </template>
-      <!-- This part is shown only when isOrdering is false -->
         <div class="upload-header">
           <h2 class="section-title">上传图纸</h2>
           <div class="button-group">
