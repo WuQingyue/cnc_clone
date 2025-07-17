@@ -35,10 +35,10 @@
 
 <script setup>
 import DeliveryInfo from '@/components/PriceInquiry/DeliveryInfo.vue'
-import ExpressInfo from '@/components/PriceInquiry/ExpressInfo.vue'
+// import ExpressInfo from '@/components/PriceInquiry/ExpressInfo.vue'
 import OrderInfo from '@/components/PriceInquiry/OrderInfo.vue'
-import InvoiceInfo from '@/components/PriceInquiry/InvoiceInfo.vue'
-import OtherInfo from '@/components/PriceInquiry/OtherInfo.vue'
+// import InvoiceInfo from '@/components/PriceInquiry/InvoiceInfo.vue'
+// import OtherInfo from '@/components/PriceInquiry/OtherInfo.vue'
 import TotalInfo from '@/components/PriceInquiry/TotalInfo.vue'
 import { ref, onMounted, onUnmounted, computed } from 'vue'
 import { useSelectedDataStore } from '@/store/PriceInquiryDatas'
