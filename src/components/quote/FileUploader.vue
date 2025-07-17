@@ -51,7 +51,7 @@
   
   // 使用 async/await 的最终重构方案
   const handleBeforeUpload = async (file) => {
-    console.log('文件大小为', file.size);
+    // console.log('文件大小为', file.size);
     
     // 1. 同步验证
     if (!props.processInfo) {
@@ -69,7 +69,7 @@
     const acceptTypes = props.processInfo.acceptTypes
       .split(',')
       .map(type => type.replace('.', '').toLowerCase());
-    console.log('文件的类型为', extension);
+    // console.log('文件的类型为', extension);
     if (!acceptTypes.includes(extension)) {
       ElMessage.error(`不支持的文件格式: ${extension}`);
       return false;
@@ -88,7 +88,7 @@
       }
       
       const fileInfoAccessId = preUploadResponse.data.data[0].fileInfoAccessId;
-      console.log('fileInfoAccessId', fileInfoAccessId);
+      // console.log('fileInfoAccessId', fileInfoAccessId);
   
       // 步骤二：并行执行主文件上传和模型分析
       const mainUploadData = new FormData();
@@ -112,7 +112,7 @@
       // 步骤三：处理最终结果
       if (uploadResult.status === 200) {
         ElMessage.success('上传成功');
-        console.log('分析成功！');
+        // console.log('分析成功！');
         emit('update-history');
         // 向上游 (el-upload) 返回 true 表示整个流程成功
         return true;
@@ -121,7 +121,7 @@
       }
   
     } catch (error) {
-      console.error('上传流程出错:', error);
+      // console.error('上传流程出错:', error);
       ElMessage.error(error.message || '上传过程中发生未知错误');
       // 向上游 (el-upload) 返回一个被拒绝的 Promise 来报告失败
       return Promise.reject(error);

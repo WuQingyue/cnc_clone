@@ -10,6 +10,7 @@
 
     <div class="dialog-content">
       <div class="left-section">
+        <!-- (template部分无变化，此处省略以保持简洁) -->
         <!-- 材料选择 -->
         <div class="param-item">
           <div class="material-selection">
@@ -274,7 +275,6 @@
       </div>
 
       <!-- 右侧价格信息区域 -->
-      <!-- ★★★★★ MODIFICATION 1: Add v-loading directive ★★★★★ -->
       <div class="right-section" v-loading="isPriceLoading">
         <!-- 文件信息 -->
         <div class="file-info">
@@ -333,7 +333,7 @@
 </template>
 
 <script>
-import { ref, watch, computed, onMounted } from 'vue'
+import { ref, watch, computed, onMounted, nextTick } from 'vue' // 引入 nextTick
 import {
   parametersList,
   currentParameters,
@@ -341,8 +341,8 @@ import {
   surfaceTreatmentData
 } from './AutomationTool'
 import { ElMessage } from 'element-plus'
-import axios from 'axios'
 import service from '@/utils/request'
+
 export default {
   name: 'ParameterInfo',
   props: {
@@ -357,10 +357,13 @@ export default {
   },
   emits: ['update:visible', 'confirm'],
   setup(props, { emit }) {
-    // ★★★★★ MODIFICATION 2: Add loading state ref ★★★★★
-    const isPriceLoading = ref(false);
+    // ★★★★★ 关键修改点 1: 添加状态标志 ★★★★★
+    const isReadyForApiCall = ref(false);
 
+    const isPriceLoading = ref(false);
     const dialogVisible = ref(false)
+    
+    // (此处省略了所有其他 ref 的定义，它们保持不变)
     const selectedParameterId = ref(currentParameters.value.id)
     const materialName = ref('')
     const surfaceTreatment = ref('none')
@@ -392,56 +395,93 @@ export default {
     const productModelAccessId = ref('')
     const fileInfoAccnessId =ref('')
 
+    
+    const uploadedFile = ref(null)
+    const uploadedFileName = ref('')
+    const fileInput = ref(null)
+    const isHover = ref(false)
+    const selectedTreatment = ref('')
+    const selectedColor = ref('')
 
+    const glossiness = ref('');
+    const craftAccessId1 = ref('')
+    const craftAttributeColorAccessIds1 = ref('')
+    const craftAttributeGlossinessAccessIds1 = ref('')
+    const craftAttributeFileAccessIds1 = ref('')
+    const craftAccessId2 = ref('')
+    const craftAttributeColorAccessIds2 = ref('')
+    const craftAttributeGlossinessAccessIds2 = ref('')
+    const craftAttributeFileAccessIds2 = ref('')
+    const glossiness2 = ref('');
+    const uploadedFile2 = ref(null)
+    const uploadedFileName2 = ref('')
+    const fileInput2 = ref(null)
+    const isHover2 = ref(false)
+
+
+    // ★★★★★ 关键修改点 2: 修改 props.visible 的监听器 ★★★★★
     watch(() => props.visible, (val) => {
-      dialogVisible.value = val
-      materialName.value = props.record.material
-      categoryName.value = props.record.categoryName
-      surfaceTreatment.value = props.record.surfaceTreatment
-      tolerance.value = props.record.tolerance
-      roughness.value = props.record.roughness
-      selectedTreatment.value = props.record.selectedTreatment
-      selectedColor.value = props.record.selectedColor
-      glossiness.value = props.record.glossiness
-      uploadedFileName.value = props.record.uploadedFileName
-      selectedTreatment2.value = props.record.selectedTreatment2
-      selectedColor2.value = props.record.selectedColor2
-      glossiness2.value = props.record.glossiness2
-      uploadedFileName2.value = props.record.uploadedFileName2
-      totalPrice.value = props.record.totalPrice
-      pricePerUnit.value = props.record.pricePerUnit
-      quantity.value = props.record.quantity
-      hasThread.value = props.record.hasThread
-      hasAssembly.value = props.record.hasAssembly
-      materialCost.value = props.record.materialCost
-      engineeringCost.value = props.record.engineeringCost
-      clampingCost.value = props.record.clampingCost
-      processingCost.value = props.record.processingCost
-      surfaceCost.value = props.record.surfaceCost
-      materialAccessId.value = props.record.materialAccessId
-      craftAccessId1.value = props.record.craftAccessId1
-      craftAttributeColorAccessIds1.value = props.record.craftAttributeColorAccessIds1
-      craftAttributeGlossinessAccessIds1.value = props.record.craftAttributeGlossinessAccessIds1
-      craftAttributeFileAccessIds1.value = props.record.craftAttributeFileAccessIds1
-      craftAccessId2.value = props.record.craftAccessId2
-      craftAttributeColorAccessIds2.value = props.record.craftAttributeColorAccessIds2
-      craftAttributeGlossinessAccessIds2.value = props.record.craftAttributeGlossinessAccessIds2
-      craftAttributeFileAccessIds2.value = props.record.craftAttributeFileAccessIds2
-      expeditedPrice.value = props.record.expeditedPrice
-      deliveryTypeCode.value = props.record.deliveryTypeCode
-      productModelAccessId.value = props.record.productModelAccessId
-      fileInfoAccnessId.value = props.record.fileInfoAccnessId
-      roughnessAccessId.value = props.record.roughnessAccessId
-      toleranceAccessId.value = props.record.toleranceAccessId
-      if (val) {
-        resetSelection()
+      dialogVisible.value = val;
+      
+      if (val) { // 如果弹窗正在打开
+        // 1. 先关闭API调用开关，防止初始化数据时触发API
+        isReadyForApiCall.value = false;
+
+        // 2. 正常从 props.record 填充数据
+        materialName.value = props.record.material;
+        categoryName.value = props.record.categoryName;
+        surfaceTreatment.value = props.record.surfaceTreatment;
+        tolerance.value = props.record.tolerance;
+        roughness.value = props.record.roughness;
+        selectedTreatment.value = props.record.selectedTreatment;
+        selectedColor.value = props.record.selectedColor;
+        glossiness.value = props.record.glossiness;
+        uploadedFileName.value = props.record.uploadedFileName;
+        selectedTreatment2.value = props.record.selectedTreatment2;
+        selectedColor2.value = props.record.selectedColor2;
+        glossiness2.value = props.record.glossiness2;
+        uploadedFileName2.value = props.record.uploadedFileName2;
+        pricePerUnit.value = props.record.pricePerUnit;
+        quantity.value = props.record.quantity;
+        hasThread.value = props.record.hasThread;
+        hasAssembly.value = props.record.hasAssembly;
+        materialCost.value = props.record.materialCost;
+        engineeringCost.value = props.record.engineeringCost;
+        clampingCost.value = props.record.clampingCost;
+        processingCost.value = props.record.processingCost;
+        surfaceCost.value = props.record.surfaceCost;
+        materialAccessId.value = props.record.materialAccessId;
+        craftAccessId1.value = props.record.craftAccessId1;
+        craftAttributeColorAccessIds1.value = props.record.craftAttributeColorAccessIds1;
+        craftAttributeGlossinessAccessIds1.value = props.record.craftAttributeGlossinessAccessIds1;
+        craftAttributeFileAccessIds1.value = props.record.craftAttributeFileAccessIds1;
+        craftAccessId2.value = props.record.craftAccessId2;
+        craftAttributeColorAccessIds2.value = props.record.craftAttributeColorAccessIds2;
+        craftAttributeGlossinessAccessIds2.value = props.record.craftAttributeGlossinessAccessIds2;
+        craftAttributeFileAccessIds2.value = props.record.craftAttributeFileAccessIds2;
+        expeditedPrice.value = props.record.expeditedPrice;
+        deliveryTypeCode.value = props.record.deliveryTypeCode;
+        productModelAccessId.value = props.record.productModelAccessId;
+        fileInfoAccnessId.value = props.record.fileInfoAccnessId;
+        roughnessAccessId.value = props.record.roughnessAccessId;
+        toleranceAccessId.value = props.record.toleranceAccessId;
+        
+        resetSelection();
+
+        // 3. 使用 nextTick，在所有数据都初始化完成后，再打开API调用开关
+        nextTick(() => {
+          isReadyForApiCall.value = true;
+        });
+      } else { // 如果弹窗正在关闭，也关闭开关
+        isReadyForApiCall.value = false;
       }
-    })
+    });
 
     watch(dialogVisible, (val) => {
       emit('update:visible', val)
-    })
+    });
 
+    // ... (此处省略所有 computed, methods, onMounted 等，它们保持不变)
     const handleParametersChange = (parameterId) => {
       updateParameters(parameterId)
     }
@@ -516,7 +556,7 @@ export default {
     const selectMaterial = (material) => {
       if (!material) return
       selectedMaterial.value = material
-      console.log('selectedMaterial:', selectedMaterial.value);
+      // console.log('selectedMaterial:', selectedMaterial.value);
     }
 
     const handleConfirm = () => {
@@ -639,8 +679,7 @@ export default {
       craftAttributeFileAccessIds2.value = '';
     })
 
-    const selectedTreatment = ref('')
-    const selectedColor = ref('')
+
     const surfaceTreatmentNoteDisplay = computed(() => {
       if (selectedTreatment.value) {
         const selectedItem = surfaceTreatmentData.find(item => item.craftName === selectedTreatment.value);
@@ -654,7 +693,7 @@ export default {
       const selectedItem = surfaceTreatmentData.find(item => item.craftName === selectedTreatment.value);
       return selectedItem?.option?.optionName === '颜色' ? selectedItem.option : null;
     });
-    const glossiness = ref('');
+    
     const glossinessOptions = computed(() => {
       if (!selectedTreatment.value) return [];
       if(colorOption.value){
@@ -677,14 +716,6 @@ export default {
         }
       }
     });
-    const craftAccessId1 = ref('')
-    const craftAttributeColorAccessIds1 = ref('')
-    const craftAttributeGlossinessAccessIds1 = ref('')
-    const craftAttributeFileAccessIds1 = ref('')
-    const craftAccessId2 = ref('')
-    const craftAttributeColorAccessIds2 = ref('')
-    const craftAttributeGlossinessAccessIds2 = ref('')
-    const craftAttributeFileAccessIds2 = ref('')
 
     watch(selectedTreatment, (newVal) => {
       selectedColor.value = '';
@@ -747,7 +778,8 @@ export default {
       const selectedItem = surfaceTreatmentData.find(item => item.craftName === selectedTreatment2.value);
       return selectedItem?.option?.optionName === '颜色' ? selectedItem.option : null;
     });
-    const glossiness2 = ref('');
+    
+    
     const glossinessOptions2 = computed(() => {
       if (!selectedTreatment2.value) return [];
       const selectedItem = colorOption2.value.attrs.find(item => item.value === selectedColor2.value);
@@ -816,18 +848,15 @@ export default {
     const resetSelection = () => {
       if (parametersList.length > 0) {
         currentCategory.value = parametersList.find(category => category.name === categoryName.value)
-        console.log('categoryName.value:', categoryName.value);
-        console.log('currentCategory.value:', currentCategory.value);
         if (currentCategory.value) {
           selectedMaterial.value = currentCategory.value.children.find(material => material.materialName === materialName.value)
         }
       }
     }
    
-    // ★★★★★ MODIFICATION 3: Update fetchPrices to manage loading state ★★★★★
     const fetchPrices = async () => {
       if (!selectedMaterial.value) return;
-      isPriceLoading.value = true; // Start loading
+      isPriceLoading.value = true;
       try {
         const requestData = [
           {
@@ -858,9 +887,7 @@ export default {
           }
         ];
         const response = await service.post('/api/price/price', requestData,{withCredentials: true})
-        console.log('参数对话框中的response', response)
         const priceData = response.data
-        console.log('参数对话框中的priceData', priceData)
         materialCost.value = priceData[0].materialPrice
         engineeringCost.value = priceData[0].programPrice
         clampingCost.value = priceData[0].clampPrice
@@ -870,18 +897,19 @@ export default {
         expeditedPrice.value = priceData[0].expeditedPrice
         
       } catch (error) {
-        console.error('请求失败:', error.response?.data || error.message)
         ElMessage.error('获取价格信息失败，请检查网络连接')
       } finally {
-        isPriceLoading.value = false; // Stop loading
+        isPriceLoading.value = false;
       }
     }
     
+    // ★★★★★ 关键修改点 3: 修改主监听器 ★★★★★
     watch([selectedMaterial, surfaceTreatment, selectedTreatment, selectedTreatment2, quantity, tolerance, roughness, selectedColor, selectedColor2, glossiness, glossiness2, uploadedFileName, uploadedFileName2], () => {
-      if (selectedMaterial.value) {
+      // 只有在API调用开关打开时，才执行价格请求
+      if (isReadyForApiCall.value) {
         fetchPrices();
       }
-    });
+    }, { deep: true });
     
     const totalPrice = computed(() => {
       return pricePerUnit.value * quantity.value;
@@ -892,11 +920,6 @@ export default {
       if (toleranceOptions.value.length > 0) tolerance.value = toleranceOptions.value[0].value
       if (roughnessOptions.value.length > 0) roughness.value = roughnessOptions.value[0].value
     })
-
-    const uploadedFile = ref(null)
-    const uploadedFileName = ref('')
-    const fileInput = ref(null)
-    const isHover = ref(false)
 
     const handleFileUpload = (e) => {
       const file = e.target.files[0]
@@ -911,11 +934,6 @@ export default {
       uploadedFileName.value = ''
       fileInput.value.value = null
     }
-
-    const uploadedFile2 = ref(null)
-    const uploadedFileName2 = ref('')
-    const fileInput2 = ref(null)
-    const isHover2 = ref(false)
 
     const handleFileUpload2 = (e) => {
       const file = e.target.files[0]
@@ -932,9 +950,10 @@ export default {
     }
 
     return {
-      // ★★★★★ MODIFICATION 4: Return the loading state ref ★★★★★
+      isReadyForApiCall, // 虽然模板中不用，但返回以供调试
       isPriceLoading,
       dialogVisible,
+      // ... (其他返回的变量保持不变)
       selectedParameterId,
       parametersList,
       currentParameters,
@@ -1012,6 +1031,7 @@ export default {
 </script>
 
 <style scoped>
+/* (样式无变化，此处省略) */
 .dialog-header {
   font-size: 18px;
   font-weight: bold;
@@ -1344,4 +1364,5 @@ export default {
 .upload-button.disabled .el-icon {
   color: #c0c4cc;
 }
-</style>
+</style>```
+

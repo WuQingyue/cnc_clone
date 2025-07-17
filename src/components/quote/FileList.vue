@@ -1,7 +1,7 @@
+
 <template>
   <div class="file-list">
     <h2 class="section-title">文件列表</h2>
-    <!-- ★★★ 修改点: 将 v-loading 指令从 .left-section 移到这里 ★★★ -->
     <div class="file-list-container" v-loading="loading">
       <!-- 左部分：文件信息和文件上传框 -->
       <div class="left-section">
@@ -129,6 +129,7 @@ import { useSelectedDataStore } from '@/store/PriceInquiryDatas'
 import { useRouter } from 'vue-router'
 import service from '@/utils/request'
 import { ElMessage, ElLoading } from 'element-plus'
+import ParameterInfo from './ParameterInfo.vue'
 
 const loading = ref(false)
 const selectedDataStore = useSelectedDataStore()
@@ -138,18 +139,25 @@ const localRecords = ref([])
 const showParameterDialog = ref(false)
 const selectedRecord = ref(null) 
 
+const props = defineProps({
+  selectedRecords: {
+    type: Object,
+    default: () => ({})
+  }
+})
+
+const emit = defineEmits(['update:selectedRecords', 'listEmpty'])
+
 const fetchPrices = async () => {
-  const selectedDatas = selectedDataStore.getSelectedData();
-  if (!selectedDatas || selectedDatas.length === 0) {
-      console.log('No selected data to fetch prices for.');
+  const recordsToPrice = localRecords.value.filter(r => r.selected);
+  if (!recordsToPrice || recordsToPrice.length === 0) {
       return;
   }
   
-  console.log('获取勾选的数据', selectedDatas);
   loading.value = true;
 
   try {
-    const requestData = selectedDatas.map(item => ({
+    const requestData = recordsToPrice.map(item => ({
       materialAccessId: item.materialAccessId,
       crafts: [
         {
@@ -158,7 +166,7 @@ const fetchPrices = async () => {
             item.craftAttributeColorAccessIds1,
             item.craftAttributeGlossinessAccessIds1,
             item.craftAttributeFileAccessIds1
-          ].flat().filter(Boolean) // 使用.flat()确保数组扁平化
+          ].flat().filter(Boolean)
         },
         {
           craftAccessId: item.craftAccessId2,
@@ -166,9 +174,9 @@ const fetchPrices = async () => {
             item.craftAttributeColorAccessIds2,
             item.craftAttributeGlossinessAccessIds2,
             item.craftAttributeFileAccessIds2
-          ].flat().filter(Boolean) // 使用.flat()确保数组扁平化
+          ].flat().filter(Boolean)
         }
-      ].filter(craft => craft.craftAccessId), // 过滤掉没有craftAccessId的craft对象
+      ].filter(craft => craft.craftAccessId),
       productModelAccessId: item.productModelAccessId,
       goodsQuantity: item.quantity,
       toleranceAccessId: item.toleranceAccessId,
@@ -180,45 +188,33 @@ const fetchPrices = async () => {
     const priceData = response.data;
     
     if (response.status === 200 && Array.isArray(priceData)) {
-      const quoteInfos = priceData;
-      selectedDatas.forEach((record, index) => {
-        if (index < quoteInfos.length) {
-          record.materialCost = quoteInfos[index].materialPrice;
-          record.engineeringCost = quoteInfos[index].programPrice;
-          record.processingCost = quoteInfos[index].processPrice;
-          record.clampingCost = quoteInfos[index].clampPrice;
-          record.surfaceCost = quoteInfos[index].craftPrice;
-          record.expeditedPrice = quoteInfos[index].expeditedPrice;
-          record.pricePerUnit = quoteInfos[index].price;
-          record.totalPrice = record.pricePerUnit * record.quantity;
+      // 直接并高效地更新 localRecords
+      priceData.forEach((quoteInfo, index) => {
+        // 假设返回的priceData与请求的recordsToPrice顺序一致
+        const correspondingRecord = recordsToPrice[index];
+        if (correspondingRecord) {
+          const recordInLocalList = localRecords.value.find(
+            lr => lr.fileInfoAccessId === correspondingRecord.fileInfoAccessId
+          );
+          if (recordInLocalList) {
+            recordInLocalList.materialCost = quoteInfo.materialPrice;
+            recordInLocalList.engineeringCost = quoteInfo.programPrice;
+            recordInLocalList.processingCost = quoteInfo.processPrice;
+            recordInLocalList.clampingCost = quoteInfo.clampPrice;
+            recordInLocalList.surfaceCost = quoteInfo.craftPrice;
+            recordInLocalList.expeditedPrice = quoteInfo.expeditedPrice;
+            recordInLocalList.pricePerUnit = quoteInfo.price;
+            recordInLocalList.totalPrice = quoteInfo.price * recordInLocalList.quantity;
+          }
         }
       });
-      localRecords.value = localRecords.value.map(record => {
-        const updatedRecord = selectedDatas.find(selRecord => selRecord.fileInfoAccessId === record.fileInfoAccessId);
-        if (updatedRecord) {
-          return {
-            ...record,
-            materialCost: updatedRecord.materialCost,
-            engineeringCost: updatedRecord.engineeringCost,
-            processingCost: updatedRecord.processingCost,
-            clampingCost: updatedRecord.clampingCost,
-            surfaceCost: updatedRecord.surfaceCost,
-            expeditedPrice: updatedRecord.expeditedPrice,
-            pricePerUnit: updatedRecord.pricePerUnit,
-            totalPrice: updatedRecord.totalPrice,
-          };
-        }
-        return record;
-      });
-
-      selectedDataStore.setSelectedData(selectedDatas);
+      // 将更新后的数据同步到Pinia Store
+      selectedDataStore.setSelectedData(localRecords.value.filter(r => r.selected));
     } else {
-      console.error('Unexpected response format:', priceData);
       ElMessage.error('获取价格信息失败，返回数据格式不正确');
     }
     
   } catch (error) {
-    console.error('请求失败:', error.response?.data || error.message);
     ElMessage.error('获取价格信息失败，请检查网络连接');
   } finally {
     loading.value = false;
@@ -226,34 +222,22 @@ const fetchPrices = async () => {
 };
 
 watch(selectedDelivery, (newDeliveryOption) => {
-  if(selectedDelivery.value === 'UD'){
-    localRecords.value.forEach(record => {
+  // 当交期变化时，更新所有记录的交期代码
+  localRecords.value.forEach(record => {
     record.deliveryTypeCode = newDeliveryOption; 
-    record.EstimatedDeliveryTime = '5个工作日'
-  })
-  }else{
-    localRecords.value.forEach(record => {
-    record.deliveryTypeCode = newDeliveryOption; 
-    record.EstimatedDeliveryTime = "10个工作日"
-  })
-  }
-  const selectedDatas = selectedDataStore.getSelectedData()
+    record.EstimatedDeliveryTime = newDeliveryOption === 'UD' ? '5个工作日' : '10个工作日';
+  });
+
+  // 更新Pinia Store中的数据
+  const selectedDatas = selectedDataStore.getSelectedData();
   selectedDatas.forEach(record => {
     record.deliveryTypeCode = newDeliveryOption; 
   });
-  selectedDataStore.setSelectedData(selectedDatas)
-  fetchPrices()
+  selectedDataStore.setSelectedData(selectedDatas);
+
+  // 重新获取价格，因为交期会影响价格
+  fetchPrices();
 });
-
-import ParameterInfo from './ParameterInfo.vue'
-const props = defineProps({
-  selectedRecords: {
-    type: Object,
-    default: () => ({})
-  }
-})
-
-const emit = defineEmits(['update:selectedRecords', 'listEmpty'])
 
 watch(() => props.selectedRecords, (record) => {
   if (record && Object.keys(record).length > 0) {
@@ -265,51 +249,54 @@ watch(() => props.selectedRecords, (record) => {
     if (selectedDatas.length > 0) {
         try {
             selectedDataStore.setSelectedData(selectedDatas);
-            fetchPrices();
+            fetchPrices(); // 新增记录时获取初始价格
         } catch (error) {
-            console.error("存储数据时出错:", error);
             alert('准备询价数据时出错，请稍后重试。');
         }
     }
   }
-}, { immediate: true, deep: true })
+}, { immediate: true, deep: true });
 
 const deletePart = (index) => {
-  localRecords.value.splice(index, 1)
+  localRecords.value.splice(index, 1);
   if (localRecords.value.length === 0) {
-    emit('listEmpty')
+    emit('listEmpty');
   }
-}
+  // 更新store
+  selectedDataStore.setSelectedData(localRecords.value.filter(r => r.selected));
+};
 
 const openParameterDialog = (record) => {
   selectedRecord.value = record;
   showParameterDialog.value = true;
-}
+};
 
 const handleParameterConfirm = (newParameters) => {
-  Object.assign(selectedRecord.value, newParameters);
-  
+  // 找到被编辑的记录的索引
   const index = localRecords.value.findIndex(record => 
     record.fileInfoAccessId === selectedRecord.value.fileInfoAccessId
   );
   
   if (index !== -1) {
+    // 使用从弹窗传回的、已包含最新价格的完整数据来更新本地记录
     localRecords.value[index] = { ...localRecords.value[index], ...newParameters };
+    
+    // 更新Pinia Store
     const selectedDatas = localRecords.value.filter(record => record.selected);
     selectedDataStore.setSelectedData(selectedDatas);
-    // After confirming parameters, prices might change, so re-fetch
-    fetchPrices();
+    
+    // 不再调用 fetchPrices()！因为价格已经由子组件计算并返回了。
   }
-}
+};
 
 onMounted(() => {
-  // onMounted fetch is handled by the props watcher
-})
+  // onMounted的初次价格获取由 props watcher 触发
+});
 
 const selectedRecordsCount = computed(() => {
   return localRecords.value
     .filter(record => record.selected)
-    .reduce((total, record) => total + record.quantity, 0)
+    .reduce((total, record) => total + record.quantity, 0);
 });
 
 const selectedTotalPrice = computed(() => {
@@ -321,27 +308,24 @@ const selectedTotalPrice = computed(() => {
 
 const handleAddToCart = async () => {
   try {
-    const selectedDatas = localRecords.value.filter(record => record.selected)
-    console.log('准备提交的数据:', selectedDatas)
+    const selectedDatas = localRecords.value.filter(record => record.selected);
     if (selectedDatas.length === 0) {
       ElMessage.warning('请至少选择一个零件进行询价');
       return;
     }
-    const response = await service.post('/api/orders/add_to_cart', selectedDatas, { withCredentials: true })
+    const response = await service.post('/api/orders/add_to_cart', selectedDatas, { withCredentials: true });
     if (response.data.success) {
-      ElMessage.success('已加入购物车')
+      ElMessage.success('已加入购物车');
     } else {
-      ElMessage.error('加入购物车失败')
+      ElMessage.error('加入购物车失败');
     }
   } catch (error) {
-    console.error('加入购物车失败:', error.response?.data || error.message)
-    ElMessage.error('加入购物车失败，请检查网络连接')
+    ElMessage.error('加入购物车失败，请检查网络连接');
   }
-}
+};
 
 const handleConfirm = async () => {
-  const selectedDatas = localRecords.value.filter(record => record.selected)
-  console.log('准备提交的数据:', selectedDatas)
+  const selectedDatas = localRecords.value.filter(record => record.selected);
   if (selectedDatas.length === 0) {
     ElMessage.warning('请至少选择一个零件进行询价');
     return;
@@ -355,24 +339,21 @@ const handleConfirm = async () => {
 
   try {
     const response = await service.post('/api/orders/save_selected_datas', selectedDatas, { withCredentials: true });
-    console.log('后端返回的数据:', response);
-    
     if (response.status === 200) {
       router.push('/price-inquiry');
     } else {
       ElMessage.error('准备询价数据时出错，请稍后重试。');
     }
   } catch (error) {
-    console.error("存储数据时出错:", error);
     ElMessage.error('准备询价数据时出错，请检查网络连接。');
   } finally {
     loadingInstance.close();
   }
-}
+};
 </script>
 
 <style lang="scss" scoped>
-/* 样式保持不变 */
+/* (样式无变化，此处省略) */
 .delete-btn {
   background-color: #409eff;
   color: white;

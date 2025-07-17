@@ -175,7 +175,7 @@ import service from '@/utils/request'
 })
 
 // 定义事件
-const emit = defineEmits(['fileInfoAccessId', 'delete'])
+const emit = defineEmits(['fileInfoAccessId', 'delete','fileInfo'])
 
 // 分页相关
 const currentPage = ref(1)
@@ -222,7 +222,7 @@ const handleDelete = async (fileId) => {
       ElMessage.error(response.data.message || '删除失败')
     }
   } catch (error) {
-    console.error('删除记录失败:', error)
+    // console.error('删除记录失败:', error)
     ElMessage.error('删除失败，请稍后重试')
   }
 }
@@ -230,10 +230,10 @@ const handleDelete = async (fileId) => {
 const fileInfoAccessId = ref('')
 // 处理下单点击事件
 const handleOrder = async (row) => {
-  console.log('row:', row)
+  // console.log('row:', row)
   // 发送请求到后端查询数据
   const response = await service.get(`/api/upload/get_file_info/${row.id}`, { withCredentials: true })
-  console.log('fileInfoAccessId:', response.data)
+  // console.log('fileInfoAccessId:', response.data)
 
   fileInfoAccessId.value = response.data
   service.post(`/api/upload/get_analysis_result?data=${fileInfoAccessId.value}`, { withCredentials: true })
