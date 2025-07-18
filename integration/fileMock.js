@@ -1,2 +1,2 @@
-// jest/fileMock.js
+// integration/fileMock.js
 module.exports = 'test-file-stub';

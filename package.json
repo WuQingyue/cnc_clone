@@ -22,6 +22,7 @@
     "jwt-decode": "^4.0.0",
     "pinia": "^3.0.1",
     "pinia-plugin-persistedstate": "^4.2.0",
+    "query-string": "^9.2.2",
     "sass": "^1.69.5",
     "sass-loader": "^13.3.2",
     "swiper": "^8.4.7",
@@ -72,8 +73,8 @@
       "jsx"
     ],
     "moduleNameMapper": {
-      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/jest/fileMock.js",
-      "\\.(css|scss|sass|less)$": "<rootDir>/jest/fileMock.js",
+      "\\.(jpg|jpeg|png|gif|eot|otf|webp|svg|ttf|woff|woff2|mp4|webm|wav|mp3|m4a|aac|oga)$": "<rootDir>/integration/fileMock.js",
+      "\\.(css|scss|sass|less)$": "<rootDir>/integration/fileMock.js",
       "^@/(.*)$": "<rootDir>/src/$1"
     }
   }

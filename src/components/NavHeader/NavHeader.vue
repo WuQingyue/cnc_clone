@@ -72,9 +72,9 @@
       </div>
     </div>
   </header>
-  <div class="login-options">
+  <!-- <div class="login-options">
     <div id="googleButton"></div>
-  </div>
+  </div> -->
 </template>
 
 <script setup>
@@ -172,27 +172,36 @@ onMounted(() => {
   
   // 初始化翻译功能
   if (window.translate) {
-    window.translateConfig = {
-      container: '#translate',
-      excludeSelectors: [
-        '.no-translate',
-        '.el-icon',
-        '.el-dropdown', // Exclude el-dropdown to prevent issues with its content
-        'script',
-        'style'
-      ],
-      defaultLang: 'zh',
-      detectLanguage: true,
-      translateDelay: 100,
-      cache: true
-    };
+    // ***** START OF MODIFICATION *****
+    // 明确使用 window.translate 来避免 ESLint 报错
+    window.translate.selectLanguageTag.languages = [
+      'chinese_simplified', // 简体中文
+      'english',            // 英语
+      'japanese',           // 日语
+      'korean',             // 韩语
+      'german',             // 德语
+      'french',             // 法语
+      'russian',            // 俄语
+      'spanish',            // 西班牙语
+      'arabic',             // 阿拉伯语
+      'hindi',              // 印地语
+      'portuguese',         // 葡萄牙语
+    ];
 
-    window.translate.language.setDefaultTo('chinese_simplified');
+    // 设置本地语种（当前网页的语种）
+    window.translate.language.setLocal('chinese_simplified');
+    
+    // 启用翻译过程中的遮罩提示
     window.translate.progress.api.startUITip();
+    
+    // 开启页面变化监控，自动翻译
     window.translate.listener.start();
+    
+    // 执行翻译初始化
     window.translate.execute();
     
-    console.log('translate.js initialized.');
+    // ***** END OF MODIFICATION *****
+    console.log('translate.js initialized with a specific language list.');
   } else {
     console.error('translate.js library not loaded.');
   }
@@ -206,16 +215,13 @@ onUnmounted(() => {
 })
 
 const initializeGoogleLogin = () => {
-  if (window.gapi) {
-    window.gapi.load('auth2', () => {
-      window.gapi.auth2.init({
-        client_id: 'your-google-client-id'
-      });
-      
+  // 确保 gapi 和 google.accounts.id 都存在
+  if (window.google && window.google.accounts && window.google.accounts.id) {
+    try {
       window.google.accounts.id.initialize({
         client_id: 'your-google-client-id',
         callback: handleCredentialResponse
-      })
+      });
       window.google.accounts.id.renderButton(
         document.getElementById('googleButton'),
         { 
@@ -224,12 +230,15 @@ const initializeGoogleLogin = () => {
           text: '使用Google账号登录',
           width: 250
         }
-      )
-    });
+      );
+    } catch (error) {
+       console.error("Google Login Error:", error);
+    }
   } else {
-    console.warn('Google API (gapi) not loaded. Google login button will not render.');
+    console.warn('Google Identity Services (GIS) library not loaded. Google login button will not render.');
   }
 }
+
 
 const handleCredentialResponse = async (response) => {
   try {
@@ -545,7 +554,7 @@ onUpdated(() => {
     }
   }
 
-  .nav-header .header-content {
+  .header-content {
     padding: 10px 0;
   }
 
@@ -574,7 +583,7 @@ onUpdated(() => {
     }
   }
 
-  .nav-header .header-content {
+  .header-content {
     padding: 8px 0;
   }
 

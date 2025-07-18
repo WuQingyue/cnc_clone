@@ -1,5 +1,5 @@
 # 工作流名称
-name: Component Check
+name: Components Check
 
 on:
   # 允许手动触发

@@ -169,7 +169,7 @@ const fetchCart = async () => {
   loading.value = true
   try {
     const res = await service.get('/api/orders/get_cart', { withCredentials: true })
-    console.log('获取购物车数据', res.data)
+    // console.log('获取购物车数据', res.data)
     if (res.data.success) {
       cart.value = (res.data.result || []).map(item => {
         const processing = item.model_processing_info || {}
@@ -228,7 +228,7 @@ const fetchCart = async () => {
     }
   } catch (err) {
     ElMessage.error('购物车数据获取失败')
-    console.error(err)
+    // console.error(err)
   } finally {
     loading.value = false
   }
@@ -283,7 +283,7 @@ const removeItem = async (rowToRemove) => {
     }
   } catch (err) {
     ElMessage.error('移除商品失败，请稍后再试。')
-    console.error(err)
+    // console.error(err)
   }
 }
 
@@ -372,7 +372,7 @@ const submitInquiry = async () => {
     }
   } catch (err) {
     ElMessage.error('提交询价失败，请稍后再试。')
-    console.error(err)
+    // console.error(err)
   } finally {
     loading.value = false
   }
